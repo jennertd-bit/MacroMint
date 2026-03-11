@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(120 120) rotate(45) scale(320)">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#mint)" />
+  <rect width="512" height="512" rx="120" fill="url(#glow)" />
+  <path
+    d="M160 338V174C160 165.2 167.2 158 176 158H205.5C214.1 158 221.8 163.2 224.8 171.3L256 256L287.2 171.3C290.2 163.2 297.9 158 306.5 158H336C344.8 158 352 165.2 352 174V338C352 346.8 344.8 354 336 354H324C315.2 354 308 346.8 308 338V237.3L279.5 312.5C276.7 320 269.5 325 261.5 325H250.5C242.5 325 235.3 320 232.5 312.5L204 237.3V338C204 346.8 196.8 354 188 354H176C167.2 354 160 346.8 160 338Z"
+    fill="#ffffff"
+    fill-opacity="0.95"
+  />
+</svg>

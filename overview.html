@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | Tracking Overview</title>
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="calcs.js"></script>
+    <script src="config.js"></script>
+    <script src="overview.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">MM</div>
+          <div>
+            <h1>MacroMint</h1>
+            <p>Tracking overview for day, week, and month.</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a class="chip" href="index.html#scanner">Scan Label</a>
+          <nav class="tracking-tabs" aria-label="Tracking">
+            <a class="chip ghost" href="index.html#log">Today</a>
+            <a class="chip ghost" href="index.html#weight">Weight</a>
+            <a class="chip ghost active" href="overview.html" aria-current="page">Overview</a>
+            <a class="chip ghost" href="profile.html">Account</a>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div>
+            <p class="eyebrow">MacroFactor-style</p>
+            <h2>Progress, coaching, and trends.</h2>
+            <p class="muted">
+              Adaptive TDEE from your real data. Weekly coaching adjusts your targets automatically.
+            </p>
+            <div class="hero-tags">
+              <span>Adaptive TDEE</span>
+              <span>Weight Trend</span>
+              <span>Weekly Coaching</span>
+            </div>
+          </div>
+          <div class="hero-card">
+            <h3>Active Range</h3>
+            <div class="summary-grid">
+              <div class="summary-item highlight">
+                <span>Range</span>
+                <strong id="overview-range">--</strong>
+                <small>Auto-calculated</small>
+              </div>
+              <div class="summary-item">
+                <span>Target / Day</span>
+                <strong id="overview-target">--</strong>
+                <small id="overview-goal">Goal target</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Weekly Coaching Card -->
+        <section class="panel coaching-panel" id="coaching-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">MacroFactor-style</p>
+              <h3>Weekly Coaching</h3>
+              <p class="muted">Based on your weight trend vs your goal rate.</p>
+            </div>
+            <div id="coaching-badge" class="coaching-badge coaching-badge--neutral">Checking...</div>
+          </div>
+          <div id="coaching-content" class="coaching-content">
+            <p class="muted" id="coaching-message">Log your weight daily for 7+ days to unlock coaching.</p>
+          </div>
+          <div id="coaching-metrics" class="coaching-metrics" hidden>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span>Goal Rate</span>
+                <strong id="coaching-goal-rate">--</strong>
+                <small>kg/week target</small>
+              </div>
+              <div class="summary-item">
+                <span>Actual Rate</span>
+                <strong id="coaching-actual-rate">--</strong>
+                <small>kg/week (7-day trend)</small>
+              </div>
+              <div class="summary-item">
+                <span>Adaptive TDEE</span>
+                <strong id="coaching-adaptive-tdee">--</strong>
+                <small>estimated expenditure</small>
+              </div>
+              <div class="summary-item highlight">
+                <span>Suggested Target</span>
+                <strong id="coaching-suggested-target">--</strong>
+                <small id="coaching-adjustment-label">kcal/day</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Progress Charts -->
+        <section class="panel charts-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Progress</p>
+              <h3>Charts</h3>
+              <p class="muted">Weight trend and calorie intake over the past 30 days.</p>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-dot legend-dot--weight"></span><small>Weight</small>
+              <span class="legend-dot legend-dot--trend"></span><small>Trend (EMA)</small>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h4>Weight Trend</h4>
+              <canvas id="weight-chart" class="progress-chart" height="160"></canvas>
+              <p id="weight-chart-empty" class="muted chart-empty">Log your weight daily to see your trend.</p>
+            </div>
+            <div class="chart-card">
+              <h4>Calorie Intake vs Target</h4>
+              <canvas id="calorie-chart" class="progress-chart" height="160"></canvas>
+              <p id="calorie-chart-empty" class="muted chart-empty">Log meals to see your intake trend.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Account</p>
+              <h3>Authentication is managed in one place</h3>
+              <p class="muted">
+                Sign in or create an account from the main
+                <a href="index.html#account-auth">Account panel</a>
+                to sync saved meals, targets, and progress.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Filters</p>
+              <h3>Tracking Controls</h3>
+              <p class="muted">Pick a view mode and time window.</p>
+            </div>
+          </div>
+          <div class="overview-grid">
+            <div class="overview-controls">
+              <div class="form-field">
+                <label for="overview-mode">View Mode</label>
+                <select id="overview-mode">
+                  <option value="day">Daily</option>
+                  <option value="week">Weekly</option>
+                  <option value="month">Monthly</option>
+                </select>
+              </div>
+              <div class="form-field" id="overview-date-wrap">
+                <label for="overview-date">Select date</label>
+                <input id="overview-date" type="date" />
+              </div>
+              <div class="form-field" id="overview-month-wrap" hidden>
+                <label for="overview-month">Select month</label>
+                <input id="overview-month" type="month" />
+              </div>
+            </div>
+            <div class="overview-metrics">
+              <div class="metric-card">
+                <span>Total Calories</span>
+                <strong id="overview-total">0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Avg per Day</span>
+                <strong id="overview-average">0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Meals Logged</span>
+                <strong id="overview-meals">0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Highest Day</span>
+                <strong id="overview-high">--</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel plan-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Today</p>
+              <h3>Plan Suggestions</h3>
+              <p class="muted">Remaining macros plus quick ideas based on your logged foods.</p>
+            </div>
+            <div id="plan-status" class="plan-status">Sign in to generate suggestions.</div>
+          </div>
+          <div class="plan-grid">
+            <div class="plan-remaining">
+              <div class="metric-card">
+                <span>Remaining Calories</span>
+                <strong id="plan-remaining-calories">--</strong>
+              </div>
+              <div class="metric-card">
+                <span>Remaining Protein</span>
+                <strong id="plan-remaining-protein">--</strong>
+              </div>
+              <div class="metric-card">
+                <span>Remaining Carbs</span>
+                <strong id="plan-remaining-carbs">--</strong>
+              </div>
+              <div class="metric-card">
+                <span>Remaining Fat</span>
+                <strong id="plan-remaining-fat">--</strong>
+              </div>
+            </div>
+            <div id="plan-suggestions" class="plan-suggestions"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Details</p>
+              <h3>Entries</h3>
+              <p class="muted">Use the list below to review totals and meals.</p>
+            </div>
+          </div>
+          <div id="overview-list" class="overview-list"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

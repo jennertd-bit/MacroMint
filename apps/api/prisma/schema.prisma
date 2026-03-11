@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GoalType {
+  CUT
+  MAINTAIN
+  BULK
+}
+
+enum FoodSource {
+  USER_SCAN
+  USDA
+  MANUAL
+}
+
+enum ScanStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum MealSlot {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  CUSTOM
+}
+
+enum ServingUnit {
+  SERVING
+  GRAMS
+  ML
+}
+
+enum PlannerEventType {
+  MEAL_PREP
+  MEAL
+  SNACK
+}
+
+enum PlannerEventSource {
+  AUTO
+  USER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  name             String?
+  passwordHash     String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  refreshTokenHash String?
+  stripeCustomerId String?
+
+  profile          UserProfile?
+  goals            Goal[]
+  foods            Food[]
+  scans            Scan[]
+  meals            MealLog[]
+  dailyTotals      DailyTotal[]
+  weightLogs       WeightLog[]
+  plannerEvents    PlannerEvent[]
+  plannerFeedback  PlannerFeedback[]
+  plannerSuggestions PlannerSuggestion[]
+  subscriptions    Subscription[]
+}
+
+model UserProfile {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id])
+  units           String?
+  heightCm        Int?
+  weightKg        Int?
+  age             Int?
+  sex             String?
+  activityLevel   Float?
+  goalPreset      String?
+  adjustment      Int?
+  timezone        String?  @default("UTC")
+  dietPreferences Json?
+  allergies       Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Goal {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  goalType        GoalType
+  targetCalories  Int
+  targetProteinG  Int
+  targetCarbsG    Int
+  targetFatG      Int
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+  createdAt       DateTime @default(now())
+}
+
+model Food {
+  id              String      @id @default(uuid())
+  name            String
+  brand           String?
+  barcode         String?     @unique
+  source          FoodSource
+  createdByUserId String?
+  createdByUser   User?       @relation(fields: [createdByUserId], references: [id])
+  verified        Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  servings        FoodServing[]
+  nutrition       FoodNutrition?
+  mealItems       MealLogItem[]
+  scanLinks       ScanFoodLink[]
+
+  @@index([name])
+  @@index([brand])
+}
+
+model FoodServing {
+  id                       String   @id @default(uuid())
+  foodId                   String
+  food                     Food     @relation(fields: [foodId], references: [id])
+  labelServingName         String
+  gramsPerServing          Float?
+  mlPerServing             Float?
+  servingCountPerContainer Float?
+  createdAt                DateTime @default(now())
+}
+
+model FoodNutrition {
+  foodId             String  @id
+  food               Food    @relation(fields: [foodId], references: [id])
+  caloriesPerServing Float
+  proteinG           Float
+  carbsG             Float
+  fatG               Float
+  fiberG             Float?
+  sugarG             Float?
+  sodiumMg           Float?
+  updatedAt          DateTime @updatedAt
+}
+
+model Scan {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  imageUrl  String
+  ocrText   String?
+  status    ScanStatus @default(PENDING)
+  createdAt DateTime   @default(now())
+
+  links     ScanFoodLink[]
+  rawData   Json?
+}
+
+model ScanFoodLink {
+  scanId     String
+  foodId     String
+  scan       Scan @relation(fields: [scanId], references: [id])
+  food       Food @relation(fields: [foodId], references: [id])
+  confidence Float
+
+  @@id([scanId, foodId])
+}
+
+model MealLog {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  loggedAt      DateTime
+  mealSlot      MealSlot
+  customSlotName String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  items         MealLogItem[]
+
+  @@index([userId, loggedAt])
+}
+
+model MealLogItem {
+  id               String      @id @default(uuid())
+  mealLogId        String
+  mealLog          MealLog     @relation(fields: [mealLogId], references: [id])
+  foodId           String
+  food             Food        @relation(fields: [foodId], references: [id])
+  servingQty       Float
+  servingUnit      ServingUnit
+  computedCalories Float
+  computedProteinG Float
+  computedCarbsG   Float
+  computedFatG     Float
+  createdAt        DateTime    @default(now())
+}
+
+model DailyTotal {
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  date        DateTime
+  calories    Float
+  proteinG    Float
+  carbsG      Float
+  fatG        Float
+  updatedAt   DateTime  @updatedAt
+
+  @@id([userId, date])
+}
+
+model WeightLog {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime
+  weightKg  Float
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, date])
+  @@index([userId, date])
+}
+
+model PlannerSuggestion {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  date       DateTime
+  payload    Json
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime?
+}
+
+model PlannerEvent {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  date            DateTime
+  eventType       PlannerEventType
+  title           String
+  description     String?
+  plannedCalories Float
+  plannedProteinG Float
+  plannedCarbsG   Float
+  plannedFatG     Float
+  source          PlannerEventSource
+  createdAt       DateTime          @default(now())
+
+  @@index([userId, date])
+}
+
+model PlannerFeedback {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  suggestionId String
+  action      String
+  reason      String?
+  createdAt   DateTime @default(now())
+}
+
+model Subscription {
+  id                   String              @id @default(uuid())
+  userId               String
+  user                 User                @relation(fields: [userId], references: [id])
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  priceId              String?
+  status               SubscriptionStatus
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([userId])
+}

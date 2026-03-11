@@ -1,0 +1,27 @@
+{
+  "name": "macromint",
+  "version": "1.0.0",
+  "description": "MacroMint monorepo",
+  "private": true,
+  "type": "commonjs",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run start:dev --workspace @macromint/api",
+    "build:api": "npm run build --workspace @macromint/api",
+    "start:api": "npm run start --workspace @macromint/api",
+    "worker:api": "npm run start:worker --workspace @macromint/api",
+    "prisma:generate": "npm run prisma:generate --workspace @macromint/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace @macromint/api",
+    "prisma:studio": "npm run prisma:studio --workspace @macromint/api",
+    "test": "echo \"No root tests\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
+}

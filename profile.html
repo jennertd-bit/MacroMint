@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | Account Settings</title>
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js"></script>
+    <script src="profile.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">MM</div>
+          <div>
+            <h1>MacroMint</h1>
+            <p>Account settings and security.</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a class="chip" href="index.html#scanner">Scan Label</a>
+          <nav class="tracking-tabs" aria-label="Tracking">
+            <a class="chip ghost" href="index.html#log">Today</a>
+            <a class="chip ghost" href="overview.html">Overview</a>
+            <a class="chip ghost active" href="profile.html" aria-current="page">Account</a>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Profile</p>
+            <h2>Manage your account and security.</h2>
+            <p class="muted">Update your email, verify your account, and reset your password.</p>
+          </div>
+          <div class="hero-card">
+            <h3>Status</h3>
+            <div class="summary-grid">
+              <div class="summary-item highlight">
+                <span>Account</span>
+                <strong id="profile-email">--</strong>
+                <small id="profile-status">Not signed in</small>
+              </div>
+              <div class="summary-item">
+                <span>Verification</span>
+                <strong id="profile-verify">--</strong>
+                <small id="profile-verify-note">--</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Details</p>
+              <h3>Profile Info</h3>
+              <p class="muted">Update your name and email.</p>
+            </div>
+          </div>
+          <div class="auth-grid">
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="profile-name">Name</label>
+                <input id="profile-name" type="text" placeholder="Jamie Appleseed" />
+              </div>
+              <div class="form-field">
+                <label for="profile-email-input">Email</label>
+                <input id="profile-email-input" type="email" placeholder="you@email.com" />
+              </div>
+            </div>
+            <div class="auth-actions">
+              <button id="profile-save" class="button" type="button">Save changes</button>
+              <button id="profile-logout" class="button ghost" type="button">Sign out</button>
+              <p id="profile-message" class="help"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Security</p>
+              <h3>Email Verification</h3>
+              <p class="muted">Verify your email to keep your account secure.</p>
+            </div>
+          </div>
+          <div class="auth-actions">
+            <button id="profile-resend" class="button" type="button">Resend verification email</button>
+            <p class="help" id="profile-verify-message"></p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Password</p>
+              <h3>Reset Password</h3>
+              <p class="muted">Send a reset email to update your password.</p>
+            </div>
+          </div>
+          <div class="auth-actions">
+            <button id="profile-reset" class="button" type="button">Send reset email</button>
+            <p class="help" id="profile-reset-message"></p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,86 @@
+services:
+  - type: web
+    name: macromint-api-v2
+    runtime: node
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run prisma:migrate && npm run start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGINS
+        value: https://macromint.fit,https://steady-vacherin-f5b1c4.netlify.app
+      - key: REDIS_URL
+        sync: false
+      - key: ALLOW_LOCAL_REDIS
+        value: "false"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_ID_PRO
+        sync: false
+      - key: STRIPE_SUCCESS_URL
+        value: https://macromint.fit/account?checkout=success
+      - key: STRIPE_CANCEL_URL
+        value: https://macromint.fit/account?checkout=cancel
+      - key: STRIPE_TRIAL_DAYS
+        value: "3"
+      - key: ALLOW_AI_FREE
+        value: "true"
+      - key: USDA_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_PUBLIC_BASE_URL
+        sync: false
+
+  - type: worker
+    name: macromint-scan-worker
+    runtime: node
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm install
+    startCommand: npm run start:worker
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: ALLOW_LOCAL_REDIS
+        value: "false"
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_PUBLIC_BASE_URL
+        sync: false
+      - key: USDA_API_KEY
+        sync: false
+
+databases:
+  - name: macromint-db
+    plan: free
+    databaseName: macromint
+    user: macromint

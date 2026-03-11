@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+server/node_modules/
+apps/api/dist/
+apps/api/.env
+.env
+server/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.netlify/
+.vercel/
+MacroMint/
+MarcoMint/
+calorie-io
+calorie-io.pub

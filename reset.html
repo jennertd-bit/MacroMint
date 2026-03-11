@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | Reset Password</title>
+    <meta name="theme-color" content="#10b981" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js"></script>
+    <script src="reset.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">MM</div>
+          <div>
+            <h1>MacroMint</h1>
+            <p>Password reset</p>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Reset</p>
+              <h3>Set a new password</h3>
+              <p class="muted" id="reset-message">Enter a new password below.</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="reset-password">New password</label>
+              <input id="reset-password" type="password" placeholder="••••••••" />
+            </div>
+            <div class="form-field">
+              <label for="reset-confirm">Confirm password</label>
+              <input id="reset-confirm" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+          <div class="auth-actions">
+            <button id="reset-submit" class="button" type="button">Update password</button>
+            <p class="help" id="reset-help"></p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

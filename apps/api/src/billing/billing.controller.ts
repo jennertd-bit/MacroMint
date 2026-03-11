@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Headers, Post, Req, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Headers, Post, RawBodyRequest, Req, UseGuards } from "@nestjs/common";
+import { FastifyRequest } from "fastify";
 import { JwtAuthGuard } from "../auth/jwt.guard";
 import { BillingService } from "./billing.service";
 
@@ -25,12 +26,16 @@ export class BillingController {
   }
 
   @Post("webhook")
-  webhook(@Req() req: any, @Body() body: any, @Headers("stripe-signature") signature?: string) {
+  webhook(
+    @Req() req: RawBodyRequest<FastifyRequest>,
+    @Body() body: any,
+    @Headers("stripe-signature") signature?: string
+  ) {
     if (!signature) throw new BadRequestException("Missing stripe-signature header");
-    const rawBody: Buffer = (req.raw ?? req).rawBody;
+    const rawBody = req.rawBody ?? Buffer.from(JSON.stringify(body));
     let event: any;
     try {
-      event = this.billing.verifyWebhookSignature(rawBody ?? JSON.stringify(body), signature);
+      event = this.billing.verifyWebhookSignature(rawBody, signature);
     } catch (err: any) {
       throw new BadRequestException(`Webhook signature verification failed: ${err.message}`);
     }

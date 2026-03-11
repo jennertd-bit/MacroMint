@@ -2,12 +2,12 @@ import { IsDateString, IsNumber, IsOptional, IsString, Max, Min } from "class-va
 
 export class LogWeightDto {
   @IsDateString()
-  date: string;
+  date!: string;
 
   @IsNumber()
   @Min(20)
   @Max(500)
-  weightKg: number;
+  weightKg!: number;
 
   @IsOptional()
   @IsString()

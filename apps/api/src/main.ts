@@ -12,7 +12,13 @@ const parseOrigins = (value?: string): string[] =>
 async function bootstrap() {
   const adapter = new FastifyAdapter({ logger: true });
 
-  // Store raw body for Stripe webhook signature verification
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    adapter
+  );
+
+  // Override JSON parser AFTER NestJS registers its own, so we can store
+  // the raw body buffer needed for Stripe webhook signature verification
   const fastify = adapter.getInstance();
   fastify.removeAllContentTypeParsers();
   fastify.addContentTypeParser(
@@ -26,11 +32,6 @@ async function bootstrap() {
         done(err);
       }
     }
-  );
-
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    adapter
   );
 
   app.setGlobalPrefix("v1");

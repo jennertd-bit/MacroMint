@@ -291,6 +291,56 @@
     }
   };
 
+  // ── Quick sign-in ─────────────────────────────────────────────────────────
+  const initSignIn = () => {
+    const toggle = $("signin-toggle");
+    const panel  = $("signin-panel");
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener("click", () => {
+      panel.classList.toggle("hidden");
+      toggle.textContent = panel.classList.contains("hidden") ? "Sign In" : "Cancel";
+    });
+
+    $("si-submit")?.addEventListener("click", async () => {
+      const email    = $("si-email")?.value.trim();
+      const password = $("si-password")?.value;
+      const errEl    = $("si-error");
+      const btn      = $("si-submit");
+
+      if (!email || !password) {
+        errEl.textContent = "Please enter your email and password.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.textContent = "Signing in…";
+      btn.disabled = true;
+      errEl.classList.add("hidden");
+
+      try {
+        const res = await fetch(`${API_BASE()}/v1/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.message || "Invalid email or password.");
+        }
+        if (data.accessToken)  localStorage.setItem(TOKEN_KEY,   data.accessToken);
+        if (data.refreshToken) localStorage.setItem(REFRESH_KEY, data.refreshToken);
+        localStorage.setItem(ONBOARD_KEY, "1");
+        window.location.href = "index.html";
+      } catch (err) {
+        errEl.textContent = err.message || "Sign in failed. Please try again.";
+        errEl.classList.remove("hidden");
+        btn.textContent = "Sign In";
+        btn.disabled = false;
+      }
+    });
+  };
+
   // ── Terms toggle ──────────────────────────────────────────────────────────
   const initTermsToggle = () => {
     $("terms-toggle")?.addEventListener("click", () => {
@@ -328,6 +378,9 @@
 
     // Terms
     initTermsToggle();
+
+    // Quick sign-in
+    initSignIn();
 
     // Navigation
     $("step1-next")?.addEventListener("click", () => showStep(2));

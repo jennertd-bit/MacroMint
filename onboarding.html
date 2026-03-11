@@ -20,6 +20,22 @@
       <div class="onboard-header">
         <div class="logo">MM</div>
         <span class="onboard-brand">MacroMint</span>
+        <button class="signin-toggle-btn" id="signin-toggle" type="button">Sign In</button>
+      </div>
+
+      <!-- Quick Sign-In Panel -->
+      <div class="signin-panel hidden" id="signin-panel">
+        <h3 class="signin-panel-title">Welcome back</h3>
+        <div class="field-group">
+          <label class="field-label" for="si-email">Email</label>
+          <input class="onboard-input" id="si-email" type="email" placeholder="you@email.com" autocomplete="email" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="si-password">Password</label>
+          <input class="onboard-input" id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
+        </div>
+        <p class="onboard-error hidden" id="si-error"></p>
+        <button class="onboard-cta cta-green" id="si-submit" type="button">Sign In</button>
       </div>
 
       <!-- Progress -->

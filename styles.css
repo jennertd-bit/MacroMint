@@ -624,7 +624,21 @@ body.onboard-body {
 }
 .onboard-wrap { width: 100%; max-width: 520px; }
 .onboard-header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
-.onboard-brand  { font-family: "Syne", sans-serif; font-weight: 800; font-size: 1.1rem; }
+.onboard-brand  { font-family: "Syne", sans-serif; font-weight: 800; font-size: 1.1rem; flex: 1; }
+.signin-toggle-btn {
+  background: transparent; border: 1.5px solid rgba(0,229,204,0.45);
+  color: #00e5cc; font-size: 0.85rem; font-weight: 600;
+  padding: 6px 16px; border-radius: 20px; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.signin-toggle-btn:hover { background: rgba(0,229,204,0.12); }
+.signin-panel {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 28px 24px; margin-bottom: 28px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.signin-panel.hidden { display: none; }
+.signin-panel-title { font-family: "Syne", sans-serif; font-weight: 700; font-size: 1.2rem; margin: 0 0 4px; }
 .onboard-progress { display: flex; align-items: center; margin-bottom: 36px; }
 .progress-step {
   width: 32px; height: 32px; border-radius: 50%;

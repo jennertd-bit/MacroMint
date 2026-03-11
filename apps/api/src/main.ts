@@ -13,7 +13,9 @@ async function bootstrap() {
   const adapter = new FastifyAdapter({ logger: true });
 
   // Store raw body for Stripe webhook signature verification
-  adapter.getInstance().addContentTypeParser(
+  const fastify = adapter.getInstance();
+  fastify.removeAllContentTypeParsers();
+  fastify.addContentTypeParser(
     "application/json",
     { parseAs: "buffer" },
     (req: any, body: Buffer, done: (err: any, payload?: any) => void) => {

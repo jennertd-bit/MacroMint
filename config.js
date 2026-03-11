@@ -14,4 +14,4 @@
   }
 })();
 
-window.MACROMINT_API = window.MACROMINT_API || "https://macromint-api.onrender.com";
+window.MACROMINT_API = window.MACROMINT_API || "https://macromint-1.onrender.com";

@@ -12,35 +12,162 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
     <link rel="apple-touch-icon" href="icons/icon-180.png" />
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      // Redirect first-time visitors to onboarding
+      if (!localStorage.getItem("macromint_onboarded") &&
+          !window.location.search.includes("skip_onboard")) {
+        window.location.replace("onboarding.html");
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script src="calcs.js"></script>
     <script src="config.js"></script>
     <script src="app.js" defer></script>
+    <script>
+    // Arc + macro bar updater — watches daily-total and syncs the dashboard
+    (function() {
+      function updateDashboard() {
+        const total    = parseFloat(document.getElementById("daily-total")?.textContent) || 0;
+        const target   = parseFloat(document.getElementById("target-value")?.textContent) || 0;
+        const remaining = parseFloat(document.getElementById("daily-remaining")?.textContent) || 0;
+
+        // Update arc display
+        const arcLogged    = document.getElementById("arc-logged");
+        const arcTarget    = document.getElementById("arc-target");
+        const arcRemaining = document.getElementById("arc-remaining");
+        const arcCircle    = document.getElementById("arc-circle");
+        if (arcLogged)    arcLogged.textContent = Math.round(total).toLocaleString();
+        if (arcTarget)    arcTarget.textContent  = target ? Math.round(target).toLocaleString() : "--";
+        if (arcRemaining && target) {
+          const rem = target - total;
+          arcRemaining.textContent = rem >= 0
+            ? Math.round(rem).toLocaleString() + " left"
+            : Math.abs(Math.round(rem)).toLocaleString() + " over";
+        }
+        if (arcCircle && target > 0) {
+          const pct = Math.min(total / target, 1);
+          const circumference = 2 * Math.PI * 80;
+          arcCircle.style.strokeDashoffset = circumference * (1 - pct);
+          arcCircle.classList.toggle("over-budget", total > target);
+        }
+
+        // Date
+        const dateEl = document.getElementById("dash-date");
+        if (dateEl) {
+          const now = new Date();
+          dateEl.textContent = now.toLocaleDateString(undefined, { weekday:"long", month:"short", day:"numeric" });
+        }
+      }
+
+      // Poll every second for changes (simple, reliable)
+      setInterval(updateDashboard, 1000);
+      document.addEventListener("DOMContentLoaded", updateDashboard);
+    })();
+    </script>
   </head>
   <body>
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" type="button" data-scroll="log">
+        <span class="nav-icon">📋</span>Today
+      </button>
+      <button class="nav-item" type="button" data-scroll="weight">
+        <span class="nav-icon">⚖️</span>Weight
+      </button>
+      <a class="nav-fab" href="#scanner" aria-label="Scan label">＋</a>
+      <a class="nav-item" href="overview.html">
+        <span class="nav-icon">📈</span>Trends
+      </a>
+      <a class="nav-item" href="profile.html">
+        <span class="nav-icon">👤</span>Account
+      </a>
+    </nav>
+
     <div class="app">
       <header class="app-header">
         <div class="brand">
           <div class="logo">MM</div>
           <div>
             <h1>MacroMint</h1>
-            <p>Nutrition label scanner + goal-based calorie tracking.</p>
           </div>
         </div>
         <div class="header-actions">
           <button class="chip" type="button" data-scroll="scanner">Scan Label</button>
-          <nav class="tracking-tabs" aria-label="Tracking">
-            <button class="chip ghost" type="button" data-scroll="log">Today</button>
-            <button class="chip ghost" type="button" data-scroll="weight">Weight</button>
-            <a class="chip ghost" href="overview.html">Overview</a>
-            <button class="chip ghost" type="button" data-scroll="workout">Workout</button>
-            <a class="chip ghost" href="profile.html">Account</a>
-          </nav>
         </div>
       </header>
 
       <main>
+        <!-- ── Dashboard ── -->
+        <section class="dashboard">
+          <div class="dashboard-top">
+            <span class="date-line" id="dash-date">Today</span>
+            <span class="streak-badge" id="dash-streak">🔥 <span id="streak-count">0</span> day streak</span>
+          </div>
+          <div class="dashboard-body">
+            <!-- Calorie arc -->
+            <div class="calorie-arc-wrap">
+              <svg class="calorie-arc" viewBox="0 0 200 200" aria-hidden="true">
+                <defs>
+                  <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00e5cc"/>
+                    <stop offset="100%" stop-color="#6366f1"/>
+                  </linearGradient>
+                </defs>
+                <circle class="arc-track" cx="100" cy="100" r="80"/>
+                <circle class="arc-fill" id="arc-circle" cx="100" cy="100" r="80"/>
+              </svg>
+              <div class="arc-center">
+                <div class="arc-value" id="arc-logged">0</div>
+                <div class="arc-label">kcal logged</div>
+                <div class="arc-target">of <span id="arc-target">--</span></div>
+                <div class="arc-remaining" id="arc-remaining"></div>
+              </div>
+            </div>
+            <!-- Macro bars -->
+            <div class="macro-rings">
+              <div class="macro-ring-item">
+                <div class="macro-ring-info">
+                  <span class="macro-ring-label">Protein</span>
+                  <div class="macro-ring-bar"><div class="macro-ring-fill protein" id="bar-protein"></div></div>
+                </div>
+                <span class="macro-ring-val protein" id="val-protein">0g</span>
+              </div>
+              <div class="macro-ring-item">
+                <div class="macro-ring-info">
+                  <span class="macro-ring-label">Carbs</span>
+                  <div class="macro-ring-bar"><div class="macro-ring-fill carbs" id="bar-carbs"></div></div>
+                </div>
+                <span class="macro-ring-val carbs" id="val-carbs">0g</span>
+              </div>
+              <div class="macro-ring-item">
+                <div class="macro-ring-info">
+                  <span class="macro-ring-label">Fat</span>
+                  <div class="macro-ring-bar"><div class="macro-ring-fill fat" id="bar-fat"></div></div>
+                </div>
+                <span class="macro-ring-val fat" id="val-fat">0g</span>
+              </div>
+            </div>
+          </div>
+          <!-- Quick stats -->
+          <div class="quick-stats">
+            <div class="quick-stat qs-teal">
+              <span>Daily Target</span>
+              <strong id="target-value">--</strong>
+              <small id="goal-label">kcal/day</small>
+            </div>
+            <div class="quick-stat qs-orange">
+              <span>TDEE</span>
+              <strong id="tdee-value">--</strong>
+              <small>estimated burn</small>
+            </div>
+            <div class="quick-stat qs-purple">
+              <span>BMR</span>
+              <strong id="bmr-value">--</strong>
+              <small>at rest</small>
+            </div>
+          </div>
+        </section>
         <section class="hero">
           <div>
             <p class="eyebrow">Smart Calorie Intake</p>

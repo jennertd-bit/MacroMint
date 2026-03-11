@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | Get Started</title>
+    <meta name="theme-color" content="#080c14" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js"></script>
+    <script src="calcs.js"></script>
+  </head>
+  <body class="onboard-body">
+    <div class="onboard-wrap">
+
+      <!-- Header -->
+      <div class="onboard-header">
+        <div class="logo">MM</div>
+        <span class="onboard-brand">MacroMint</span>
+      </div>
+
+      <!-- Progress -->
+      <div class="onboard-progress" aria-label="Step progress">
+        <div class="progress-step active" data-step="1"></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="2"></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3"></div>
+      </div>
+
+      <!-- ── STEP 1: Body & Goal ── -->
+      <div class="onboard-step" id="step-1">
+        <div class="onboard-step-header">
+          <p class="step-eyebrow">Step 1 of 3</p>
+          <h2>Tell us about yourself</h2>
+          <p class="step-sub">We'll calculate your personalized calorie and macro targets.</p>
+        </div>
+
+        <div class="onboard-fields">
+
+          <!-- Sex -->
+          <div class="field-group">
+            <label class="field-label">Biological sex</label>
+            <div class="option-tiles cols-3" id="sex-tiles">
+              <button class="option-tile selected" data-value="male" type="button">
+                <span class="tile-icon">♂</span>
+                <span>Male</span>
+              </button>
+              <button class="option-tile" data-value="female" type="button">
+                <span class="tile-icon">♀</span>
+                <span>Female</span>
+              </button>
+              <button class="option-tile" data-value="other" type="button">
+                <span class="tile-icon">⚧</span>
+                <span>Other</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Age -->
+          <div class="field-group">
+            <label class="field-label">Age</label>
+            <div class="stepper">
+              <button class="stepper-btn" id="age-minus" type="button">−</button>
+              <span class="stepper-val" id="age-display">25</span>
+              <button class="stepper-btn" id="age-plus" type="button">+</button>
+            </div>
+            <input type="hidden" id="ob-age" value="25" />
+          </div>
+
+          <!-- Units -->
+          <div class="field-group">
+            <label class="field-label">Units</label>
+            <div class="toggle-row">
+              <button class="toggle-btn active" id="units-us" type="button">Imperial (lbs / ft)</button>
+              <button class="toggle-btn" id="units-metric" type="button">Metric (kg / cm)</button>
+            </div>
+          </div>
+
+          <!-- Height -->
+          <div class="field-group">
+            <label class="field-label">Height</label>
+            <div class="height-row" id="height-us">
+              <div class="height-part">
+                <div class="stepper">
+                  <button class="stepper-btn" id="ft-minus" type="button">−</button>
+                  <span class="stepper-val" id="ft-display">5</span>
+                  <button class="stepper-btn" id="ft-plus" type="button">+</button>
+                </div>
+                <span class="height-unit">ft</span>
+              </div>
+              <div class="height-part">
+                <div class="stepper">
+                  <button class="stepper-btn" id="in-minus" type="button">−</button>
+                  <span class="stepper-val" id="in-display">9</span>
+                  <button class="stepper-btn" id="in-plus" type="button">+</button>
+                </div>
+                <span class="height-unit">in</span>
+              </div>
+            </div>
+            <div class="height-row hidden" id="height-metric">
+              <div class="stepper">
+                <button class="stepper-btn" id="cm-minus" type="button">−</button>
+                <span class="stepper-val" id="cm-display">175</span>
+                <button class="stepper-btn" id="cm-plus" type="button">+</button>
+              </div>
+              <span class="height-unit">cm</span>
+            </div>
+          </div>
+
+          <!-- Weight -->
+          <div class="field-group">
+            <label class="field-label" id="weight-label">Current weight (lbs)</label>
+            <div class="stepper stepper-wide">
+              <button class="stepper-btn" id="weight-minus" type="button">−</button>
+              <span class="stepper-val" id="weight-display">160</span>
+              <button class="stepper-btn" id="weight-plus" type="button">+</button>
+            </div>
+            <input type="hidden" id="ob-weight" value="160" />
+          </div>
+
+          <!-- Goal -->
+          <div class="field-group">
+            <label class="field-label">Your goal</label>
+            <div class="option-tiles cols-2" id="goal-tiles">
+              <button class="option-tile selected" data-value="lose" type="button">
+                <span class="tile-icon">🔥</span>
+                <span>Lose Fat</span>
+              </button>
+              <button class="option-tile" data-value="maintain" type="button">
+                <span class="tile-icon">⚖️</span>
+                <span>Maintain</span>
+              </button>
+              <button class="option-tile" data-value="gain" type="button">
+                <span class="tile-icon">💪</span>
+                <span>Build Muscle</span>
+              </button>
+              <button class="option-tile" data-value="recomp" type="button">
+                <span class="tile-icon">🔄</span>
+                <span>Recomposition</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="onboard-cta" id="step1-next" type="button">
+          Continue <span class="cta-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- ── STEP 2: Activity Level ── -->
+      <div class="onboard-step hidden" id="step-2">
+        <div class="onboard-step-header">
+          <p class="step-eyebrow">Step 2 of 3</p>
+          <h2>How active are you?</h2>
+          <p class="step-sub">Be honest — we use this to estimate how many calories you burn daily.</p>
+        </div>
+
+        <div class="onboard-fields">
+          <div class="option-tiles cols-1" id="activity-tiles">
+            <button class="option-tile tile-row" data-value="sedentary" type="button">
+              <span class="tile-icon">🛋️</span>
+              <div class="tile-text">
+                <strong>Sedentary</strong>
+                <span>Desk job, little or no exercise</span>
+              </div>
+            </button>
+            <button class="option-tile tile-row" data-value="light" type="button">
+              <span class="tile-icon">🚶</span>
+              <div class="tile-text">
+                <strong>Lightly Active</strong>
+                <span>Light exercise 1–3 days/week</span>
+              </div>
+            </button>
+            <button class="option-tile tile-row selected" data-value="moderate" type="button">
+              <span class="tile-icon">🏃</span>
+              <div class="tile-text">
+                <strong>Moderately Active</strong>
+                <span>Moderate exercise 3–5 days/week</span>
+              </div>
+            </button>
+            <button class="option-tile tile-row" data-value="active" type="button">
+              <span class="tile-icon">🏋️</span>
+              <div class="tile-text">
+                <strong>Very Active</strong>
+                <span>Hard exercise 6–7 days/week</span>
+              </div>
+            </button>
+            <button class="option-tile tile-row" data-value="very_active" type="button">
+              <span class="tile-icon">⚡</span>
+              <div class="tile-text">
+                <strong>Athlete / Physical Job</strong>
+                <span>Twice daily training or physical labor</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Estimated TDEE preview -->
+        <div class="tdee-preview" id="tdee-preview">
+          <span class="tdee-label">Estimated daily burn</span>
+          <strong class="tdee-value" id="tdee-est">—</strong>
+          <span class="tdee-label">kcal/day</span>
+        </div>
+
+        <div class="onboard-nav">
+          <button class="onboard-back" id="step2-back" type="button">← Back</button>
+          <button class="onboard-cta" id="step2-next" type="button">
+            Continue <span class="cta-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: Account + Trial ── -->
+      <div class="onboard-step hidden" id="step-3">
+        <div class="onboard-step-header">
+          <p class="step-eyebrow">Step 3 of 3</p>
+          <h2>Create your account</h2>
+          <p class="step-sub">Start tracking in seconds. No credit card required to begin.</p>
+        </div>
+
+        <!-- Trial badge -->
+        <div class="trial-banner">
+          <div class="trial-badge">
+            <span class="trial-days">7</span>
+            <span class="trial-text">Day<br>Free Trial</span>
+          </div>
+          <div class="trial-info">
+            <strong>Full access, free for 7 days</strong>
+            <span>Then $9/month — cancel anytime, no commitment.</span>
+          </div>
+        </div>
+
+        <div class="onboard-fields">
+          <div class="field-group">
+            <label class="field-label" for="ob-email">Email address</label>
+            <input class="onboard-input" id="ob-email" type="email" placeholder="you@email.com" autocomplete="email" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="ob-password">Password</label>
+            <input class="onboard-input" id="ob-password" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="terms-wrap">
+          <label class="terms-check-row">
+            <input type="checkbox" id="ob-terms" />
+            <span>I agree to the <button class="terms-link" id="terms-toggle" type="button">Terms of Service</button></span>
+          </label>
+          <div class="terms-box hidden" id="terms-box">
+            <div class="terms-content">
+              <h4>MacroMint Terms of Service</h4>
+              <p><em>Last updated: March 2026</em></p>
+
+              <h5>1. Service Description</h5>
+              <p>MacroMint is a nutrition and fitness tracking application. We provide calorie tracking, macro logging, weight trend analysis, adaptive TDEE estimation, and workout planning tools.</p>
+
+              <h5>2. Not Medical Advice</h5>
+              <p>MacroMint is not a medical service. Nothing in this app constitutes medical, dietary, or clinical advice. Always consult a qualified healthcare professional before starting any diet or exercise program.</p>
+
+              <h5>3. Subscription & Billing</h5>
+              <p>MacroMint Pro is $9.00/month billed monthly. Your free trial lasts 7 days from account creation. After the trial ends, your payment method will be charged unless you cancel before the trial period expires. You may cancel at any time through your Account page. Cancellation takes effect at the end of the current billing period — no partial refunds are issued.</p>
+
+              <h5>4. Your Data</h5>
+              <p>We store the data you log (meals, weight, profile settings) to provide the service. We do not sell your personal data. You may request deletion of your account and associated data at any time by contacting support.</p>
+
+              <h5>5. User Responsibilities</h5>
+              <p>You are responsible for maintaining the security of your account credentials. You agree not to misuse the service, attempt unauthorized access, or violate any applicable laws.</p>
+
+              <h5>6. Disclaimer of Warranties</h5>
+              <p>The service is provided "as is" without warranties of any kind. We do not guarantee uninterrupted access or that calorie/macro calculations will be error-free.</p>
+
+              <h5>7. Changes to Terms</h5>
+              <p>We may update these terms at any time. Continued use of the app after changes constitutes acceptance of the updated terms.</p>
+
+              <h5>8. Contact</h5>
+              <p>For support or questions, contact us at support@macromint.fit.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="onboard-error hidden" id="ob-error"></p>
+
+        <button class="onboard-cta cta-green" id="step3-submit" type="button">
+          Start Free Trial
+        </button>
+
+        <p class="onboard-signin">
+          Already have an account?
+          <a href="index.html#account-auth" class="signin-link">Sign in</a>
+        </p>
+
+        <div class="onboard-nav onboard-nav-back">
+          <button class="onboard-back" id="step3-back" type="button">← Back</button>
+        </div>
+      </div>
+
+      <!-- ── SUCCESS ── -->
+      <div class="onboard-step hidden" id="step-success">
+        <div class="success-wrap">
+          <div class="success-icon">✓</div>
+          <h2>You're all set!</h2>
+          <p class="step-sub">Your profile is saved and your free trial has started.</p>
+          <button class="onboard-cta cta-green" id="go-to-app" type="button">
+            Open MacroMint →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="onboarding.js" defer></script>
+  </body>
+</html>

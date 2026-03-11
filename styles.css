@@ -616,6 +616,48 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .workout-output li { margin-bottom: 4px; }
 .workout-output strong { color: var(--text); }
 
+/* ─── Floating Scan Bubbles (all pages) ─────────────────── */
+.scan-float {
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+}
+.scan-bubble {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1.5px solid rgba(0,229,204,0.35);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(0,229,204,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.scan-bubble:hover, .scan-bubble:active {
+  transform: scale(1.1);
+  border-color: var(--teal);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 20px rgba(0,229,204,0.35);
+}
+.scan-bubble svg { width: 24px; height: 24px; }
+.scan-bubble-label {
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: "DM Mono", monospace;
+}
+
 /* ─── Exercise Cards (Workout Page) ────────────────────── */
 .muscle-group.muscle-selected {
   fill: rgba(0, 229, 204, 0.35);

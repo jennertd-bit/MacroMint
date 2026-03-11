@@ -2106,6 +2106,25 @@ const init = async () => {
 
 document.addEventListener("DOMContentLoaded", init);
 
+// ── Auto-trigger scanner from floating bubble deep-links ──────────────────
+// Other pages link to index.html?scan=barcode or ?scan=camera
+document.addEventListener("DOMContentLoaded", () => {
+  const scanParam = new URLSearchParams(window.location.search).get("scan");
+  if (!scanParam) return;
+  // Small delay to let the page init settle
+  setTimeout(() => {
+    const sec = document.getElementById("scanner");
+    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => {
+      if (scanParam === "barcode") {
+        document.getElementById("barcode-start")?.click();
+      } else if (scanParam === "camera") {
+        document.getElementById("label-input")?.click();
+      }
+    }, 500);
+  }, 600);
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./service-worker.js").catch(() => {});

@@ -6,15 +6,13 @@ export class UsdaService {
   constructor(private readonly config: ConfigService) {}
 
   private get apiKey() {
-    return this.config.get<string>("USDA_API_KEY");
+    // Fall back to DEMO_KEY so USDA search works without a configured key.
+    // DEMO_KEY is rate-limited (30 req/hour) — set USDA_API_KEY for production.
+    return this.config.get<string>("USDA_API_KEY") || "DEMO_KEY";
   }
 
   private ensureKey() {
-    const key = this.apiKey;
-    if (!key) {
-      throw new Error("USDA_API_KEY not configured");
-    }
-    return key;
+    return this.apiKey;
   }
 
   async searchFoods(query: string) {

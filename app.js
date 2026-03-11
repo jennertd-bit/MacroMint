@@ -1258,15 +1258,23 @@ const updatePlanForToday = async () => {
       elements.remainingFat.textContent = formatMacro(remaining.fatG, "g");
     }
 
-    renderPlanSuggestions(plan);
     if (result.source === "ai") {
+      // AI gave us real varied suggestions — use them
+      renderPlanSuggestions(plan);
       setPlanStatus("AI suggestions ready.");
-    } else if (result.noFoodsForAi) {
-      setPlanStatus("Standard suggestions loaded. Add foods to improve AI results.");
-    } else if (result.proRequired) {
-      setPlanStatus("Standard suggestions loaded. Upgrade to Pro for AI.", false);
     } else {
-      setPlanStatus("Standard suggestions loaded (AI unavailable).");
+      // Rules-based path only has the user's scanned foods (often repetitive).
+      // Use the local real-meal database instead, keeping the API's remaining macros.
+      const localPlan = {
+        remaining,
+        suggestions: buildLocalSuggestions(remaining.calories || 2000),
+      };
+      renderPlanSuggestions(localPlan);
+      if (result.proRequired) {
+        setPlanStatus("Meal ideas based on your target. Upgrade to Pro for AI suggestions.", false);
+      } else {
+        setPlanStatus("Meal ideas based on your remaining calories.");
+      }
     }
   } catch (error) {
     const message = error.message || "Unable to load plan suggestions.";

@@ -529,22 +529,34 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 }
 .body-svg { width: 100%; max-width: 120px; height: auto; }
 .body-head, .body-neck, .body-joint {
-  fill: var(--surface-2);
-  stroke: var(--border);
+  fill: #1e2d50;
+  stroke: rgba(99,102,241,0.45);
   stroke-width: 1.5;
 }
-.body-torso { stroke: var(--border); stroke-width: 1.5; }
+.body-torso { stroke: rgba(99,102,241,0.35); stroke-width: 1.5; fill: none; }
 .muscle-group {
-  fill: var(--surface-2);
-  stroke: var(--border);
-  stroke-width: 1;
-  transition: fill 0.3s, stroke 0.3s, filter 0.3s;
+  fill: #1e2d50;
+  stroke: rgba(99,102,241,0.55);
+  stroke-width: 1.2;
+  cursor: pointer;
+  transition: fill 0.25s, stroke 0.25s, filter 0.25s;
 }
-.muscle-group.muscle-active {
-  fill: rgba(0, 229, 204, 0.25);
+.muscle-group:hover {
+  fill: rgba(0,229,204,0.18);
   stroke: var(--teal);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 4px rgba(0, 229, 204, 0.5));
+}
+.muscle-group.muscle-active {
+  fill: rgba(0, 229, 204, 0.28);
+  stroke: var(--teal);
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 5px rgba(0, 229, 204, 0.55));
+}
+.muscle-group.muscle-selected {
+  fill: rgba(0, 229, 204, 0.38);
+  stroke: var(--teal);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 7px rgba(0, 229, 204, 0.75));
 }
 .muscle-legend {
   display: flex;
@@ -605,12 +617,6 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .workout-output strong { color: var(--text); }
 
 /* ─── Exercise Cards (Workout Page) ────────────────────── */
-.muscle-group { cursor: pointer; }
-.muscle-group:hover {
-  fill: rgba(0, 229, 204, 0.15);
-  stroke: var(--teal);
-  stroke-width: 1.5;
-}
 .muscle-group.muscle-selected {
   fill: rgba(0, 229, 204, 0.35);
   stroke: var(--teal);

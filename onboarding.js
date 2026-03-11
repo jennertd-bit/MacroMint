@@ -201,7 +201,7 @@
     btn.disabled = true;
 
     try {
-      const res = await fetch(`${API_BASE()}/v1/auth/register`, {
+      const res = await fetch(`${API_BASE()}/v1/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

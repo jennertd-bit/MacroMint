@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | Workouts</title>
+    <meta name="theme-color" content="#080c14" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js"></script>
+    <script src="workouts.js" defer></script>
+  </head>
+  <body>
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <a class="nav-item" href="index.html#log"><span class="nav-icon">📋</span>Today</a>
+      <a class="nav-item" href="index.html#weight"><span class="nav-icon">⚖️</span>Weight</a>
+      <a class="nav-fab" href="index.html#scanner" aria-label="Scan label">＋</a>
+      <a class="nav-item active" href="workouts.html"><span class="nav-icon">💪</span>Workouts</a>
+      <a class="nav-item" href="overview.html"><span class="nav-icon">📈</span>Trends</a>
+    </nav>
+
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">MM</div>
+          <div><h1>MacroMint</h1></div>
+        </div>
+        <div class="header-actions">
+          <a class="chip" href="profile.html">Account</a>
+        </div>
+      </header>
+
+      <main>
+        <!-- Page header -->
+        <section class="panel workout-intro-panel">
+          <p class="eyebrow">Training</p>
+          <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin:4px 0 6px;">Your Workout Plan</h2>
+          <p class="muted">AI-powered plan tailored to your goal and activity level. Muscles targeted light up after generation.</p>
+        </section>
+
+        <!-- Body outline -->
+        <section class="panel body-card">
+            <h3>Muscles Targeted</h3>
+            <div class="body-views">
+              <!-- Front view -->
+              <div class="body-view-wrap">
+                <p class="body-view-label">Front</p>
+                <svg class="body-svg" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg" aria-label="Front body muscles">
+                  <!-- Head -->
+                  <ellipse cx="60" cy="18" rx="14" ry="16" class="body-head" />
+                  <!-- Neck -->
+                  <rect x="54" y="32" width="12" height="10" rx="3" class="body-neck" />
+                  <!-- Shoulders / front delts -->
+                  <ellipse cx="30" cy="50" rx="13" ry="9" class="muscle-group" data-muscle="shoulders" />
+                  <ellipse cx="90" cy="50" rx="13" ry="9" class="muscle-group" data-muscle="shoulders" />
+                  <!-- Chest (pecs) -->
+                  <ellipse cx="46" cy="62" rx="15" ry="12" class="muscle-group" data-muscle="chest" />
+                  <ellipse cx="74" cy="62" rx="15" ry="12" class="muscle-group" data-muscle="chest" />
+                  <!-- Torso outline -->
+                  <path d="M42 42 Q24 48 24 70 L24 110 Q24 120 40 122 L80 122 Q96 120 96 110 L96 70 Q96 48 78 42 Z" class="body-torso" fill="none" />
+                  <!-- Abs -->
+                  <rect x="50" y="75" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <rect x="61" y="75" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <rect x="50" y="87" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <rect x="61" y="87" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <rect x="50" y="99" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <rect x="61" y="99" width="9" height="9" rx="3" class="muscle-group" data-muscle="abs" />
+                  <!-- Biceps -->
+                  <ellipse cx="20" cy="78" rx="7" ry="14" class="muscle-group" data-muscle="biceps" />
+                  <ellipse cx="100" cy="78" rx="7" ry="14" class="muscle-group" data-muscle="biceps" />
+                  <!-- Forearms -->
+                  <ellipse cx="17" cy="106" rx="5" ry="12" class="muscle-group" data-muscle="forearms" />
+                  <ellipse cx="103" cy="106" rx="5" ry="12" class="muscle-group" data-muscle="forearms" />
+                  <!-- Hip / obliques -->
+                  <ellipse cx="38" cy="118" rx="10" ry="8" class="muscle-group" data-muscle="obliques" />
+                  <ellipse cx="82" cy="118" rx="10" ry="8" class="muscle-group" data-muscle="obliques" />
+                  <!-- Quads -->
+                  <ellipse cx="43" cy="160" rx="14" ry="28" class="muscle-group" data-muscle="quads" />
+                  <ellipse cx="77" cy="160" rx="14" ry="28" class="muscle-group" data-muscle="quads" />
+                  <!-- Knees -->
+                  <ellipse cx="43" cy="194" rx="10" ry="8" class="body-joint" />
+                  <ellipse cx="77" cy="194" rx="10" ry="8" class="body-joint" />
+                  <!-- Calves / Shins -->
+                  <ellipse cx="43" cy="226" rx="9" ry="22" class="muscle-group" data-muscle="calves" />
+                  <ellipse cx="77" cy="226" rx="9" ry="22" class="muscle-group" data-muscle="calves" />
+                </svg>
+              </div>
+
+              <!-- Back view -->
+              <div class="body-view-wrap">
+                <p class="body-view-label">Back</p>
+                <svg class="body-svg" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg" aria-label="Back body muscles">
+                  <!-- Head -->
+                  <ellipse cx="60" cy="18" rx="14" ry="16" class="body-head" />
+                  <!-- Neck -->
+                  <rect x="54" y="32" width="12" height="10" rx="3" class="body-neck" />
+                  <!-- Rear delts / shoulders -->
+                  <ellipse cx="30" cy="50" rx="13" ry="9" class="muscle-group" data-muscle="shoulders" />
+                  <ellipse cx="90" cy="50" rx="13" ry="9" class="muscle-group" data-muscle="shoulders" />
+                  <!-- Traps -->
+                  <path d="M46 34 Q60 28 74 34 Q76 44 60 46 Q44 44 46 34 Z" class="muscle-group" data-muscle="traps" />
+                  <!-- Torso outline -->
+                  <path d="M42 42 Q24 48 24 70 L24 110 Q24 120 40 122 L80 122 Q96 120 96 110 L96 70 Q96 48 78 42 Z" class="body-torso" fill="none" />
+                  <!-- Lats -->
+                  <path d="M26 68 Q34 80 38 110 L42 122 L42 70 Q36 58 26 68 Z" class="muscle-group" data-muscle="lats" />
+                  <path d="M94 68 Q86 80 82 110 L78 122 L78 70 Q84 58 94 68 Z" class="muscle-group" data-muscle="lats" />
+                  <!-- Lower back (erectors) -->
+                  <rect x="50" y="88" width="8" height="30" rx="4" class="muscle-group" data-muscle="lower-back" />
+                  <rect x="62" y="88" width="8" height="30" rx="4" class="muscle-group" data-muscle="lower-back" />
+                  <!-- Triceps -->
+                  <ellipse cx="20" cy="78" rx="7" ry="14" class="muscle-group" data-muscle="triceps" />
+                  <ellipse cx="100" cy="78" rx="7" ry="14" class="muscle-group" data-muscle="triceps" />
+                  <!-- Forearms -->
+                  <ellipse cx="17" cy="106" rx="5" ry="12" class="muscle-group" data-muscle="forearms" />
+                  <ellipse cx="103" cy="106" rx="5" ry="12" class="muscle-group" data-muscle="forearms" />
+                  <!-- Glutes -->
+                  <ellipse cx="46" cy="130" rx="16" ry="13" class="muscle-group" data-muscle="glutes" />
+                  <ellipse cx="74" cy="130" rx="16" ry="13" class="muscle-group" data-muscle="glutes" />
+                  <!-- Hamstrings -->
+                  <ellipse cx="43" cy="162" rx="14" ry="26" class="muscle-group" data-muscle="hamstrings" />
+                  <ellipse cx="77" cy="162" rx="14" ry="26" class="muscle-group" data-muscle="hamstrings" />
+                  <!-- Knees -->
+                  <ellipse cx="43" cy="194" rx="10" ry="8" class="body-joint" />
+                  <ellipse cx="77" cy="194" rx="10" ry="8" class="body-joint" />
+                  <!-- Calves -->
+                  <ellipse cx="43" cy="226" rx="9" ry="22" class="muscle-group" data-muscle="calves" />
+                  <ellipse cx="77" cy="226" rx="9" ry="22" class="muscle-group" data-muscle="calves" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Muscle legend -->
+            <div class="muscle-legend" id="muscle-legend">
+              <p class="legend-empty">Generate a plan to see targeted muscles</p>
+            </div>
+        </section>
+
+        <!-- Generate Plan -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">AI-Powered</p>
+              <h3>Generate Plan</h3>
+              <p class="muted">Built from your profile. Sign in for a fully personalised plan.</p>
+            </div>
+          </div>
+
+          <div id="workout-auth-notice" class="workout-auth-notice hidden">
+            <p>Sign in to save your plan and sync your stats automatically.</p>
+            <a href="profile.html" class="button ghost">Sign In</a>
+          </div>
+
+          <!-- Quick goal override -->
+          <div class="workout-controls">
+            <div class="form-field">
+              <label for="workout-goal">Goal</label>
+              <select id="workout-goal" class="workout-select">
+                <option value="lose">Lose Fat</option>
+                <option value="maintain" selected>Maintain</option>
+                <option value="gain">Build Muscle</option>
+                <option value="recomp">Recomposition</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="workout-activity">Activity Level</label>
+              <select id="workout-activity" class="workout-select">
+                <option value="1.2">Sedentary</option>
+                <option value="1.375">Lightly Active</option>
+                <option value="1.55" selected>Moderately Active</option>
+                <option value="1.725">Very Active</option>
+                <option value="1.9">Athlete</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="workout-generate-btn" class="button" type="button">
+            Generate My Workout Plan
+          </button>
+          <p id="workout-status" class="help"></p>
+        </section>
+
+        <!-- Plan output -->
+        <section class="panel" id="workout-result-panel" hidden>
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Your Plan</p>
+              <h3 id="workout-plan-title">Weekly Workout Plan</h3>
+            </div>
+            <button id="workout-regenerate-btn" class="chip" type="button">Regenerate</button>
+          </div>
+          <div id="workout-output" class="workout-output"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

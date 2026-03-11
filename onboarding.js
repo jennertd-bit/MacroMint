@@ -114,7 +114,7 @@
         // Start repeating after 350ms hold
         holdTimeout = setTimeout(() => {
           interval = 140;
-          lastTime = 0;
+          lastTime = performance.now();
           rafId = requestAnimationFrame(tick);
         }, 350);
       };

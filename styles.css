@@ -604,6 +604,128 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .workout-output li { margin-bottom: 4px; }
 .workout-output strong { color: var(--text); }
 
+/* ─── Exercise Cards (Workout Page) ────────────────────── */
+.muscle-group { cursor: pointer; }
+.muscle-group:hover {
+  fill: rgba(0, 229, 204, 0.15);
+  stroke: var(--teal);
+  stroke-width: 1.5;
+}
+.muscle-group.muscle-selected {
+  fill: rgba(0, 229, 204, 0.35);
+  stroke: var(--teal);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 204, 0.7));
+}
+#muscle-exercises {
+  margin-top: 16px;
+  animation: fadeUp 0.25s ease both;
+}
+#muscle-exercises.hidden { display: none; }
+.exercise-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.exercise-icon { font-size: 1.8rem; line-height: 1; }
+.exercise-title {
+  font-family: "Syne", sans-serif;
+  font-size: 1.1rem;
+  color: var(--teal);
+  margin: 0 0 2px;
+}
+.exercise-subtitle { font-size: 0.72rem; color: var(--text-muted); margin: 0; }
+.exercise-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 400px) { .exercise-grid { grid-template-columns: 1fr; } }
+.exercise-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+.exercise-card:hover { border-color: var(--teal); }
+.exercise-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.exercise-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.exercise-sets-badge {
+  font-size: 0.68rem;
+  font-family: "DM Mono", monospace;
+  background: rgba(0, 229, 204, 0.12);
+  color: var(--teal);
+  border: 1px solid rgba(0, 229, 204, 0.25);
+  border-radius: 100px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.exercise-equip {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 2px 8px;
+  align-self: flex-start;
+}
+.exercise-tip {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ─── Meal Suggestion Cards ─────────────────────────────── */
+.plan-meal-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.plan-meal-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+.plan-meal-macros {
+  font-size: 0.72rem;
+  font-family: "DM Mono", monospace;
+  color: var(--text-muted);
+}
+.plan-meal-kcal {
+  font-size: 0.72rem;
+  color: var(--teal);
+  font-family: "DM Mono", monospace;
+}
+.plan-slot-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 12px 0 6px;
+  font-family: "DM Mono", monospace;
+}
+.plan-slot-label:first-child { margin-top: 0; }
+
 /* ─── Animations ────────────────────────────────────────── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px); }

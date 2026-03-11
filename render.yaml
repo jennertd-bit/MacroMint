@@ -52,8 +52,3 @@ services:
       - key: S3_PUBLIC_BASE_URL
         sync: false
 
-databases:
-  - name: macromint-db
-    plan: free
-    databaseName: macromint
-    user: macromint

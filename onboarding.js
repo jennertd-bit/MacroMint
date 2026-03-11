@@ -77,21 +77,63 @@
     });
   };
 
-  // ── Stepper helper ────────────────────────────────────────────────────────
+  // ── Stepper helper (with hold-to-accelerate) ─────────────────────────────
   const initStepper = (minusId, plusId, displayId, getter, setter, min, max, step = 1) => {
     const display = $(displayId);
     const update = () => { if (display) display.textContent = getter(); };
     update();
-    $(minusId)?.addEventListener("click", () => {
-      setter(Math.max(min, getter() - step));
-      update();
-      onAnyChange();
-    });
-    $(plusId)?.addEventListener("click", () => {
-      setter(Math.min(max, getter() + step));
-      update();
-      onAnyChange();
-    });
+
+    const addHold = (btnId, delta) => {
+      const btn = $(btnId);
+      if (!btn) return;
+      let rafId = null;
+      let holdTimeout = null;
+      let interval = 140;
+      let lastTime = 0;
+
+      const tick = (ts) => {
+        if (ts - lastTime >= interval) {
+          setter(Math.min(max, Math.max(min, getter() + delta)));
+          update();
+          onAnyChange();
+          lastTime = ts;
+          // Accelerate: ramp from 140ms down to 30ms
+          interval = Math.max(30, interval - 12);
+        }
+        rafId = requestAnimationFrame(tick);
+      };
+
+      const start = (e) => {
+        // Prevent double-fire on touch devices (touchstart + click)
+        if (e.type === "touchstart") btn._touched = true;
+        if (e.type === "click" && btn._touched) { btn._touched = false; return; }
+        // Immediate step
+        setter(Math.min(max, Math.max(min, getter() + delta)));
+        update();
+        onAnyChange();
+        // Start repeating after 350ms hold
+        holdTimeout = setTimeout(() => {
+          interval = 140;
+          lastTime = 0;
+          rafId = requestAnimationFrame(tick);
+        }, 350);
+      };
+
+      const stop = () => {
+        clearTimeout(holdTimeout);
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      };
+
+      btn.addEventListener("mousedown", start);
+      btn.addEventListener("touchstart", start, { passive: true });
+      btn.addEventListener("mouseup", stop);
+      btn.addEventListener("mouseleave", stop);
+      btn.addEventListener("touchend", stop);
+      btn.addEventListener("touchcancel", stop);
+    };
+
+    addHold(minusId, -step);
+    addHold(plusId, step);
   };
 
   // ── TDEE preview ──────────────────────────────────────────────────────────

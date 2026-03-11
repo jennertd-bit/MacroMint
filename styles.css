@@ -71,11 +71,10 @@ button, input, select, textarea { font-family: inherit; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .logo {
   width: 40px; height: 40px; border-radius: 12px;
-  display: grid; place-items: center;
-  font-family: "DM Mono", monospace; font-weight: 500; font-size: 0.7rem;
-  background: linear-gradient(140deg, var(--teal), var(--blue));
-  color: #fff; letter-spacing: 0.05em;
+  background: url('icon.svg') center/cover no-repeat;
+  font-size: 0; color: transparent;
   box-shadow: 0 0 20px rgba(0,229,204,0.28);
+  flex-shrink: 0;
 }
 .brand h1 { font-family: "Syne", sans-serif; font-weight: 800; font-size: 1.1rem; }
 .brand p  { display: none; }

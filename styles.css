@@ -308,8 +308,8 @@ button, input, select, textarea { font-family: inherit; }
   display: flex; flex-direction: column; gap: 3px;
 }
 .summary-item span  { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
-.summary-item strong { font-family: "DM Mono", monospace; font-size: 0.95rem; font-weight: 500; color: var(--text); }
-.summary-item small { font-size: 0.67rem; color: var(--muted); }
+.summary-item strong { font-family: "DM Mono", monospace; font-size: 0.95rem; font-weight: 500; color: var(--text); overflow-wrap: break-word; word-break: break-all; }
+.summary-item small { font-size: 0.67rem; color: var(--muted); overflow-wrap: break-word; word-break: break-all; }
 .summary-item.highlight { border-color: var(--border-hi); background: rgba(0,229,204,0.05); }
 .summary-item.highlight strong { color: var(--teal); }
 
@@ -506,28 +506,50 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
   font-size: 0.68rem; color: var(--muted);
   white-space: normal; line-height: 1.4;
 }
-/* Suggestions list — compact rows */
-.plan-suggestions { display: flex; flex-direction: column; gap: 4px; }
+/* Suggestions — 2-column mini cards */
+.plan-suggestions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 .plan-slot {
-  display: flex; align-items: baseline; gap: 10px;
-  padding: 8px 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: border-color 0.2s;
 }
-.plan-slot h4 {
-  font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--teal); font-family: "DM Mono", monospace;
-  white-space: nowrap; flex-shrink: 0; min-width: 64px; padding-top: 1px;
+.plan-slot:hover { border-color: rgba(0,229,204,0.3); }
+.plan-slot-tag {
+  font-size: 0.6rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--teal);
+  font-family: "DM Mono", monospace; font-weight: 500;
+  margin: 0;
 }
-.plan-option { flex: 1; }
-.plan-option > small.muted { display: none; } /* hide "Option 1/2" label */
-.plan-item { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.plan-item > div { font-size: 0.82rem; font-weight: 500; color: var(--text); }
-.plan-item small {
-  font-size: 0.65rem; color: var(--muted);
-  font-family: "DM Mono", monospace; white-space: nowrap;
+.plan-slot-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.plan-slot-item-name {
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text); line-height: 1.35;
 }
+.plan-slot-footer { display: flex; flex-direction: column; gap: 5px; }
+.plan-slot-kcal {
+  font-size: 0.88rem; font-family: "DM Mono", monospace;
+  color: var(--text); font-weight: 500;
+}
+.plan-slot-macros { display: flex; gap: 4px; flex-wrap: wrap; }
+.plan-macro-chip {
+  font-size: 0.62rem; font-family: "DM Mono", monospace;
+  border-radius: 100px; padding: 2px 7px; font-weight: 700;
+}
+.plan-macro-p { background: rgba(0,229,204,0.1);   color: var(--teal);   border: 1px solid rgba(0,229,204,0.25); }
+.plan-macro-c { background: rgba(139,92,246,0.1);  color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
+.plan-macro-f { background: rgba(249,115,22,0.1);  color: var(--orange); border: 1px solid rgba(249,115,22,0.25); }
+/* legacy compat */
+.plan-option { display: none; }
+.plan-item   { display: none; }
 
 /* ─── Workout ───────────────────────────────────────────── */
 .workout-actions { margin-bottom: 12px; }
@@ -1346,4 +1368,5 @@ body.onboard-body {
   .quick-stats .quick-stat:last-child { grid-column: span 2; }
   .totals { flex-direction: column; }
   .plan-remaining { grid-template-columns: 1fr 1fr; }
+  .plan-suggestions { grid-template-columns: 1fr 1fr; } /* keep 2-col on small screens */
 }

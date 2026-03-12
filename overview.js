@@ -253,6 +253,7 @@ const renderPlanSuggestions = (plan) => {
   if (!plan?.suggestions?.length) {
     const empty = document.createElement("p");
     empty.className = "plan-empty";
+    empty.style.cssText = "grid-column:span 2;font-size:0.85rem";
     empty.textContent = "No suggestions yet. Log a few foods to unlock ideas.";
     elements.planSuggestions.appendChild(empty);
     return;
@@ -262,52 +263,63 @@ const renderPlanSuggestions = (plan) => {
     const slotCard = document.createElement("div");
     slotCard.className = "plan-slot";
 
-    const title = document.createElement("h4");
-    title.textContent = PLAN_SLOT_LABELS[slot.slot] || slot.slot || "Meal";
-    slotCard.appendChild(title);
+    // Meal label tag
+    const tag = document.createElement("p");
+    tag.className = "plan-slot-tag";
+    tag.textContent = PLAN_SLOT_LABELS[slot.slot] || slot.slot || "Meal";
+    slotCard.appendChild(tag);
 
-    if (!slot.options || slot.options.length === 0) {
+    const option = slot.options?.[0];
+    if (!option?.items?.length) {
       const empty = document.createElement("p");
       empty.className = "plan-empty";
-      empty.textContent = "No suggestions for this slot yet.";
+      empty.textContent = "No suggestion yet.";
       slotCard.appendChild(empty);
       elements.planSuggestions.appendChild(slotCard);
       return;
     }
 
-    slot.options.slice(0, 2).forEach((option, index) => {
-      const optionWrap = document.createElement("div");
-      optionWrap.className = "plan-option";
-
-      if (slot.options.length > 1) {
-        const optionLabel = document.createElement("small");
-        optionLabel.className = "muted";
-        optionLabel.textContent = `Option ${index + 1}`;
-        optionWrap.appendChild(optionLabel);
-      }
-
-      (option.items || []).forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "plan-item";
-
-        const name = document.createElement("div");
-        const qty = item.servingQty ? `${formatQuantity(item.servingQty)} ` : "";
-        const unit = item.servingUnit ? item.servingUnit.toLowerCase() : "serving";
-        name.textContent = `${item.name} · ${qty}${unit}`;
-
-        const macros = document.createElement("small");
-        macros.textContent = `${formatMacro(item.calories)} kcal • ${formatMacro(
-          item.proteinG,
-          "P",
-        )} / ${formatMacro(item.carbsG, "C")} / ${formatMacro(item.fatG, "F")}`;
-
-        row.appendChild(name);
-        row.appendChild(macros);
-        optionWrap.appendChild(row);
-      });
-
-      slotCard.appendChild(optionWrap);
+    // Item names
+    const content = document.createElement("div");
+    content.className = "plan-slot-content";
+    let totalCal = 0, totalP = 0, totalC = 0, totalF = 0;
+    option.items.forEach((item) => {
+      const nameLine = document.createElement("div");
+      nameLine.className = "plan-slot-item-name";
+      const qty  = item.servingQty  ? `${formatQuantity(item.servingQty)} ` : "";
+      const unit = item.servingUnit ? item.servingUnit.toLowerCase() : "serving";
+      nameLine.textContent = `${item.name} · ${qty}${unit}`;
+      content.appendChild(nameLine);
+      totalCal += item.calories  || 0;
+      totalP   += item.proteinG  || 0;
+      totalC   += item.carbsG    || 0;
+      totalF   += item.fatG      || 0;
     });
+    slotCard.appendChild(content);
+
+    // Footer: kcal + macro chips
+    const footer = document.createElement("div");
+    footer.className = "plan-slot-footer";
+
+    const kcalEl = document.createElement("span");
+    kcalEl.className = "plan-slot-kcal";
+    kcalEl.textContent = `${Math.round(totalCal)} kcal`;
+    footer.appendChild(kcalEl);
+
+    const macroRow = document.createElement("div");
+    macroRow.className = "plan-slot-macros";
+    [
+      { val: Math.round(totalP), label: "P", cls: "plan-macro-p" },
+      { val: Math.round(totalC), label: "C", cls: "plan-macro-c" },
+      { val: Math.round(totalF), label: "F", cls: "plan-macro-f" },
+    ].forEach(({ val, label, cls }) => {
+      const chip = document.createElement("span");
+      chip.className = `plan-macro-chip ${cls}`;
+      chip.textContent = `${val}${label}`;
+      macroRow.appendChild(chip);
+    });
+    footer.appendChild(macroRow);
+    slotCard.appendChild(footer);
 
     elements.planSuggestions.appendChild(slotCard);
   });

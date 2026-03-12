@@ -325,6 +325,70 @@ const renderPlanSuggestions = (plan) => {
   });
 };
 
+// ── Local meal fallback pool (mirrors app.js) ─────────────────────────────
+const OV_LOCAL_MEALS = {
+  BREAKFAST: [
+    { name: "Oatmeal with banana & peanut butter",        kcal: 450, p: 15, c: 65, f: 14 },
+    { name: "Scrambled eggs & whole wheat toast",          kcal: 380, p: 22, c: 30, f: 18 },
+    { name: "Greek yogurt parfait with granola & berries", kcal: 320, p: 18, c: 45, f:  7 },
+    { name: "Protein smoothie (banana, milk, whey)",       kcal: 380, p: 32, c: 44, f:  6 },
+    { name: "Avocado toast with 2 fried eggs",             kcal: 420, p: 18, c: 35, f: 22 },
+    { name: "Overnight oats with chia seeds & honey",      kcal: 380, p: 14, c: 52, f: 12 },
+    { name: "Cottage cheese bowl with fruit & almonds",    kcal: 310, p: 24, c: 30, f:  8 },
+    { name: "Whole grain waffles with berries & syrup",    kcal: 440, p: 12, c: 72, f: 10 },
+  ],
+  LUNCH: [
+    { name: "Grilled chicken salad with olive oil",        kcal: 520, p: 42, c: 18, f: 28 },
+    { name: "Turkey, avocado & spinach wrap",              kcal: 560, p: 35, c: 48, f: 22 },
+    { name: "Tuna melt on whole wheat",                    kcal: 480, p: 38, c: 38, f: 16 },
+    { name: "Brown rice bowl with black beans & salsa",    kcal: 550, p: 18, c: 88, f:  8 },
+    { name: "Chicken & quinoa power bowl",                 kcal: 580, p: 45, c: 60, f: 12 },
+    { name: "Lentil soup with crusty whole grain bread",   kcal: 480, p: 22, c: 68, f:  8 },
+    { name: "Salmon with roasted sweet potato",            kcal: 620, p: 45, c: 52, f: 22 },
+    { name: "Greek salad with grilled chicken & pita",     kcal: 490, p: 40, c: 28, f: 22 },
+  ],
+  DINNER: [
+    { name: "Grilled salmon, asparagus & brown rice",      kcal: 650, p: 48, c: 60, f: 20 },
+    { name: "Beef stir-fry with broccoli & white rice",    kcal: 680, p: 42, c: 72, f: 22 },
+    { name: "Baked chicken breast, sweet potato & beans",  kcal: 580, p: 50, c: 55, f: 10 },
+    { name: "Lean ground turkey tacos (3 corn shells)",    kcal: 620, p: 38, c: 52, f: 24 },
+    { name: "Pasta with marinara & lean ground beef",      kcal: 700, p: 40, c: 80, f: 20 },
+    { name: "Shrimp stir-fry with jasmine rice & veg",    kcal: 600, p: 38, c: 68, f: 12 },
+    { name: "Pork tenderloin with roasted root veggies",   kcal: 520, p: 48, c: 30, f: 18 },
+    { name: "Veggie & tofu curry with basmati rice",       kcal: 580, p: 22, c: 78, f: 16 },
+  ],
+  SNACK: [
+    { name: "Apple with 2 tbsp almond butter",             kcal: 280, p:  6, c: 36, f: 14 },
+    { name: "Protein shake with oat milk",                 kcal: 250, p: 28, c: 20, f:  6 },
+    { name: "Greek yogurt with honey & walnuts",           kcal: 260, p: 17, c: 28, f:  8 },
+    { name: "Mixed nuts & dried cranberries (50g)",        kcal: 320, p:  8, c: 24, f: 24 },
+    { name: "Cottage cheese with pineapple chunks",        kcal: 220, p: 20, c: 28, f:  2 },
+    { name: "Rice cakes with peanut butter & banana",      kcal: 300, p:  8, c: 42, f: 10 },
+    { name: "2 hard-boiled eggs & whole grain crackers",   kcal: 280, p: 16, c: 22, f: 12 },
+    { name: "Edamame (1 cup) with sea salt",               kcal: 190, p: 17, c: 14, f:  8 },
+  ],
+};
+const OV_SLOT_PORTIONS = { BREAKFAST: 0.25, LUNCH: 0.30, DINNER: 0.30, SNACK: 0.15 };
+
+const ovPickMeal = (slot, targetKcal) => {
+  const pool = OV_LOCAL_MEALS[slot] || [];
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 4).sort(
+    (a, b) => Math.abs(a.kcal - targetKcal) - Math.abs(b.kcal - targetKcal)
+  )[0];
+};
+
+const ovBuildLocalSuggestions = (remainingKcal) => {
+  const kcal = Math.max(remainingKcal, 800);
+  return Object.entries(OV_SLOT_PORTIONS).map(([slot, pct]) => {
+    const meal = ovPickMeal(slot, kcal * pct);
+    return {
+      slot,
+      options: meal ? [{ items: [{ name: meal.name, servingQty: 1, servingUnit: "serving", calories: meal.kcal, proteinG: meal.p, carbsG: meal.c, fatG: meal.f }] }] : [],
+    };
+  });
+};
+
 const updatePlanForDate = async (dateKey, mode) => {
   if (!elements.planStatus) return;
 
@@ -335,8 +399,12 @@ const updatePlanForDate = async (dateKey, mode) => {
   }
 
   if (!state.isAuthenticated) {
-    clearPlanUI();
-    setPlanStatus("Sign in to generate suggestions.");
+    // Show local fallback instead of blank
+    const profile = state.profile || (() => { try { return JSON.parse(localStorage.getItem("macromint_profile") || "{}"); } catch { return {}; } })();
+    const target  = calculateTargetFromProfile(profile) || 2000;
+    const localPlan = { remaining: { calories: target, proteinG: 0, carbsG: 0, fatG: 0 }, suggestions: ovBuildLocalSuggestions(target) };
+    renderPlanSuggestions(localPlan);
+    setPlanStatus("Meal ideas based on your calorie target. Sign in for AI.");
     return;
   }
 
@@ -411,8 +479,12 @@ const updatePlanForDate = async (dateKey, mode) => {
       }
     }
 
-    clearPlanUI();
-    setPlanStatus(message, true);
+    // Fall back to local suggestions rather than showing an error
+    const profile = state.profile || (() => { try { return JSON.parse(localStorage.getItem("macromint_profile") || "{}"); } catch { return {}; } })();
+    const target  = calculateTargetFromProfile(profile) || 2000;
+    const localPlan = { remaining: { calories: target, proteinG: 0, carbsG: 0, fatG: 0 }, suggestions: ovBuildLocalSuggestions(target) };
+    renderPlanSuggestions(localPlan);
+    setPlanStatus("Showing local ideas (API unavailable).");
   }
 };
 
@@ -847,6 +919,22 @@ const init = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", init);
+
+// ── Meal refresh button ────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("ov-meals-refresh-btn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    btn.textContent = "⏳";
+    btn.disabled = true;
+    const mode    = elements.mode?.value || "day";
+    const dateKey = elements.dateInput?.value || new Date().toISOString().slice(0, 10);
+    updatePlanForDate(dateKey, mode).finally(() => {
+      btn.textContent = "🔄";
+      btn.disabled = false;
+    });
+  });
+});
 
 // ─────────────────────────────────────────────────────────────
 // PROGRESS CHARTS + WEEKLY COACHING

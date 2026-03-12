@@ -1087,12 +1087,15 @@ const LOCAL_MEALS = {
 
 const SLOT_PORTIONS = { BREAKFAST: 0.25, LUNCH: 0.30, DINNER: 0.30, SNACK: 0.15 };
 
-// Pick the 2 meals closest to the slot's calorie target
+// Pick 1 meal per slot — shuffle pool first so every call can return a different choice
 const pickMealsForSlot = (slot, targetKcal) => {
   const pool = LOCAL_MEALS[slot] || [];
-  return [...pool]
-    .sort((a, b) => Math.abs(a.kcal - targetKcal) - Math.abs(b.kcal - targetKcal))
-    .slice(0, 2);
+  // Fisher-Yates shuffle then take first 4, sort those 4 by kcal closeness, return top 1
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const candidate = shuffled.slice(0, 4).sort(
+    (a, b) => Math.abs(a.kcal - targetKcal) - Math.abs(b.kcal - targetKcal)
+  )[0];
+  return candidate ? [candidate] : [];
 };
 
 const buildLocalSuggestions = (remainingKcal) => {
@@ -2117,6 +2120,20 @@ const init = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", init);
+
+// ── Meal refresh button ────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("meals-refresh-btn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    btn.textContent = "⏳";
+    btn.disabled = true;
+    updatePlanForToday().finally(() => {
+      btn.textContent = "🔄";
+      btn.disabled = false;
+    });
+  });
+});
 
 // ── Auto-trigger scanner modal from deep-links ────────────────────────────
 // Other pages navigate to index.html?scan=barcode or ?scan=camera

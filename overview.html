@@ -237,10 +237,13 @@
           <div class="panel-header split">
             <div>
               <p class="eyebrow">Today</p>
-              <h3>Plan Suggestions</h3>
-              <p class="muted">Remaining macros plus quick ideas based on your logged foods.</p>
+              <h3>Meal Ideas</h3>
+              <p class="muted">Suggestions based on your calorie target and remaining macros.</p>
             </div>
-            <div id="plan-status" class="plan-status">Sign in to generate suggestions.</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button id="ov-meals-refresh-btn" class="chip" type="button" title="Get different suggestions">🔄</button>
+              <div id="plan-status" class="plan-status"></div>
+            </div>
           </div>
           <div class="plan-grid">
             <div class="plan-remaining">

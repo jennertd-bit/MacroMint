@@ -788,22 +788,58 @@ const stopBarcodeScanner = async (message) => {
 };
 
 const applyProductData = (product, nutriments, sourceLabel) => {
-  const calories =
-    extractNutriment(nutriments, ["energy-kcal_serving", "energy-kcal_100g"]) ??
-    extractNutriment(nutriments, ["energy-kcal", "energy_100g"]);
-  const fat = extractNutriment(nutriments, ["fat_serving", "fat_100g"]);
-  const carbs = extractNutriment(nutriments, ["carbohydrates_serving", "carbohydrates_100g"]);
-  const protein = extractNutriment(nutriments, ["proteins_serving", "proteins_100g"]);
+  // ── Determine if the API gave us per-serving values ──────────────────────
+  // Open Food Facts stores *_serving keys when a serving size is configured.
+  // When those are missing we only have *_100g values and must scale them.
+  const hasServingKcal = extractNutriment(nutriments, ["energy-kcal_serving"]) !== null;
 
-  if (calories !== null) elements.labelCalories.value = calories;
-  if (fat !== null) elements.labelFat.value = fat;
-  if (carbs !== null) elements.labelCarbs.value = carbs;
-  if (protein !== null) elements.labelProtein.value = protein;
+  let calories, fat, carbs, protein, servingLabel;
 
-  if (product?.serving_size) {
-    elements.labelServing.value = product.serving_size;
-  } else if (extractNutriment(nutriments, ["energy-kcal_100g", "energy_100g"]) !== null) {
-    elements.labelServing.value = "100g";
+  if (hasServingKcal) {
+    // ── Per-serving data present → use directly ──
+    calories = extractNutriment(nutriments, ["energy-kcal_serving"]) ??
+               extractNutriment(nutriments, ["energy-kcal", "energy-kcal_100g"]);
+    fat      = extractNutriment(nutriments, ["fat_serving"])              ?? extractNutriment(nutriments, ["fat_100g"]);
+    carbs    = extractNutriment(nutriments, ["carbohydrates_serving"])    ?? extractNutriment(nutriments, ["carbohydrates_100g"]);
+    protein  = extractNutriment(nutriments, ["proteins_serving"])         ?? extractNutriment(nutriments, ["proteins_100g"]);
+    servingLabel = product?.serving_size || null;
+  } else {
+    // ── Only 100g data → try to scale by serving size ──────────────────────
+    // `serving_quantity` is the numeric serving size in grams/ml (e.g. 28 for "28g")
+    const servingQty = Number.parseFloat(product?.serving_quantity);
+    const scaleFactor = Number.isFinite(servingQty) && servingQty > 0 ? servingQty / 100 : null;
+
+    const kcal100  = extractNutriment(nutriments, ["energy-kcal_100g", "energy-kcal", "energy_100g"]);
+    const fat100   = extractNutriment(nutriments, ["fat_100g"]);
+    const carbs100 = extractNutriment(nutriments, ["carbohydrates_100g"]);
+    const prot100  = extractNutriment(nutriments, ["proteins_100g"]);
+
+    if (scaleFactor) {
+      // Scale 100g values to actual serving size
+      calories = kcal100  !== null ? Math.round(kcal100  * scaleFactor) : null;
+      fat      = fat100   !== null ? Math.round(fat100   * scaleFactor * 10) / 10 : null;
+      carbs    = carbs100 !== null ? Math.round(carbs100 * scaleFactor * 10) / 10 : null;
+      protein  = prot100  !== null ? Math.round(prot100  * scaleFactor * 10) / 10 : null;
+      servingLabel = product?.serving_size || `${Math.round(servingQty)}g`;
+    } else {
+      // No serving info at all — show per 100g and label it clearly
+      calories = kcal100;
+      fat      = fat100;
+      carbs    = carbs100;
+      protein  = prot100;
+      servingLabel = "100g";
+    }
+  }
+
+  if (calories !== null) elements.labelCalories.value = Math.round(calories);
+  if (fat      !== null) elements.labelFat.value      = fat;
+  if (carbs    !== null) elements.labelCarbs.value    = carbs;
+  if (protein  !== null) elements.labelProtein.value  = protein;
+
+  if (servingLabel) {
+    elements.labelServing.value = servingLabel;
+  } else if (!elements.labelServing.value) {
+    elements.labelServing.value = "1 serving";
   }
 
   const name = product?.product_name || product?.product_name_en || "";
@@ -845,7 +881,7 @@ const lookupBarcode = async (barcode) => {
     const response = await fetch(
       `https://world.openfoodfacts.net/api/v2/product/${encodeURIComponent(
         sanitized
-      )}.json?fields=product_name,product_name_en,brands,serving_size,nutriments`
+      )}.json?fields=product_name,product_name_en,brands,serving_size,serving_quantity,serving_quantity_unit,nutriments`
     );
     if (!response.ok) {
       throw new Error("Lookup failed");
@@ -982,63 +1018,80 @@ const parseServingSize = (text) => {
   };
 };
 
-const saveFoodToLibrary = async () => {
-  if (!state.isAuthenticated) {
-    setSaveFoodMessage("You need an account to save changes.", true);
-    await requireAuth(() => saveFoodToLibrary(), { message: "You need an account to save changes." });
-    return;
-  }
+// ── Pantry: localStorage-based food library ───────────────────────────────
+const PANTRY_KEY = "macromint_pantry";
 
+const getPantry = () => {
+  try { return JSON.parse(localStorage.getItem(PANTRY_KEY) || "[]"); } catch { return []; }
+};
+
+const savePantry = (items) => {
+  try { localStorage.setItem(PANTRY_KEY, JSON.stringify(items)); } catch {}
+};
+
+// Record a log entry in pantry so we can learn tendencies over time
+const recordPantryUsage = (pantryId) => {
+  const pantry = getPantry();
+  const item = pantry.find(f => f.id === pantryId);
+  if (!item) return;
+  item.useCount  = (item.useCount  || 0) + 1;
+  item.lastUsed  = new Date().toISOString();
+  item.useDates  = [...(item.useDates || []), getTodayKey()].slice(-60); // keep last 60 dates
+  savePantry(pantry);
+};
+
+const saveFoodToLibrary = () => {
   const calories = parseNumber(elements.labelCalories.value);
-  const protein = parseNumber(elements.labelProtein.value);
-  const carbs = parseNumber(elements.labelCarbs.value);
-  const fat = parseNumber(elements.labelFat.value);
+  const protein  = parseNumber(elements.labelProtein.value);
+  const carbs    = parseNumber(elements.labelCarbs.value);
+  const fat      = parseNumber(elements.labelFat.value);
 
   if (calories === null || protein === null || carbs === null || fat === null) {
     setSaveFoodMessage("Add calories, protein, carbs, and fat first.", true);
     return;
   }
 
-  const servingName = elements.labelServing.value?.trim() || "1 serving";
-  const servingsPerContainer = parseNumber(elements.labelServings.value);
-  const { grams, ml } = parseServingSize(servingName);
+  const name    = state.scannedProduct?.name || elements.mealName.value.trim() || "Scanned food";
+  const brand   = state.scannedProduct?.brand  || "";
+  const barcode = state.scannedProduct?.barcode || elements.barcodeInput?.value?.trim() || "";
+  const serving = elements.labelServing?.value?.trim() || "1 serving";
 
-  const name =
-    state.scannedProduct?.name ||
-    elements.mealName.value.trim() ||
-    "Scanned food";
-  const brand = state.scannedProduct?.brand || undefined;
-  const barcode = state.scannedProduct?.barcode || elements.barcodeInput.value?.trim() || undefined;
+  const pantry = getPantry();
 
-  const servingsPayload = {
-    labelServingName: servingName,
-    gramsPerServing: grams ?? undefined,
-    mlPerServing: ml ?? undefined,
-    servingCountPerContainer: servingsPerContainer ?? undefined,
+  // Avoid exact duplicates (same barcode or same name+brand combo)
+  const exists = pantry.find(f =>
+    (barcode && f.barcode === barcode) ||
+    (f.name.toLowerCase() === name.toLowerCase() && f.brand?.toLowerCase() === brand.toLowerCase())
+  );
+  if (exists) {
+    // Update nutrition in case label has changed, bump useCount
+    exists.nutrition = { calories, protein, carbs, fat };
+    exists.serving   = serving;
+    exists.updatedAt = new Date().toISOString();
+    exists.useCount  = (exists.useCount || 0) + 1;
+    exists.lastUsed  = new Date().toISOString();
+    savePantry(pantry);
+    setSaveFoodMessage("✓ Updated in your Pantry.");
+    return;
+  }
+
+  const newItem = {
+    id:        `pantry_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+    name,
+    brand,
+    barcode,
+    serving,
+    nutrition: { calories, protein, carbs, fat },
+    savedAt:   new Date().toISOString(),
+    lastUsed:  null,
+    useCount:  0,
+    useDates:  [],
   };
 
-  try {
-    await apiFetch("/api/foods", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        brand,
-        barcode,
-        source: "USER_SCAN",
-        servings: [servingsPayload],
-        nutrition: {
-          caloriesPerServing: calories,
-          proteinG: protein,
-          carbsG: carbs,
-          fatG: fat,
-        },
-      }),
-    });
-    setSaveFoodMessage("Saved to your food library.");
-    queuePlanUpdate();
-  } catch (error) {
-    setSaveFoodMessage(error.message || "Unable to save food.", true);
-  }
+  pantry.unshift(newItem); // newest first
+  savePantry(pantry);
+  setSaveFoodMessage("✓ Saved to your Pantry.");
+  queuePlanUpdate();
 };
 
 // ── Shared meal database — diverse pool covering homemade, chains & packaged
@@ -1176,11 +1229,35 @@ const LOCAL_MEALS = {
 
 const SLOT_PORTIONS = { BREAKFAST: 0.25, LUNCH: 0.30, DINNER: 0.30, SNACK: 0.15 };
 
-// Pick 1 random meal per slot — purely random so refresh always shows something different
+// ── Smart meal pick: blend pantry favourites into the suggestion pool ─────
+// Pantry items used 3+ times get a weighted slot in the pool.
+// 40% chance of picking a pantry item (when available), 60% from built-in pool.
 const pickMealsForSlot = (slot) => {
-  const pool = LOCAL_MEALS[slot] || [];
-  if (!pool.length) return [];
-  const meal = pool[Math.floor(Math.random() * pool.length)];
+  const builtIn = LOCAL_MEALS[slot] || [];
+
+  // Pull pantry items that have been used at least twice (learned preference)
+  const pantry = getPantry();
+  const pantryFaves = pantry
+    .filter(f => (f.useCount || 0) >= 2 && f.nutrition?.calories > 0)
+    .sort((a, b) => (b.useCount || 0) - (a.useCount || 0))
+    .slice(0, 6) // cap at top 6 pantry items
+    .map(f => ({
+      name:  f.brand ? `${f.name} (${f.brand})` : f.name,
+      kcal:  f.nutrition.calories,
+      p:     f.nutrition.protein  || 0,
+      c:     f.nutrition.carbs    || 0,
+      f:     f.nutrition.fat      || 0,
+      _pantryId: f.id,
+    }));
+
+  // 40% chance to surface a pantry favourite if any exist
+  if (pantryFaves.length && Math.random() < 0.4) {
+    const pick = pantryFaves[Math.floor(Math.random() * pantryFaves.length)];
+    return [pick];
+  }
+
+  if (!builtIn.length) return [];
+  const meal = builtIn[Math.floor(Math.random() * builtIn.length)];
   return meal ? [meal] : [];
 };
 
@@ -1194,7 +1271,7 @@ const buildLocalSuggestions = (remainingKcal) => {
         items: [{
           name:       m.name,
           servingQty: 1,
-          servingUnit:"serving",
+          servingUnit: "serving",
           calories:   m.kcal,
           proteinG:   m.p,
           carbsG:     m.c,

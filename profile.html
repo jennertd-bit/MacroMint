@@ -85,6 +85,21 @@
           </div>
         </section>
 
+        <!-- ── Food Bank ── -->
+        <section class="panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Food Bank</p>
+              <h3>My Pantry</h3>
+              <p class="muted">Foods you've scanned &amp; saved. Used to personalise your meal suggestions.</p>
+            </div>
+            <a class="button" href="pantry.html">Open Pantry →</a>
+          </div>
+          <div id="pantry-preview" class="pantry-preview">
+            <!-- filled by inline script below -->
+          </div>
+        </section>
+
         <section class="panel">
           <div class="panel-header">
             <div>
@@ -114,6 +129,26 @@
         </section>
       </main>
     </div>
+
+    <script>
+    // ── Pantry preview on Account page ────────────────────────────────────
+    (function() {
+      const el = document.getElementById("pantry-preview");
+      if (!el) return;
+      try {
+        const pantry = JSON.parse(localStorage.getItem("macromint_pantry") || "[]");
+        if (!pantry.length) {
+          el.innerHTML = '<p class="muted" style="font-size:0.82rem">No foods saved yet. Scan a product and tap "Save to Pantry".</p>';
+          return;
+        }
+        const chips = pantry.slice(0, 6).map(f =>
+          `<span class="pantry-chip">${f.brand ? f.brand + " · " : ""}${f.name} <span class="pantry-chip-kcal">${f.nutrition?.calories || 0} kcal</span></span>`
+        ).join("");
+        const more = pantry.length > 6 ? `<span class="pantry-chip pantry-chip-more">+${pantry.length - 6} more</span>` : "";
+        el.innerHTML = `<div class="pantry-chip-row">${chips}${more}</div>`;
+      } catch {}
+    })();
+    </script>
 
     <div class="scan-always">
       <a class="scan-always-btn" href="index.html?scan=barcode" aria-label="Scan barcode">

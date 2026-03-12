@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MacroMint | My Pantry</title>
+    <meta name="theme-color" content="#080c14" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js"></script>
+  </head>
+  <body>
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <a class="nav-item" href="index.html#log"><span class="nav-icon">📋</span>Today</a>
+      <a class="nav-item" href="workouts.html"><span class="nav-icon">💪</span>Workouts</a>
+      <a class="nav-fab" href="index.html#scanner" aria-label="Scan label">＋</a>
+      <a class="nav-item" href="overview.html"><span class="nav-icon">📈</span>Trends</a>
+      <a class="nav-item active" href="profile.html"><span class="nav-icon">👤</span>Account</a>
+    </nav>
+
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">MM</div>
+          <div><h1>MacroMint</h1></div>
+        </div>
+        <div class="header-actions">
+          <a class="chip" href="profile.html">← Account</a>
+        </div>
+      </header>
+
+      <main>
+        <!-- Page header -->
+        <section class="panel">
+          <p class="eyebrow">Food Bank</p>
+          <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin:4px 0 6px;">My Pantry</h2>
+          <p class="muted">Your saved foods. The more you use an item, the more likely it is to appear in your Meal Ideas.</p>
+        </section>
+
+        <!-- Stats row -->
+        <section class="panel">
+          <div class="pantry-stats-row">
+            <div class="pantry-stat">
+              <span id="pantry-count">0</span>
+              <small>Saved</small>
+            </div>
+            <div class="pantry-stat">
+              <span id="pantry-faves">0</span>
+              <small>Favourites</small>
+            </div>
+            <div class="pantry-stat">
+              <span id="pantry-uses">0</span>
+              <small>Total Uses</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search + sort -->
+        <section class="panel" style="padding-bottom:8px">
+          <div class="pantry-toolbar">
+            <input id="pantry-search" type="search" placeholder="Search your pantry…" class="pantry-search-input" />
+            <select id="pantry-sort" class="pantry-sort-select">
+              <option value="recent">Most Recent</option>
+              <option value="used">Most Used</option>
+              <option value="az">A → Z</option>
+              <option value="kcal">Calories ↑</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Food list -->
+        <section class="panel" style="padding:0">
+          <ul id="pantry-list" class="pantry-list">
+            <li class="pantry-empty">Loading your pantry…</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <!-- ── Edit Food Modal ── -->
+    <div id="edit-food-modal" class="log-ex-modal" hidden aria-modal="true" role="dialog">
+      <div class="log-ex-backdrop" id="edit-food-backdrop"></div>
+      <div class="log-ex-sheet" id="edit-food-sheet">
+        <div class="log-ex-handle"></div>
+        <h3 id="edit-food-title" class="log-ex-title">Edit Food</h3>
+        <input type="hidden" id="edit-food-id" />
+        <div class="log-ex-fields">
+          <div class="form-field">
+            <label for="edit-food-name">Name</label>
+            <input id="edit-food-name" type="text" />
+          </div>
+          <div class="form-field">
+            <label for="edit-food-brand">Brand</label>
+            <input id="edit-food-brand" type="text" placeholder="Optional" />
+          </div>
+          <div class="form-field">
+            <label for="edit-food-serving">Serving Size</label>
+            <input id="edit-food-serving" type="text" placeholder="e.g. 1 cup (240ml)" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-field">
+              <label for="edit-food-cal">Calories</label>
+              <input id="edit-food-cal" type="number" min="0" inputmode="numeric" />
+            </div>
+            <div class="form-field">
+              <label for="edit-food-prot">Protein (g)</label>
+              <input id="edit-food-prot" type="number" min="0" step="0.1" inputmode="decimal" />
+            </div>
+            <div class="form-field">
+              <label for="edit-food-carbs">Carbs (g)</label>
+              <input id="edit-food-carbs" type="number" min="0" step="0.1" inputmode="decimal" />
+            </div>
+            <div class="form-field">
+              <label for="edit-food-fat">Fat (g)</label>
+              <input id="edit-food-fat" type="number" min="0" step="0.1" inputmode="decimal" />
+            </div>
+          </div>
+        </div>
+        <div class="log-ex-actions">
+          <button id="edit-food-cancel" class="button ghost" type="button">Cancel</button>
+          <button id="edit-food-save"   class="button"       type="button">Save Changes</button>
+        </div>
+        <p id="edit-food-msg" class="help" style="text-align:center;margin-top:8px"></p>
+      </div>
+    </div>
+
+    <script>
+    // ── Pantry page logic ─────────────────────────────────────────────────
+    (function() {
+      const PANTRY_KEY = "macromint_pantry";
+
+      const getPantry = () => {
+        try { return JSON.parse(localStorage.getItem(PANTRY_KEY) || "[]"); } catch { return []; }
+      };
+      const savePantry = (items) => {
+        try { localStorage.setItem(PANTRY_KEY, JSON.stringify(items)); } catch {}
+      };
+
+      const listEl   = document.getElementById("pantry-list");
+      const searchEl = document.getElementById("pantry-search");
+      const sortEl   = document.getElementById("pantry-sort");
+
+      // ── Stats ────────────────────────────────────────────────────────────
+      function renderStats(pantry) {
+        document.getElementById("pantry-count").textContent  = pantry.length;
+        document.getElementById("pantry-faves").textContent  = pantry.filter(f => (f.useCount || 0) >= 3).length;
+        document.getElementById("pantry-uses").textContent   = pantry.reduce((s, f) => s + (f.useCount || 0), 0);
+      }
+
+      // ── Main render ──────────────────────────────────────────────────────
+      function render() {
+        let pantry = getPantry();
+        renderStats(pantry);
+
+        const q = (searchEl.value || "").toLowerCase().trim();
+        if (q) pantry = pantry.filter(f =>
+          f.name.toLowerCase().includes(q) || (f.brand || "").toLowerCase().includes(q)
+        );
+
+        const sort = sortEl.value;
+        if (sort === "used")   pantry.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
+        else if (sort === "az") pantry.sort((a, b) => a.name.localeCompare(b.name));
+        else if (sort === "kcal") pantry.sort((a, b) => (a.nutrition?.calories || 0) - (b.nutrition?.calories || 0));
+        // "recent" is default (array is newest-first)
+
+        listEl.innerHTML = "";
+
+        if (!pantry.length) {
+          const li = document.createElement("li");
+          li.className = "pantry-empty";
+          li.textContent = q ? "No foods match your search." : "Your pantry is empty. Scan a food and tap "Save to Pantry".";
+          listEl.appendChild(li);
+          return;
+        }
+
+        pantry.forEach(food => {
+          const li   = document.createElement("li");
+          li.className = "pantry-item";
+          li.dataset.id = food.id;
+
+          const uses   = food.useCount || 0;
+          const stars  = uses >= 5 ? "⭐⭐" : uses >= 3 ? "⭐" : "";
+          const n      = food.nutrition || {};
+
+          li.innerHTML = `
+            <div class="pantry-item-main">
+              <div class="pantry-item-name">${food.name}${stars ? " " + stars : ""}</div>
+              ${food.brand ? `<div class="pantry-item-brand">${food.brand}</div>` : ""}
+              <div class="pantry-item-macro">
+                <span class="pantry-kcal">${n.calories || 0} kcal</span>
+                <span class="plan-macro-chip plan-macro-p">${Math.round(n.protein || 0)}P</span>
+                <span class="plan-macro-chip plan-macro-c">${Math.round(n.carbs || 0)}C</span>
+                <span class="plan-macro-chip plan-macro-f">${Math.round(n.fat || 0)}F</span>
+              </div>
+              <div class="pantry-item-meta">${food.serving || "1 serving"} · Used ${uses}×${food.lastUsed ? " · Last: " + new Date(food.lastUsed).toLocaleDateString() : ""}</div>
+            </div>
+            <div class="pantry-item-actions">
+              <button class="pantry-btn-edit"   data-id="${food.id}" aria-label="Edit">✏️</button>
+              <button class="pantry-btn-delete" data-id="${food.id}" aria-label="Delete">🗑️</button>
+            </div>
+          `;
+          listEl.appendChild(li);
+        });
+      }
+
+      // ── Edit modal ───────────────────────────────────────────────────────
+      const modal     = document.getElementById("edit-food-modal");
+      const backdrop  = document.getElementById("edit-food-backdrop");
+      const cancelBtn = document.getElementById("edit-food-cancel");
+      const saveBtn   = document.getElementById("edit-food-save");
+      const msgEl     = document.getElementById("edit-food-msg");
+
+      function openEdit(id) {
+        const pantry = getPantry();
+        const food   = pantry.find(f => f.id === id);
+        if (!food) return;
+        const n = food.nutrition || {};
+        document.getElementById("edit-food-id").value       = food.id;
+        document.getElementById("edit-food-name").value     = food.name;
+        document.getElementById("edit-food-brand").value    = food.brand || "";
+        document.getElementById("edit-food-serving").value  = food.serving || "1 serving";
+        document.getElementById("edit-food-cal").value      = n.calories  || "";
+        document.getElementById("edit-food-prot").value     = n.protein   || "";
+        document.getElementById("edit-food-carbs").value    = n.carbs     || "";
+        document.getElementById("edit-food-fat").value      = n.fat       || "";
+        if (msgEl) msgEl.textContent = "";
+        modal.removeAttribute("hidden");
+        requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add("is-open")));
+      }
+
+      function closeEdit() {
+        modal.classList.remove("is-open");
+        setTimeout(() => modal.setAttribute("hidden", ""), 350);
+      }
+
+      saveBtn?.addEventListener("click", () => {
+        const id  = document.getElementById("edit-food-id").value;
+        const pantry = getPantry();
+        const idx = pantry.findIndex(f => f.id === id);
+        if (idx === -1) return;
+
+        const name = document.getElementById("edit-food-name").value.trim();
+        if (!name) { if (msgEl) msgEl.textContent = "Name is required."; return; }
+
+        pantry[idx] = {
+          ...pantry[idx],
+          name,
+          brand:   document.getElementById("edit-food-brand").value.trim(),
+          serving: document.getElementById("edit-food-serving").value.trim() || "1 serving",
+          nutrition: {
+            calories: parseFloat(document.getElementById("edit-food-cal").value)   || 0,
+            protein:  parseFloat(document.getElementById("edit-food-prot").value)  || 0,
+            carbs:    parseFloat(document.getElementById("edit-food-carbs").value) || 0,
+            fat:      parseFloat(document.getElementById("edit-food-fat").value)   || 0,
+          },
+          updatedAt: new Date().toISOString(),
+        };
+        savePantry(pantry);
+        if (msgEl) msgEl.textContent = "✓ Saved!";
+        setTimeout(() => { closeEdit(); render(); }, 600);
+      });
+
+      backdrop?.addEventListener("click", closeEdit);
+      cancelBtn?.addEventListener("click", closeEdit);
+
+      // ── Delegated clicks: edit / delete ──────────────────────────────────
+      listEl.addEventListener("click", (e) => {
+        const editBtn = e.target.closest(".pantry-btn-edit");
+        if (editBtn) { openEdit(editBtn.dataset.id); return; }
+
+        const delBtn = e.target.closest(".pantry-btn-delete");
+        if (delBtn) {
+          const id = delBtn.dataset.id;
+          const pantry = getPantry();
+          const food = pantry.find(f => f.id === id);
+          if (!food) return;
+          if (!confirm(`Remove "${food.name}" from your pantry?`)) return;
+          savePantry(pantry.filter(f => f.id !== id));
+          render();
+        }
+      });
+
+      // ── Search & sort ─────────────────────────────────────────────────────
+      searchEl?.addEventListener("input",  render);
+      sortEl?.addEventListener("change",   render);
+
+      // ── Initial render ────────────────────────────────────────────────────
+      render();
+    })();
+    </script>
+  </body>
+</html>

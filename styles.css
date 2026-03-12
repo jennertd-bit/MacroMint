@@ -424,6 +424,71 @@ button, input, select, textarea { font-family: inherit; }
 .food-result-name { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
 .food-result-meta { font-size: 0.72rem; color: var(--muted); font-family: "DM Mono", monospace; }
 
+/* ── Pantry (Food Bank) ──────────────────────────────────────────────────── */
+
+/* Profile page preview chips */
+.pantry-preview { margin-top: 10px; }
+.pantry-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pantry-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 100px; font-size: 0.72rem; color: var(--text);
+}
+.pantry-chip-kcal { color: var(--teal); font-family: "DM Mono", monospace; }
+.pantry-chip-more { color: var(--muted); font-style: italic; }
+
+/* Pantry page stats */
+.pantry-stats-row { display: flex; gap: 16px; }
+.pantry-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--surface-2); border-radius: var(--radius-md); padding: 12px 8px;
+  border: 1px solid var(--border);
+}
+.pantry-stat span { font-size: 1.5rem; font-family: "Syne", sans-serif; font-weight: 700; color: var(--teal); }
+.pantry-stat small { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+
+/* Toolbar */
+.pantry-toolbar { display: flex; gap: 8px; }
+.pantry-search-input {
+  flex: 1; padding: 9px 12px; font-size: 0.85rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); outline: none;
+}
+.pantry-search-input:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(0,229,204,0.15); }
+.pantry-sort-select {
+  padding: 9px 10px; font-size: 0.8rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); outline: none;
+}
+
+/* Item list */
+.pantry-list { list-style: none; margin: 0; padding: 0; }
+.pantry-empty { padding: 20px 18px; font-size: 0.84rem; color: var(--muted); }
+.pantry-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.pantry-item:last-child { border-bottom: none; }
+.pantry-item:hover { background: rgba(255,255,255,0.02); }
+.pantry-item-main { flex: 1; min-width: 0; }
+.pantry-item-name  { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.pantry-item-brand { font-size: 0.72rem; color: var(--teal); margin-bottom: 5px; }
+.pantry-item-macro { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.pantry-kcal       { font-size: 0.82rem; font-family: "DM Mono", monospace; color: var(--text); }
+.pantry-item-meta  { font-size: 0.7rem; color: var(--muted); }
+.pantry-item-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.pantry-btn-edit,
+.pantry-btn-delete {
+  background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 8px; cursor: pointer; font-size: 0.85rem; color: var(--muted);
+  transition: border-color 0.15s, background 0.15s;
+}
+.pantry-btn-edit:hover   { border-color: var(--teal); background: rgba(0,229,204,0.08); }
+.pantry-btn-delete:hover { border-color: #ff6b6b; background: rgba(255,107,107,0.08); }
+
 .product-info {
   background: var(--surface); border: 1px solid var(--border-hi);
   border-radius: var(--radius-sm); padding: 12px;

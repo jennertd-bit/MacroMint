@@ -1041,68 +1041,153 @@ const saveFoodToLibrary = async () => {
   }
 };
 
-// ── Local meal database (real meals by slot) ─────────────────────────────
+// ── Shared meal database — diverse pool covering homemade, chains & packaged
 const LOCAL_MEALS = {
   BREAKFAST: [
-    { name: "Oatmeal with banana & peanut butter",       kcal: 450, p: 15, c: 65, f: 14 },
-    { name: "Scrambled eggs & whole wheat toast",         kcal: 380, p: 22, c: 30, f: 18 },
-    { name: "Greek yogurt parfait with granola & berries",kcal: 320, p: 18, c: 45, f:  7 },
-    { name: "Protein smoothie (banana, milk, whey)",      kcal: 380, p: 32, c: 44, f:  6 },
-    { name: "Avocado toast with 2 fried eggs",            kcal: 420, p: 18, c: 35, f: 22 },
-    { name: "Overnight oats with chia seeds & honey",     kcal: 380, p: 14, c: 52, f: 12 },
-    { name: "Cottage cheese bowl with fruit & almonds",   kcal: 310, p: 24, c: 30, f:  8 },
-    { name: "Whole grain waffles with berries & syrup",   kcal: 440, p: 12, c: 72, f: 10 },
+    // Homemade
+    { name: "Oatmeal with banana & peanut butter",            kcal: 450, p: 15, c: 65, f: 14 },
+    { name: "Scrambled eggs & whole wheat toast",              kcal: 380, p: 22, c: 30, f: 18 },
+    { name: "Greek yogurt parfait with granola & berries",     kcal: 320, p: 18, c: 45, f:  7 },
+    { name: "Protein smoothie — banana, milk & whey",          kcal: 390, p: 32, c: 44, f:  6 },
+    { name: "Avocado toast with 2 fried eggs",                 kcal: 420, p: 18, c: 35, f: 22 },
+    { name: "Overnight oats with chia seeds & honey",          kcal: 380, p: 14, c: 52, f: 12 },
+    { name: "Cottage cheese bowl with fruit & almonds",        kcal: 310, p: 24, c: 30, f:  8 },
+    { name: "Veggie omelette with feta & spinach",             kcal: 360, p: 26, c: 12, f: 24 },
+    { name: "Açaí bowl with granola, banana & honey",          kcal: 480, p: 10, c: 78, f: 12 },
+    { name: "Peanut butter & banana overnight oats",           kcal: 470, p: 18, c: 60, f: 16 },
+    { name: "Smoked salmon & cream cheese bagel",              kcal: 430, p: 24, c: 50, f: 14 },
+    { name: "Whole grain waffles with berries & syrup",        kcal: 440, p: 12, c: 72, f: 10 },
+    { name: "French toast with powdered sugar & maple syrup",  kcal: 480, p: 14, c: 76, f: 14 },
+    { name: "Breakfast burrito — eggs, beans & salsa",         kcal: 520, p: 28, c: 56, f: 20 },
+    // Starbucks
+    { name: "Starbucks Egg & Cheese Protein Box",              kcal: 470, p: 25, c: 52, f: 18 },
+    { name: "Starbucks Spinach & Feta Wrap",                   kcal: 290, p: 20, c: 33, f:  8 },
+    { name: "Starbucks Bacon, Gouda & Egg Sandwich",           kcal: 370, p: 17, c: 36, f: 18 },
+    { name: "Starbucks Ham & Swiss Panini",                    kcal: 340, p: 20, c: 35, f: 12 },
+    { name: "Starbucks Sausage Cheddar & Egg Sandwich",        kcal: 500, p: 21, c: 41, f: 28 },
+    // McDonald's
+    { name: "McDonald's Egg McMuffin",                         kcal: 310, p: 17, c: 30, f: 13 },
+    { name: "McDonald's Big Breakfast with Hotcakes",          kcal: 1090,p: 36, c:111, f: 56 },
+    { name: "McDonald's Hotcakes (3) with syrup & butter",     kcal: 600, p:  9, c: 98, f: 17 },
+    // Dunkin
+    { name: "Dunkin' Turkey Sausage Wake-Up Wrap",             kcal: 210, p: 10, c: 17, f: 11 },
+    { name: "Dunkin' Avocado Toast",                           kcal: 330, p:  9, c: 45, f: 13 },
+    // Chick-fil-A
+    { name: "Chick-fil-A Egg White Grill Breakfast Sandwich",  kcal: 300, p: 26, c: 30, f:  7 },
+    { name: "Chick-fil-A Hash Brown Scramble Burrito",         kcal: 700, p: 32, c: 67, f: 34 },
+    // Packaged / store-bought
+    { name: "Kodiak Cakes Flapjack (2) with berries",          kcal: 440, p: 26, c: 56, f: 10 },
+    { name: "RXBAR Chocolate Sea Salt (1 bar)",                kcal: 210, p: 12, c: 23, f:  9 },
+    { name: "Chobani Flip Almond Coco Loco (1 cup)",           kcal: 180, p: 11, c: 24, f:  5 },
   ],
+
   LUNCH: [
-    { name: "Grilled chicken salad with olive oil",       kcal: 520, p: 42, c: 18, f: 28 },
-    { name: "Turkey, avocado & spinach wrap",             kcal: 560, p: 35, c: 48, f: 22 },
-    { name: "Tuna melt on whole wheat",                   kcal: 480, p: 38, c: 38, f: 16 },
-    { name: "Brown rice bowl with black beans & salsa",   kcal: 550, p: 18, c: 88, f:  8 },
-    { name: "Chicken & quinoa power bowl",                kcal: 580, p: 45, c: 60, f: 12 },
-    { name: "Lentil soup with crusty whole grain bread",  kcal: 480, p: 22, c: 68, f:  8 },
-    { name: "Salmon with roasted sweet potato",           kcal: 620, p: 45, c: 52, f: 22 },
-    { name: "Greek salad with grilled chicken & pita",    kcal: 490, p: 40, c: 28, f: 22 },
+    // Homemade
+    { name: "Grilled chicken salad with olive oil",            kcal: 520, p: 42, c: 18, f: 28 },
+    { name: "Turkey, avocado & spinach wrap",                  kcal: 560, p: 35, c: 48, f: 22 },
+    { name: "Tuna melt on whole wheat",                        kcal: 480, p: 38, c: 38, f: 16 },
+    { name: "Brown rice bowl with black beans & salsa",        kcal: 550, p: 18, c: 88, f:  8 },
+    { name: "Chicken & quinoa power bowl",                     kcal: 580, p: 45, c: 60, f: 12 },
+    { name: "Lentil soup with whole grain bread",              kcal: 480, p: 22, c: 68, f:  8 },
+    { name: "Salmon with roasted sweet potato",                kcal: 620, p: 45, c: 52, f: 22 },
+    { name: "BLT sandwich on sourdough",                       kcal: 530, p: 24, c: 52, f: 24 },
+    { name: "Caprese sandwich with fresh mozzarella",          kcal: 500, p: 22, c: 48, f: 22 },
+    // Chipotle
+    { name: "Chipotle Chicken Burrito Bowl (rice, beans, guac)",kcal: 760, p: 46, c: 82, f: 26 },
+    { name: "Chipotle Steak Tacos x3 (corn tortillas)",        kcal: 570, p: 36, c: 54, f: 22 },
+    { name: "Chipotle Veggie Burrito with sofritas",           kcal: 650, p: 24, c: 84, f: 22 },
+    // Subway
+    { name: "Subway 6\" Turkey & Avocado (whole wheat)",       kcal: 430, p: 26, c: 48, f: 14 },
+    { name: "Subway Footlong Rotisserie Chicken (multigrain)", kcal: 720, p: 52, c: 90, f: 16 },
+    // Panera
+    { name: "Panera Fuji Apple Chicken Salad (full)",          kcal: 570, p: 36, c: 54, f: 24 },
+    { name: "Panera You Pick Two — half sandwich + soup",      kcal: 620, p: 30, c: 72, f: 22 },
+    // Wendy's
+    { name: "Wendy's Apple Pecan Chicken Salad (full)",        kcal: 550, p: 39, c: 43, f: 22 },
+    // Chick-fil-A
+    { name: "Chick-fil-A Grilled Chicken Sandwich",            kcal: 380, p: 40, c: 40, f:  7 },
+    { name: "Chick-fil-A 8-ct Grilled Nuggets + side salad",  kcal: 290, p: 32, c: 17, f:  9 },
+    // Sweetgreen-style
+    { name: "Harvest Bowl — roasted chicken, wild rice & beets",kcal: 705, p: 46, c: 76, f: 24 },
+    { name: "Garden Cobb — hard egg, avocado, bacon, romaine", kcal: 490, p: 38, c: 18, f: 30 },
+    // Packaged
+    { name: "Amy's Organic Lentil Vegetable Soup + crackers",  kcal: 380, p: 16, c: 60, f:  8 },
+    { name: "Trader Joe's Chicken Caesar Wrap",                kcal: 460, p: 28, c: 44, f: 18 },
   ],
+
   DINNER: [
-    { name: "Grilled salmon, asparagus & brown rice",     kcal: 650, p: 48, c: 60, f: 20 },
-    { name: "Beef stir-fry with broccoli & white rice",   kcal: 680, p: 42, c: 72, f: 22 },
-    { name: "Baked chicken breast, sweet potato & beans", kcal: 580, p: 50, c: 55, f: 10 },
-    { name: "Lean ground turkey tacos (3 corn shells)",   kcal: 620, p: 38, c: 52, f: 24 },
-    { name: "Pasta with marinara & lean ground beef",     kcal: 700, p: 40, c: 80, f: 20 },
-    { name: "Shrimp stir-fry with jasmine rice & veg",   kcal: 600, p: 38, c: 68, f: 12 },
-    { name: "Pork tenderloin with roasted root veggies",  kcal: 520, p: 48, c: 30, f: 18 },
-    { name: "Veggie & tofu curry with basmati rice",      kcal: 580, p: 22, c: 78, f: 16 },
+    // Homemade
+    { name: "Grilled salmon, asparagus & brown rice",          kcal: 650, p: 48, c: 60, f: 20 },
+    { name: "Beef stir-fry with broccoli & white rice",        kcal: 680, p: 42, c: 72, f: 22 },
+    { name: "Turkey & veggie sheet-pan bake",                  kcal: 530, p: 46, c: 38, f: 18 },
+    { name: "Lean ground turkey tacos x3 (corn shells)",       kcal: 620, p: 38, c: 52, f: 24 },
+    { name: "Pasta with marinara & lean ground beef",          kcal: 700, p: 40, c: 80, f: 20 },
+    { name: "Shrimp stir-fry with jasmine rice & veg",        kcal: 600, p: 38, c: 68, f: 12 },
+    { name: "Pork tenderloin with roasted root veggies",       kcal: 520, p: 48, c: 30, f: 18 },
+    { name: "Veggie & tofu curry with basmati rice",           kcal: 580, p: 22, c: 78, f: 16 },
+    { name: "BBQ pulled chicken with coleslaw & rice",         kcal: 660, p: 44, c: 74, f: 18 },
+    { name: "Seared tuna with edamame & miso rice",            kcal: 590, p: 52, c: 58, f: 14 },
+    { name: "Lamb kofta with tzatziki & couscous",             kcal: 670, p: 40, c: 62, f: 26 },
+    { name: "Black bean & sweet potato enchiladas (x2)",       kcal: 610, p: 20, c: 88, f: 18 },
+    { name: "Chicken tikka masala with naan & basmati",        kcal: 750, p: 44, c: 80, f: 28 },
+    { name: "Sesame noodles with edamame & soft-boiled egg",   kcal: 560, p: 24, c: 74, f: 18 },
+    // Restaurants / take-out
+    { name: "Chick-fil-A Grilled Nuggets 12ct + waffle fries", kcal: 710, p: 46, c: 80, f: 22 },
+    { name: "Chipotle Bowl — chicken, rice, beans, sour cream",kcal: 810, p: 50, c: 88, f: 24 },
+    { name: "Wendy's Dave's Double + side salad",              kcal: 880, p: 52, c: 60, f: 52 },
+    { name: "McDonald's Quarter Pounder with Cheese Meal",     kcal: 1080,p: 47, c:112, f: 48 },
+    { name: "Subway Footlong Chicken Teriyaki",                kcal: 710, p: 46, c:108, f: 10 },
+    { name: "Panera Chicken Noodle Soup & Baguette",           kcal: 490, p: 28, c: 62, f: 12 },
+    // Trader Joe's / store-ready
+    { name: "Trader Joe's Chicken Tikka Masala (pouch) + rice",kcal: 630, p: 38, c: 68, f: 20 },
+    { name: "Trader Joe's Mandarin Orange Chicken + edamame",  kcal: 720, p: 36, c: 84, f: 24 },
+    { name: "Amy's Palak Paneer with basmati rice",            kcal: 490, p: 16, c: 66, f: 18 },
   ],
+
   SNACK: [
-    { name: "Apple with 2 tbsp almond butter",            kcal: 280, p:  6, c: 36, f: 14 },
-    { name: "Protein shake with oat milk",                kcal: 250, p: 28, c: 20, f:  6 },
-    { name: "Greek yogurt with honey & walnuts",          kcal: 260, p: 17, c: 28, f:  8 },
-    { name: "Mixed nuts & dried cranberries (50g)",       kcal: 320, p:  8, c: 24, f: 24 },
-    { name: "Cottage cheese with pineapple chunks",       kcal: 220, p: 20, c: 28, f:  2 },
-    { name: "Rice cakes with peanut butter & banana",     kcal: 300, p:  8, c: 42, f: 10 },
-    { name: "2 hard-boiled eggs & whole grain crackers",  kcal: 280, p: 16, c: 22, f: 12 },
-    { name: "Edamame (1 cup) with sea salt",              kcal: 190, p: 17, c: 14, f:  8 },
+    // Homemade
+    { name: "Apple with 2 tbsp almond butter",                 kcal: 280, p:  6, c: 36, f: 14 },
+    { name: "Greek yogurt with honey & walnuts",               kcal: 260, p: 17, c: 28, f:  8 },
+    { name: "Mixed nuts & dried cranberries (50g)",            kcal: 320, p:  8, c: 24, f: 24 },
+    { name: "Cottage cheese with pineapple chunks",            kcal: 220, p: 20, c: 28, f:  2 },
+    { name: "Rice cakes with peanut butter & banana",          kcal: 300, p:  8, c: 42, f: 10 },
+    { name: "2 hard-boiled eggs & whole grain crackers",       kcal: 280, p: 16, c: 22, f: 12 },
+    { name: "Edamame (1 cup) with sea salt",                   kcal: 190, p: 17, c: 14, f:  8 },
+    { name: "Celery sticks with hummus (3 tbsp)",              kcal: 160, p:  5, c: 18, f:  8 },
+    { name: "Turkey roll-ups with cream cheese (4 rolls)",     kcal: 240, p: 18, c:  6, f: 16 },
+    { name: "String cheese & a small apple",                   kcal: 200, p: 10, c: 26, f:  6 },
+    // Protein bars / packaged
+    { name: "RXBAR Chocolate Sea Salt",                        kcal: 210, p: 12, c: 23, f:  9 },
+    { name: "Quest Chocolate Chip Cookie Dough Bar",           kcal: 190, p: 21, c: 21, f:  8 },
+    { name: "KIND Dark Chocolate Nuts & Sea Salt Bar",         kcal: 200, p:  6, c: 16, f: 15 },
+    { name: "Cliff Bar Chocolate Chip",                        kcal: 240, p: 11, c: 44, f:  6 },
+    { name: "Protein shake with oat milk (1 scoop)",           kcal: 250, p: 28, c: 20, f:  6 },
+    { name: "Fairlife Core Power 26g Protein Shake",           kcal: 230, p: 26, c: 25, f:  4 },
+    // Fast food snacks
+    { name: "McDonald's Apple Slices + yogurt parfait",        kcal: 230, p:  6, c: 44, f:  3 },
+    { name: "Starbucks Protein Box with peanut butter",        kcal: 380, p: 13, c: 44, f: 18 },
+    { name: "Chick-fil-A Greek Yogurt Parfait",                kcal: 230, p: 13, c: 35, f:  5 },
+    // Grocery aisle
+    { name: "Siggis Skyr Coconut & Vanilla (5.3oz)",           kcal: 120, p: 14, c: 11, f:  2 },
+    { name: "Babybel Light cheese x2 + grapes",                kcal: 190, p: 10, c: 22, f:  5 },
+    { name: "Chocolate protein bar (generic)",                 kcal: 230, p: 20, c: 24, f:  7 },
   ],
 };
 
 const SLOT_PORTIONS = { BREAKFAST: 0.25, LUNCH: 0.30, DINNER: 0.30, SNACK: 0.15 };
 
-// Pick 1 meal per slot — shuffle pool first so every call can return a different choice
-const pickMealsForSlot = (slot, targetKcal) => {
+// Pick 1 random meal per slot — purely random so refresh always shows something different
+const pickMealsForSlot = (slot) => {
   const pool = LOCAL_MEALS[slot] || [];
-  // Fisher-Yates shuffle then take first 4, sort those 4 by kcal closeness, return top 1
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  const candidate = shuffled.slice(0, 4).sort(
-    (a, b) => Math.abs(a.kcal - targetKcal) - Math.abs(b.kcal - targetKcal)
-  )[0];
-  return candidate ? [candidate] : [];
+  if (!pool.length) return [];
+  const meal = pool[Math.floor(Math.random() * pool.length)];
+  return meal ? [meal] : [];
 };
 
 const buildLocalSuggestions = (remainingKcal) => {
   const kcal = Math.max(remainingKcal, 800); // floor so suggestions still show
-  return Object.entries(SLOT_PORTIONS).map(([slot, pct]) => {
-    const slotKcal = kcal * pct;
-    const meals    = pickMealsForSlot(slot, slotKcal);
+  return Object.entries(SLOT_PORTIONS).map(([slot]) => {
+    const meals = pickMealsForSlot(slot);
     return {
       slot,
       options: meals.map(m => ({

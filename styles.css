@@ -385,6 +385,45 @@ button, input, select, textarea { font-family: inherit; }
 .barcode-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .barcode-reader { min-height: 56px; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); }
 .barcode-status { font-size: 0.75rem; color: var(--muted); }
+
+/* ── Food Search (Search tab) ───────────────────────────── */
+.food-search-wrap { display: flex; flex-direction: column; gap: 10px; }
+.food-search-input-row { display: flex; gap: 8px; }
+.food-search-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  outline: none;
+}
+.food-search-input-row input:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(0,229,204,0.15); }
+.food-search-status { font-size: 0.75rem; color: var(--muted); padding: 4px 2px; }
+.food-search-error  { color: #ff6b6b !important; }
+.food-search-results {
+  list-style: none;
+  margin: 0; padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.food-result-item {
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.food-result-item:last-child { border-bottom: none; }
+.food-result-item:hover,
+.food-result-item:active  { background: rgba(0,229,204,0.07); }
+.food-result-item.selected { background: rgba(0,229,204,0.12); }
+.food-result-name { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.food-result-meta { font-size: 0.72rem; color: var(--muted); font-family: "DM Mono", monospace; }
+
 .product-info {
   background: var(--surface); border: 1px solid var(--border-hi);
   border-radius: var(--radius-sm); padding: 12px;

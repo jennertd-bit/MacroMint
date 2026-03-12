@@ -660,6 +660,12 @@
             </svg>
             Barcode
           </button>
+          <button class="scanner-tab" id="tab-search" role="tab" type="button" data-tab="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Search
+          </button>
           <button class="scanner-tab" id="tab-photo" role="tab" type="button" data-tab="photo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -693,6 +699,21 @@
                   <span id="product-brand">Brand</span>
                   <span id="product-source">Source</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SEARCH TAB PANEL ── -->
+          <div id="panel-search" class="scanner-panel" role="tabpanel" hidden>
+            <div class="scan-card">
+              <p class="muted" style="margin-bottom:12px">Search restaurants, chains &amp; packaged foods by name.</p>
+              <div class="food-search-wrap">
+                <div class="food-search-input-row">
+                  <input id="food-search-input" type="search" placeholder="e.g. Starbucks breakfast sandwich…" autocomplete="off" />
+                  <button id="food-search-btn" class="button" type="button">Search</button>
+                </div>
+                <div id="food-search-status" class="food-search-status" hidden></div>
+                <ul id="food-search-results" class="food-search-results" hidden></ul>
               </div>
             </div>
           </div>
@@ -857,9 +878,14 @@
           t.classList.toggle("active", t.dataset.tab === tabName)
         );
         const pb = document.getElementById("panel-barcode");
+        const ps = document.getElementById("panel-search");
         const pp = document.getElementById("panel-photo");
         if (pb) pb.hidden = (tabName !== "barcode");
+        if (ps) ps.hidden = (tabName !== "search");
         if (pp) pp.hidden = (tabName !== "photo");
+        if (tabName === "search") {
+          setTimeout(() => document.getElementById("food-search-input")?.focus(), 150);
+        }
       }
 
       // ── FAB speed-dial ────────────────────────────────────
@@ -942,6 +968,125 @@
 
       // Expose openModal globally so app.js hooks can use it
       window.openScannerModal = openModal;
+    })();
+
+    // ─── Food Search (Open Food Facts) ─────────────────────
+    (function() {
+      const searchInput   = document.getElementById("food-search-input");
+      const searchBtn     = document.getElementById("food-search-btn");
+      const statusEl      = document.getElementById("food-search-status");
+      const resultsList   = document.getElementById("food-search-results");
+      if (!searchInput || !searchBtn) return;
+
+      let debounceTimer = null;
+
+      function showStatus(msg, isError) {
+        if (!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.className = "food-search-status" + (isError ? " food-search-error" : "");
+        statusEl.hidden = !msg;
+      }
+
+      function applyFoodItem(item) {
+        // Autofill the "Scan Insights" form fields (same IDs as barcode lookup)
+        const cal  = Math.round(item.kcal  || 0);
+        const fat  = Math.round(item.fat   || 0);
+        const carb = Math.round(item.carbs || 0);
+        const prot = Math.round(item.prot  || 0);
+        const srv  = item.serving || "1 serving";
+        const name = item.name || "";
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        setVal("label-calories", cal);
+        setVal("label-fat",      fat);
+        setVal("label-carbs",    carb);
+        setVal("label-protein",  prot);
+        setVal("label-serving",  srv);
+        setVal("meal-name",      name);
+        // Switch to photo tab to show the Scan Insights form
+        document.querySelector('.scanner-tab[data-tab="photo"]')?.click();
+        // Scroll to form
+        setTimeout(() => document.getElementById("label-calories")?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+      }
+
+      function renderResults(products) {
+        if (!resultsList) return;
+        resultsList.innerHTML = "";
+        if (!products.length) {
+          showStatus("No results found. Try a different search.", false);
+          resultsList.hidden = true;
+          return;
+        }
+        showStatus("", false);
+        products.forEach(p => {
+          const li = document.createElement("li");
+          li.className = "food-result-item";
+          const kcalVal = Math.round(p.kcal || 0);
+          li.innerHTML = `
+            <div class="food-result-name">${p.name}</div>
+            <div class="food-result-meta">${p.brand ? p.brand + " · " : ""}${kcalVal} kcal · ${Math.round(p.prot||0)}P / ${Math.round(p.carbs||0)}C / ${Math.round(p.fat||0)}F</div>
+          `;
+          li.addEventListener("click", () => {
+            applyFoodItem(p);
+            // Highlight selected
+            resultsList.querySelectorAll(".food-result-item").forEach(r => r.classList.remove("selected"));
+            li.classList.add("selected");
+          });
+          resultsList.appendChild(li);
+        });
+        resultsList.hidden = false;
+      }
+
+      async function doSearch(query) {
+        if (!query || query.trim().length < 2) return;
+        showStatus("Searching…", false);
+        resultsList.hidden = true;
+        try {
+          const url = `https://world.openfoodfacts.net/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15&fields=product_name,brands,nutriments,serving_size`;
+          const res  = await fetch(url, { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+          if (!res.ok) throw new Error("Network error");
+          const data = await res.json();
+          const products = (data.products || [])
+            .filter(p => p.product_name && p.nutriments)
+            .slice(0, 12)
+            .map(p => {
+              const n = p.nutriments;
+              const per = n["energy-kcal_serving"] ? "serving" : "100g";
+              const kcal  = per === "serving" ? (n["energy-kcal_serving"] || n["energy-kcal_100g"] || 0) : (n["energy-kcal_100g"] || 0);
+              const fat   = per === "serving" ? (n["fat_serving"]         || n["fat_100g"]         || 0) : (n["fat_100g"]         || 0);
+              const carbs = per === "serving" ? (n["carbohydrates_serving"]|| n["carbohydrates_100g"]|| 0) : (n["carbohydrates_100g"]|| 0);
+              const prot  = per === "serving" ? (n["proteins_serving"]    || n["proteins_100g"]    || 0) : (n["proteins_100g"]    || 0);
+              return {
+                name:    p.product_name,
+                brand:   p.brands || "",
+                kcal:    kcal,
+                fat:     fat,
+                carbs:   carbs,
+                prot:    prot,
+                serving: p.serving_size || "1 serving",
+              };
+            })
+            .filter(p => p.kcal > 0);
+          renderResults(products);
+        } catch (err) {
+          showStatus("Search failed. Check your connection and try again.", true);
+        }
+      }
+
+      // Search on button click
+      searchBtn.addEventListener("click", () => doSearch(searchInput.value));
+
+      // Search on Enter
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); doSearch(searchInput.value); }
+      });
+
+      // Debounced auto-search after 500ms of no typing
+      searchInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        const q = searchInput.value.trim();
+        if (q.length < 3) { resultsList.hidden = true; showStatus("", false); return; }
+        debounceTimer = setTimeout(() => doSearch(q), 500);
+      });
     })();
 
     // ─── Stats edit panel show/hide ────────────────────────

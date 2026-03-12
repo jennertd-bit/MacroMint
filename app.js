@@ -1382,6 +1382,22 @@ const renderPlanSuggestions = (plan) => {
     footer.appendChild(macroRow);
     slotCard.appendChild(footer);
 
+    // Make card clickable → open meal detail modal
+    slotCard.style.cursor = "pointer";
+    slotCard.setAttribute("title", "Tap for recipe & swaps");
+    slotCard.addEventListener("click", () => {
+      if (typeof openMealModal === "function") {
+        openMealModal({
+          name:  option.items[0]?.name || (slot.slot || "Meal"),
+          slot:  slot.slot || "custom",
+          kcal:  totalCal,
+          p:     totalP,
+          c:     totalC,
+          f:     totalF,
+        });
+      }
+    });
+
     elements.planSuggestions.appendChild(slotCard);
   });
 };

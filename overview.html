@@ -298,5 +298,45 @@
         <span>Camera</span>
       </a>
     </div>
+
+    <!-- Meal Detail Modal (shared) -->
+    <div id="meal-modal" class="meal-modal" hidden aria-modal="true" role="dialog">
+      <div class="meal-modal-backdrop" id="meal-modal-backdrop"></div>
+      <div class="meal-modal-sheet">
+        <div class="meal-card-photo" id="meal-card-photo">
+          <div class="meal-card-header" id="meal-card-header">
+            <div class="meal-card-emoji" id="meal-card-emoji">🍽️</div>
+            <div class="meal-card-header-info">
+              <span class="meal-card-badge" id="meal-card-badge">Meal</span>
+              <h2 class="meal-card-title" id="meal-card-title">Meal Name</h2>
+              <div class="meal-card-time" id="meal-card-time">⏱ — min</div>
+              <div class="meal-card-macro-row">
+                <span class="meal-macro-chip mcp" id="meal-chip-p">P 0g</span>
+                <span class="meal-macro-chip mcc" id="meal-chip-c">C 0g</span>
+                <span class="meal-macro-chip mcf" id="meal-chip-f">F 0g</span>
+                <span class="meal-macro-chip mck" id="meal-chip-k">0 kcal</span>
+              </div>
+            </div>
+          </div>
+          <div class="meal-section">
+            <div class="meal-section-title">📋 Ingredients</div>
+            <div id="meal-ingredients" class="meal-ingredients"></div>
+          </div>
+          <div class="meal-section">
+            <div class="meal-section-title">👨‍🍳 How to Make It</div>
+            <ol id="meal-steps" class="meal-steps"></ol>
+          </div>
+          <div class="meal-card-brand">MacroMint</div>
+        </div>
+        <div class="meal-modal-actions">
+          <button id="meal-save-btn" class="button" type="button">📸 Save Card</button>
+          <button id="meal-close-btn" class="button ghost" type="button">✕ Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="recipes.js"></script>
+    <script src="meal-modal.js"></script>
   </body>
 </html>

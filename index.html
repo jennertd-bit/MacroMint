@@ -743,6 +743,12 @@
             </svg>
             Photo Label
           </button>
+          <button class="scanner-tab scanner-tab--magic" id="tab-fridge" role="tab" type="button" data-tab="fridge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            ✨ Fridge Magic
+          </button>
         </div>
 
         <!-- Scrollable content -->
@@ -800,6 +806,72 @@
               <div class="ocr-status">
                 <div id="ocr-message">Waiting for image...</div>
                 <progress id="ocr-progress" value="0" max="1" hidden></progress>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── FRIDGE MAGIC TAB PANEL ── -->
+          <div id="panel-fridge" class="scanner-panel" role="tabpanel" hidden>
+            <div class="scan-card fridge-magic-card">
+              <div class="fridge-magic-hero">
+                <span class="fridge-magic-icon">✨</span>
+                <div>
+                  <h4 class="fridge-magic-title">Fridge Magic</h4>
+                  <p class="muted" style="margin:0;font-size:0.8rem">List what's in your fridge — AI builds you a clean, healthy recipe.</p>
+                </div>
+              </div>
+              <div class="fridge-magic-input-wrap">
+                <textarea id="fridge-ingredients" class="fridge-ingredients-input"
+                  placeholder="e.g. chicken breast, broccoli, garlic, olive oil, brown rice, lemon…"
+                  rows="3"></textarea>
+                <div class="fridge-options-row">
+                  <select id="fridge-goal" class="fridge-select">
+                    <option value="balanced">Balanced</option>
+                    <option value="high-protein">High Protein</option>
+                    <option value="low-carb">Low Carb</option>
+                    <option value="plant-based">Plant-Based</option>
+                    <option value="quick">Quick (under 20 min)</option>
+                  </select>
+                  <button id="fridge-magic-btn" class="button fridge-magic-btn" type="button">
+                    <span id="fridge-magic-btn-text">✨ Generate Recipe</span>
+                  </button>
+                </div>
+              </div>
+              <div id="fridge-status" class="fridge-status" hidden></div>
+              <!-- Generated recipe output -->
+              <div id="fridge-result" class="fridge-result" hidden>
+                <div class="fridge-result-card" id="fridge-result-card">
+                  <div class="fridge-result-header">
+                    <div class="fridge-result-emoji" id="fridge-result-emoji">🍽️</div>
+                    <div>
+                      <h4 class="fridge-result-name" id="fridge-result-name">Recipe Name</h4>
+                      <div class="fridge-result-meta">
+                        <span id="fridge-result-time">⏱ —</span>
+                        <span id="fridge-result-serves">👤 1 serving</span>
+                      </div>
+                      <div class="fridge-result-macros">
+                        <span class="meal-macro-chip mcp" id="fridge-chip-p">P 0g</span>
+                        <span class="meal-macro-chip mcc" id="fridge-chip-c">C 0g</span>
+                        <span class="meal-macro-chip mcf" id="fridge-chip-f">F 0g</span>
+                        <span class="meal-macro-chip mck" id="fridge-chip-k">0 kcal</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fridge-result-section">
+                    <div class="fridge-result-section-title">📋 Ingredients</div>
+                    <ul id="fridge-result-ingredients" class="fridge-result-list"></ul>
+                  </div>
+                  <div class="fridge-result-section">
+                    <div class="fridge-result-section-title">👨‍🍳 Instructions</div>
+                    <ol id="fridge-result-steps" class="fridge-result-steps"></ol>
+                  </div>
+                  <div class="meal-card-brand">MacroMint</div>
+                </div>
+                <div class="fridge-result-actions">
+                  <button id="fridge-save-photo-btn" class="button" type="button">📸 Save Card</button>
+                  <button id="fridge-add-log-btn" class="button ghost" type="button">+ Add to Today</button>
+                  <button id="fridge-save-pantry-btn" class="button ghost" type="button">📦 Save to Pantry</button>
+                </div>
               </div>
             </div>
           </div>
@@ -893,6 +965,50 @@
     </div><!-- /scanner-modal -->
 
     <!-- ═══════════════════════════════════════════════
+         MEAL DETAIL MODAL
+    ═══════════════════════════════════════════════ -->
+    <div id="meal-modal" class="meal-modal" hidden aria-modal="true" role="dialog">
+      <div class="meal-modal-backdrop" id="meal-modal-backdrop"></div>
+      <div class="meal-modal-sheet">
+        <!-- Saveable card (captured by html2canvas) -->
+        <div class="meal-card-photo" id="meal-card-photo">
+          <!-- Header gradient with emoji + name -->
+          <div class="meal-card-header" id="meal-card-header">
+            <div class="meal-card-emoji" id="meal-card-emoji">🍽️</div>
+            <div class="meal-card-header-info">
+              <span class="meal-card-badge" id="meal-card-badge">Meal</span>
+              <h2 class="meal-card-title" id="meal-card-title">Meal Name</h2>
+              <div class="meal-card-time" id="meal-card-time">⏱ — min</div>
+              <div class="meal-card-macro-row">
+                <span class="meal-macro-chip mcp" id="meal-chip-p">P 0g</span>
+                <span class="meal-macro-chip mcc" id="meal-chip-c">C 0g</span>
+                <span class="meal-macro-chip mcf" id="meal-chip-f">F 0g</span>
+                <span class="meal-macro-chip mck" id="meal-chip-k">0 kcal</span>
+              </div>
+            </div>
+          </div>
+          <!-- Ingredients -->
+          <div class="meal-section">
+            <div class="meal-section-title">📋 Ingredients</div>
+            <div id="meal-ingredients" class="meal-ingredients"></div>
+          </div>
+          <!-- Steps -->
+          <div class="meal-section">
+            <div class="meal-section-title">👨‍🍳 How to Make It</div>
+            <ol id="meal-steps" class="meal-steps"></ol>
+          </div>
+          <!-- Branding watermark -->
+          <div class="meal-card-brand">MacroMint</div>
+        </div>
+        <!-- Action bar (not saved in photo) -->
+        <div class="meal-modal-actions">
+          <button id="meal-save-btn" class="button" type="button">📸 Save Card</button>
+          <button id="meal-close-btn" class="button ghost" type="button">✕ Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
          ALWAYS-VISIBLE SCAN BUTTONS
     ═══════════════════════════════════════════════ -->
     <div class="scan-always">
@@ -950,11 +1066,16 @@
         const pb = document.getElementById("panel-barcode");
         const ps = document.getElementById("panel-search");
         const pp = document.getElementById("panel-photo");
+        const pf = document.getElementById("panel-fridge");
         if (pb) pb.hidden = (tabName !== "barcode");
         if (ps) ps.hidden = (tabName !== "search");
         if (pp) pp.hidden = (tabName !== "photo");
+        if (pf) pf.hidden = (tabName !== "fridge");
         if (tabName === "search") {
           setTimeout(() => document.getElementById("food-search-input")?.focus(), 150);
+        }
+        if (tabName === "fridge") {
+          setTimeout(() => document.getElementById("fridge-ingredients")?.focus(), 150);
         }
       }
 
@@ -1164,6 +1285,136 @@
       });
     })();
 
+    // ─── Fridge Magic ──────────────────────────────────────
+    (function() {
+      const btn        = document.getElementById("fridge-magic-btn");
+      const btnText    = document.getElementById("fridge-magic-btn-text");
+      const textarea   = document.getElementById("fridge-ingredients");
+      const goalSelect = document.getElementById("fridge-goal");
+      const statusEl   = document.getElementById("fridge-status");
+      const resultWrap = document.getElementById("fridge-result");
+      if (!btn) return;
+
+      let lastRecipe = null;
+
+      function setStatus(msg, isErr) {
+        if (!statusEl) return;
+        statusEl.hidden = !msg;
+        statusEl.textContent = msg || "";
+        statusEl.className = "fridge-status" + (isErr ? " fridge-status--error" : "");
+      }
+
+      function renderRecipe(r) {
+        lastRecipe = r;
+        document.getElementById("fridge-result-emoji").textContent = r.emoji || "🍽️";
+        document.getElementById("fridge-result-name").textContent  = r.name  || "AI Recipe";
+        document.getElementById("fridge-result-time").textContent  = "⏱ " + (r.time || "—");
+        document.getElementById("fridge-result-serves").textContent= "👤 " + (r.serves || 1) + " serving";
+        document.getElementById("fridge-chip-p").textContent = "P " + Math.round(r.protein || 0) + "g";
+        document.getElementById("fridge-chip-c").textContent = "C " + Math.round(r.carbs   || 0) + "g";
+        document.getElementById("fridge-chip-f").textContent = "F " + Math.round(r.fat     || 0) + "g";
+        document.getElementById("fridge-chip-k").textContent = Math.round(r.calories || 0) + " kcal";
+
+        const ingList = document.getElementById("fridge-result-ingredients");
+        ingList.innerHTML = "";
+        (r.ingredients || []).forEach(ing => {
+          const li = document.createElement("li"); li.textContent = ing; ingList.appendChild(li);
+        });
+
+        const stepsList = document.getElementById("fridge-result-steps");
+        stepsList.innerHTML = "";
+        (r.steps || []).forEach(step => {
+          const li = document.createElement("li"); li.textContent = step; stepsList.appendChild(li);
+        });
+
+        resultWrap.hidden = false;
+        setTimeout(() => resultWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      }
+
+      async function generateRecipe() {
+        const ingredients = textarea?.value?.trim() || "";
+        if (!ingredients) { setStatus("Add some ingredients first!", true); return; }
+
+        btn.disabled = true;
+        btnText.textContent = "✨ Conjuring…";
+        setStatus("Asking AI for your perfect recipe…", false);
+        resultWrap.hidden = true;
+
+        try {
+          const res = await fetch("/.netlify/functions/fridge-magic", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ingredients, goal: goalSelect?.value || "balanced" }),
+          });
+          const data = await res.json();
+          if (!res.ok || data.error) throw new Error(data.error || "AI error");
+          setStatus("", false);
+          renderRecipe(data);
+        } catch (err) {
+          setStatus("Couldn't generate recipe: " + (err.message || "unknown error"), true);
+        } finally {
+          btn.disabled = false;
+          btnText.textContent = "✨ Generate Recipe";
+        }
+      }
+
+      btn.addEventListener("click", generateRecipe);
+      textarea?.addEventListener("keydown", e => {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); generateRecipe(); }
+      });
+
+      // Save card as photo
+      document.getElementById("fridge-save-photo-btn")?.addEventListener("click", () => {
+        const card = document.getElementById("fridge-result-card");
+        if (!card || typeof html2canvas === "undefined") return;
+        html2canvas(card, { backgroundColor: "#0d1117", scale: 2, useCORS: true, logging: false })
+          .then(canvas => {
+            const link = document.createElement("a");
+            const safeName = (lastRecipe?.name || "ai-recipe").replace(/[^a-z0-9]/gi, "-").toLowerCase();
+            link.download = "macromint-" + safeName + ".png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          });
+      });
+
+      // Add to Today's log
+      document.getElementById("fridge-add-log-btn")?.addEventListener("click", () => {
+        if (!lastRecipe) return;
+        // Fill in the Scan Insights fields and switch to photo tab
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+        setVal("label-calories", Math.round(lastRecipe.calories || 0));
+        setVal("label-protein",  Math.round(lastRecipe.protein  || 0));
+        setVal("label-carbs",    Math.round(lastRecipe.carbs    || 0));
+        setVal("label-fat",      Math.round(lastRecipe.fat      || 0));
+        setVal("meal-name", lastRecipe.name || "AI Recipe");
+        ["label-calories","label-protein","label-carbs","label-fat"].forEach(id => {
+          document.getElementById(id)?.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        document.querySelector('.scanner-tab[data-tab="photo"]')?.click();
+        setTimeout(() => document.getElementById("add-meal")?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+      });
+
+      // Save to Pantry
+      document.getElementById("fridge-save-pantry-btn")?.addEventListener("click", () => {
+        if (!lastRecipe) return;
+        if (typeof saveFoodToLibrary === "function") {
+          // Fill fields and trigger save
+          const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+          setVal("label-calories", Math.round(lastRecipe.calories || 0));
+          setVal("label-protein",  Math.round(lastRecipe.protein  || 0));
+          setVal("label-carbs",    Math.round(lastRecipe.carbs    || 0));
+          setVal("label-fat",      Math.round(lastRecipe.fat      || 0));
+          setVal("label-serving",  "1 serving");
+          // Use meal name via the product name field
+          const pn = document.getElementById("product-name");
+          if (pn) pn.textContent = lastRecipe.name || "AI Recipe";
+          saveFoodToLibrary();
+          setStatus("✅ Saved to Pantry!", false);
+          setTimeout(() => setStatus("", false), 3000);
+        }
+      });
+    })();
+
     // ─── Stats edit panel show/hide ────────────────────────
     (function() {
       const statsSection = document.getElementById("stats-edit-section");
@@ -1187,5 +1438,8 @@
       });
     })();
     </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="recipes.js"></script>
+    <script src="meal-modal.js"></script>
   </body>
 </html>

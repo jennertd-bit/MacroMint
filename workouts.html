@@ -192,7 +192,99 @@
           </div>
           <div id="workout-output" class="workout-output"></div>
         </section>
+
+        <!-- ── Training Journal ── -->
+        <section class="panel" id="workout-history-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Training Journal</p>
+              <h3>Recent Workouts</h3>
+              <p class="muted">Logged sessions + muscles trained this week</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span id="workout-streak-badge" class="workout-streak-badge" hidden></span>
+              <span class="workout-week-stat"><span id="workouts-this-week">0</span> this week</span>
+            </div>
+          </div>
+          <div id="workout-history-list" class="workout-history-list">
+            <p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Tap a muscle above, then hit <strong>+ Log</strong> on any exercise.</p>
+          </div>
+        </section>
       </main>
+    </div>
+
+    <!-- ── Session bar (appears when exercises are logged) ── -->
+    <div id="session-bar" class="session-bar" hidden>
+      <div class="session-bar-info">
+        <span class="session-bar-icon">💪</span>
+        <div>
+          <span class="session-bar-count" id="session-count">0 exercises</span>
+          <span class="session-bar-muscles" id="session-muscles"></span>
+        </div>
+      </div>
+      <div class="session-bar-actions">
+        <button id="session-discard-btn" class="session-discard-btn">✕</button>
+        <button id="session-save-btn" class="session-save-btn">Complete</button>
+      </div>
+    </div>
+
+    <!-- ── Log Exercise Modal ── -->
+    <div id="log-exercise-modal" class="log-ex-modal" hidden>
+      <div class="log-ex-backdrop"></div>
+      <div class="log-ex-sheet">
+        <div class="log-ex-header">
+          <h3 id="log-ex-name">Exercise</h3>
+          <button id="log-ex-close" class="log-ex-close-btn">✕</button>
+        </div>
+        <div class="log-ex-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="log-ex-sets">Sets</label>
+              <input type="number" id="log-ex-sets" value="3" min="1" max="20" inputmode="numeric" />
+            </div>
+            <div class="form-field">
+              <label for="log-ex-reps">Reps</label>
+              <input type="text" id="log-ex-reps" value="10" placeholder="e.g. 8–10" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field" style="flex:2">
+              <label for="log-ex-weight">Weight</label>
+              <input type="number" id="log-ex-weight" placeholder="0 = bodyweight" min="0" step="2.5" inputmode="decimal" />
+            </div>
+            <div class="form-field">
+              <label for="log-ex-unit">Unit</label>
+              <select id="log-ex-unit">
+                <option value="lb">lb</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button id="log-ex-add" class="button">Add to Session</button>
+      </div>
+    </div>
+
+    <!-- ── Save Session Modal ── -->
+    <div id="save-session-modal" class="log-ex-modal" hidden>
+      <div class="log-ex-backdrop"></div>
+      <div class="log-ex-sheet">
+        <div class="log-ex-header">
+          <h3>Save Workout</h3>
+          <button id="save-session-close" class="log-ex-close-btn">✕</button>
+        </div>
+        <div class="log-ex-form">
+          <div class="form-field">
+            <label for="save-session-name">Workout Name</label>
+            <input type="text" id="save-session-name" placeholder="e.g. Push Day, Leg Day" />
+          </div>
+          <div class="form-field">
+            <label for="save-session-duration">Duration (minutes)</label>
+            <input type="number" id="save-session-duration" placeholder="45" min="5" max="300" inputmode="numeric" />
+          </div>
+        </div>
+        <button id="save-session-confirm" class="button">Save &amp; Log Workout</button>
+      </div>
     </div>
 
     <!-- Always-visible scan buttons — navigate to scanner modal on index -->

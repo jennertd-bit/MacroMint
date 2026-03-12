@@ -105,6 +105,45 @@
           </div>
         </section>
 
+        <!-- Workout Trends Card -->
+        <section class="panel" id="workout-trends-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Training</p>
+              <h3>Workout Trends</h3>
+              <p class="muted">Consistency, muscles trained, and calories burned.</p>
+            </div>
+            <span id="ov-streak-badge" class="workout-streak-badge" hidden></span>
+          </div>
+          <div class="summary-grid" id="workout-trend-stats">
+            <div class="summary-item">
+              <span>This Week</span>
+              <strong id="ov-week-count">--</strong>
+              <small>workouts</small>
+            </div>
+            <div class="summary-item">
+              <span>Streak</span>
+              <strong id="ov-streak">--</strong>
+              <small>days</small>
+            </div>
+            <div class="summary-item">
+              <span>Kcal Burned</span>
+              <strong id="ov-kcal-burned">--</strong>
+              <small>this week</small>
+            </div>
+            <div class="summary-item">
+              <span>Total Logged</span>
+              <strong id="ov-total-workouts">--</strong>
+              <small>all time</small>
+            </div>
+          </div>
+          <div id="ov-muscles-trained" class="history-muscle-chips" style="margin-top:10px"></div>
+          <div id="ov-workout-coach-tip" class="coaching-tip" style="display:none;margin-top:12px"></div>
+          <div id="ov-no-workouts" class="muted" style="font-size:0.85rem;padding:8px 0;display:none">
+            No workouts logged yet. Head to the <a href="workouts.html" style="color:var(--teal)">Workout page</a> to start tracking.
+          </div>
+        </section>
+
         <!-- Progress Charts -->
         <section class="panel charts-panel">
           <div class="panel-header split">

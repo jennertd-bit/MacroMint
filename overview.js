@@ -1120,4 +1120,109 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderWeightChart(weightEntries, profile?.units || "us");
     await renderCoaching(profile, weightEntries);
   }, 700);
+
+  // Workout trends
+  renderWorkoutTrends();
 });
+
+// ── Workout Trends ─────────────────────────────────────────────────────────
+const WORKOUT_LOG_KEY = "macromint_workout_log";
+
+const loadLocalWorkoutLog = () => {
+  try { return JSON.parse(localStorage.getItem(WORKOUT_LOG_KEY) || "[]"); }
+  catch { return []; }
+};
+
+const calcWorkoutStreak = (log) => {
+  if (!log.length) return 0;
+  const dates = [...new Set(log.map(w => w.date))].sort().reverse();
+  let streak = 0;
+  let d = new Date(); d.setHours(0,0,0,0);
+  let expected = d.toISOString().slice(0,10);
+  for (const date of dates) {
+    if (date === expected) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+      expected = d.toISOString().slice(0,10);
+    } else break;
+  }
+  return streak;
+};
+
+const EXERCISE_LABELS = {
+  chest:"Chest", shoulders:"Shoulders", traps:"Traps", lats:"Lats",
+  "lower-back":"Lower Back", biceps:"Biceps", triceps:"Triceps", forearms:"Forearms",
+  abs:"Abs/Core", obliques:"Obliques", glutes:"Glutes", quads:"Quads",
+  hamstrings:"Hamstrings", calves:"Calves",
+};
+
+const renderWorkoutTrends = () => {
+  const log = loadLocalWorkoutLog();
+  const noEl = document.getElementById("ov-no-workouts");
+  const statsEl = document.getElementById("workout-trend-stats");
+
+  if (log.length === 0) {
+    if (noEl) noEl.style.display = "";
+    if (statsEl) statsEl.style.display = "none";
+    return;
+  }
+  if (noEl) noEl.style.display = "none";
+  if (statsEl) statsEl.style.display = "";
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 7);
+  const cutoffKey = cutoff.toISOString().slice(0,10);
+  const thisWeek  = log.filter(w => w.date >= cutoffKey);
+  const streak    = calcWorkoutStreak(log);
+  const weekKcal  = thisWeek.reduce((s,w) => s + (w.caloriesBurned||0), 0);
+  const musclesThisWeek = new Set();
+  thisWeek.forEach(w => (w.muscles||[]).forEach(m => musclesThisWeek.add(m)));
+
+  // Stats
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set("ov-week-count",     thisWeek.length);
+  set("ov-streak",         streak);
+  set("ov-kcal-burned",    weekKcal.toLocaleString());
+  set("ov-total-workouts", log.length);
+
+  // Streak badge
+  const badge = document.getElementById("ov-streak-badge");
+  if (badge) {
+    if (streak >= 2) {
+      badge.textContent = `🔥 ${streak} days`;
+      badge.removeAttribute("hidden");
+    } else {
+      badge.setAttribute("hidden", "");
+    }
+  }
+
+  // Muscles trained this week chips
+  const musclesEl = document.getElementById("ov-muscles-trained");
+  if (musclesEl) {
+    musclesEl.innerHTML = musclesThisWeek.size > 0
+      ? [...musclesThisWeek].map(m =>
+          `<span class="history-muscle-chip">${EXERCISE_LABELS[m] || m}</span>`
+        ).join("")
+      : `<span class="muted" style="font-size:0.8rem">No muscles logged this week</span>`;
+  }
+
+  // Coaching tip
+  const tipEl = document.getElementById("ov-workout-coach-tip");
+  if (tipEl) {
+    const today = new Date().toISOString().slice(0,10);
+    const workedOutToday = log.some(w => w.date === today);
+    let tip = "";
+    if (workedOutToday) {
+      const todayW = log.slice().reverse().find(w => w.date === today);
+      tip = `💪 Great work today — ${todayW?.name || "workout"} logged. Recovery nutrition is key: hit your protein target.`;
+    } else if (thisWeek.length >= 4) {
+      tip = `🌟 ${thisWeek.length} workouts this week — consider a rest day to let muscles recover and grow.`;
+    } else if (thisWeek.length === 0) {
+      tip = `📅 No workouts this week yet. Even a 20-min session boosts metabolism and mood.`;
+    } else {
+      tip = `📈 ${thisWeek.length} workout${thisWeek.length !== 1 ? "s" : ""} this week and ${weekKcal} kcal burned — keep the consistency going.`;
+    }
+    tipEl.textContent = tip;
+    tipEl.style.display = "";
+  }
+};

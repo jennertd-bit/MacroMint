@@ -62,6 +62,67 @@
       setInterval(updateDashboard, 1000);
       document.addEventListener("DOMContentLoaded", updateDashboard);
     })();
+
+    // ── Workout summary on Dashboard ──────────────────────────────────────
+    (function() {
+      const WORKOUT_LOG_KEY = "macromint_workout_log";
+      function loadWorkoutLog() {
+        try { return JSON.parse(localStorage.getItem(WORKOUT_LOG_KEY) || "[]"); } catch { return []; }
+      }
+      function calcStreak(log) {
+        if (!log.length) return 0;
+        const dates = [...new Set(log.map(w => w.date))].sort().reverse();
+        let streak = 0, d = new Date(); d.setHours(0,0,0,0);
+        let expected = d.toISOString().slice(0,10);
+        for (const date of dates) {
+          if (date === expected) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            expected = d.toISOString().slice(0,10);
+          } else break;
+        }
+        return streak;
+      }
+      function renderIndexWorkout() {
+        const log = loadWorkoutLog();
+        const today = new Date().toISOString().slice(0,10);
+        const todayWorkout = log.slice().reverse().find(w => w.date === today);
+        const nameEl   = document.getElementById("today-workout-name");
+        const detailEl = document.getElementById("today-workout-detail");
+        const cardEl   = document.getElementById("today-workout-summary");
+        const streak   = calcStreak(log);
+        const cutoff   = new Date(); cutoff.setDate(cutoff.getDate()-7);
+        const thisWeek = log.filter(w => w.date >= cutoff.toISOString().slice(0,10)).length;
+        const weekKcal = log.filter(w => w.date >= cutoff.toISOString().slice(0,10)).reduce((s,w)=>s+(w.caloriesBurned||0),0);
+        if (todayWorkout) {
+          if (nameEl) nameEl.textContent = "✓ " + todayWorkout.name;
+          if (detailEl) detailEl.textContent = [todayWorkout.duration ? todayWorkout.duration+"min" : null, todayWorkout.caloriesBurned ? "~"+todayWorkout.caloriesBurned+" kcal" : null, (todayWorkout.exercises||[]).length ? (todayWorkout.exercises.length)+" exercises" : null].filter(Boolean).join(" · ");
+          if (cardEl) cardEl.classList.add("today-workout-card--done");
+        } else {
+          if (nameEl) nameEl.textContent = "No workout logged today";
+          if (detailEl) detailEl.textContent = streak > 0 ? streak + "-day streak — keep it going!" : "Tap below to open your workout page";
+          if (cardEl) cardEl.classList.remove("today-workout-card--done");
+        }
+        const qStats = document.getElementById("workout-quick-stats");
+        const streakBadge = document.getElementById("index-streak-badge");
+        if (log.length > 0) {
+          if (qStats) qStats.style.display = "grid";
+          const wqStreak = document.getElementById("wq-streak");
+          const wqWeek   = document.getElementById("wq-week");
+          const wqKcal   = document.getElementById("wq-kcal");
+          if (wqStreak) wqStreak.textContent = streak;
+          if (wqWeek)   wqWeek.textContent   = thisWeek;
+          if (wqKcal)   wqKcal.textContent   = weekKcal;
+        }
+        if (streak >= 2 && streakBadge) {
+          streakBadge.textContent = "🔥 " + streak + " day streak";
+          streakBadge.style.display = "inline-flex";
+        }
+      }
+      document.addEventListener("DOMContentLoaded", renderIndexWorkout);
+      // Re-render when coming back to this tab
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) renderIndexWorkout(); });
+    })();
     </script>
   </head>
   <body>
@@ -253,16 +314,31 @@
         <section id="workout" class="panel workout-panel">
           <div class="panel-header split">
             <div>
-              <p class="eyebrow">AI-Powered</p>
-              <h3>Workout Plan</h3>
-              <p class="muted">Get a personalised weekly workout plan generated from your TDEE, goal, and stats.</p>
+              <p class="eyebrow">Training</p>
+              <h3>Workouts</h3>
             </div>
-            <div id="workout-status" class="plan-status"></div>
+            <span id="index-streak-badge" class="workout-streak-badge" style="display:none"></span>
           </div>
-          <div class="workout-actions">
-            <button id="workout-generate-btn" class="button" type="button">Generate My Workout Plan</button>
+
+          <!-- Today's workout status (filled by inline script) -->
+          <div id="today-workout-summary" class="today-workout-card">
+            <div class="today-workout-icon">💪</div>
+            <div class="today-workout-text">
+              <strong id="today-workout-name">No workout logged today</strong>
+              <span id="today-workout-detail" class="muted"></span>
+            </div>
           </div>
-          <div id="workout-output" class="workout-output" hidden></div>
+
+          <!-- Quick stats row -->
+          <div class="workout-quick-stats" id="workout-quick-stats" style="display:none">
+            <div class="wq-stat"><span id="wq-streak">0</span><small>day streak</small></div>
+            <div class="wq-stat"><span id="wq-week">0</span><small>this week</small></div>
+            <div class="wq-stat"><span id="wq-kcal">0</span><small>kcal burned</small></div>
+          </div>
+
+          <a href="workouts.html" class="button" style="display:block;text-align:center;margin-top:14px">
+            Open Full Workout Page
+          </a>
         </section>
 
         <!-- ── Weight Log ── -->

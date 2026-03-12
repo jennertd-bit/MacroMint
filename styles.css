@@ -464,6 +464,7 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .coaching-badge--warn    { background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.28); color: var(--orange); }
 .coaching-badge--alert   { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.28); color: var(--red); }
 .coaching-content { font-size: 0.82rem; margin-bottom: 12px; color: var(--muted); }
+.coaching-tip { font-size: 0.82rem; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; line-height: 1.5; }
 
 /* ─── Charts ────────────────────────────────────────────── */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -970,6 +971,219 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
   line-height: 1.5;
   margin: 0;
 }
+
+/* ─── Workout Logging ────────────────────────────────────── */
+
+/* Log button on exercise cards */
+.log-exercise-btn {
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(0,229,204,0.35);
+  background: rgba(0,229,204,0.08);
+  color: var(--teal);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, border-color 0.15s;
+  align-self: flex-start;
+}
+.log-exercise-btn:hover { background: rgba(0,229,204,0.18); border-color: var(--teal); }
+.log-exercise-btn--done {
+  background: rgba(0,229,204,0.14);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.exercise-card.exercise-logged {
+  border-color: var(--teal);
+  background: rgba(0,229,204,0.06);
+}
+
+/* Body map: trained this week (orange glow) */
+.muscle-group.muscle-trained {
+  fill: rgba(249,115,22,0.22);
+  stroke: var(--orange);
+  stroke-width: 1.6;
+  filter: drop-shadow(0 0 4px rgba(249,115,22,0.4));
+}
+.legend-trained-hint {
+  font-size: 0.72rem;
+  color: var(--orange);
+  text-align: center;
+  width: 100%;
+  margin-bottom: 4px;
+  font-family: "DM Mono", monospace;
+}
+
+/* Session bar — fixed above bottom nav */
+.session-bar {
+  position: fixed;
+  bottom: 64px;
+  left: 0; right: 0;
+  z-index: 60;
+  background: rgba(0,229,204,0.1);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,229,204,0.3);
+  padding: 10px 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: slideUpBar 0.25s ease;
+}
+@keyframes slideUpBar {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.session-bar-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.session-bar-icon { font-size: 1.2rem; flex-shrink: 0; }
+.session-bar-count { display: block; font-size: 0.85rem; font-weight: 700; color: var(--teal); }
+.session-bar-muscles { display: block; font-size: 0.7rem; color: var(--muted); font-family: "DM Mono", monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.session-bar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.session-save-btn {
+  padding: 8px 16px; border-radius: 100px; border: none;
+  background: var(--teal); color: var(--bg);
+  font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.session-save-btn:hover { opacity: 0.85; }
+.session-discard-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--muted); cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Log Exercise Modal & Save Session Modal */
+.log-ex-modal {
+  position: fixed; inset: 0; z-index: 310;
+  display: flex; align-items: flex-end;
+  transition: none;
+}
+.log-ex-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.6);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.log-ex-sheet {
+  position: relative; z-index: 1;
+  width: 100%;
+  background: var(--surface);
+  border-top: 1px solid var(--border-hi);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px 20px 32px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.log-ex-modal.is-open .log-ex-backdrop { opacity: 1; }
+.log-ex-modal.is-open .log-ex-sheet    { transform: translateY(0); }
+
+.log-ex-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.log-ex-header h3 {
+  font-family: "Syne", sans-serif;
+  font-size: 1rem; font-weight: 700;
+  margin: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.log-ex-close-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--muted); cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.log-ex-form { display: flex; flex-direction: column; gap: 12px; }
+.log-ex-form input, .log-ex-form select {
+  width: 100%; padding: 11px 14px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem;
+  outline: none; transition: border-color 0.15s;
+}
+.log-ex-form input:focus, .log-ex-form select:focus { border-color: var(--teal); }
+
+/* Streak badge */
+.workout-streak-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.75rem; font-weight: 700;
+  background: rgba(249,115,22,0.12);
+  color: var(--orange);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-family: "DM Mono", monospace;
+}
+
+/* Workout history */
+.workout-history-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.workout-history-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.workout-history-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.workout-history-name-wrap { display: flex; flex-direction: column; gap: 2px; }
+.workout-history-name { font-size: 0.85rem; font-weight: 600; }
+.workout-history-date { font-size: 0.7rem; color: var(--muted); }
+.workout-history-stats {
+  font-size: 0.7rem; font-family: "DM Mono", monospace;
+  color: var(--teal); white-space: nowrap; flex-shrink: 0;
+}
+.history-muscle-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.history-muscle-chip {
+  font-size: 0.63rem; font-family: "DM Mono", monospace;
+  background: rgba(249,115,22,0.1);
+  color: var(--orange);
+  border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 100px;
+  padding: 2px 8px;
+}
+
+/* Week stat label */
+.workout-week-stat {
+  font-size: 0.72rem; font-family: "DM Mono", monospace;
+  color: var(--muted);
+}
+
+/* Today's workout card on Dashboard */
+.today-workout-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.today-workout-card--done {
+  border-color: rgba(0,229,204,0.35);
+  background: rgba(0,229,204,0.05);
+}
+.today-workout-icon { font-size: 1.4rem; flex-shrink: 0; }
+.today-workout-text { display: flex; flex-direction: column; gap: 2px; }
+.today-workout-text strong { font-size: 0.88rem; }
+.today-workout-text .muted { font-size: 0.75rem; }
+
+/* Workout quick stats row */
+.workout-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.wq-stat {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  text-align: center;
+}
+.wq-stat span { font-size: 1.1rem; font-family: "DM Mono", monospace; color: var(--teal); font-weight: 600; }
+.wq-stat small { font-size: 0.63rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ─── Meal Suggestion Cards (legacy, kept for compat) ───── */
 .plan-meal-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; }

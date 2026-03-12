@@ -2,8 +2,9 @@
   "use strict";
 
   const API_BASE  = () => (window.MACROMINT_API || "https://macromint-1.onrender.com").replace(/\/$/, "");
-  const TOKEN_KEY   = "macromint_token";
-  const PROFILE_KEY = "macromint_profile";
+  const TOKEN_KEY        = "macromint_token";
+  const PROFILE_KEY      = "macromint_profile";
+  const WORKOUT_LOG_KEY  = "macromint_workout_log";
 
   // ── Exercise database ─────────────────────────────────────────────────────
   const EXERCISES = {
@@ -193,6 +194,17 @@
 
   // ── State ─────────────────────────────────────────────────────────────────
   let selectedMuscle = null;
+  let currentSession = { exercises: [], muscles: new Set() };
+  let pendingLogExercise = null;
+
+  // ── Workout Log Storage ───────────────────────────────────────────────────
+  const loadWorkoutLog = () => {
+    try { return JSON.parse(localStorage.getItem(WORKOUT_LOG_KEY) || "[]"); }
+    catch { return []; }
+  };
+  const saveWorkoutLog = (log) => {
+    localStorage.setItem(WORKOUT_LOG_KEY, JSON.stringify(log.slice(-120)));
+  };
 
   // ── Render exercise cards ─────────────────────────────────────────────────
   const renderExercises = (muscleKey) => {
@@ -202,23 +214,32 @@
     const panel = document.getElementById("muscle-exercises");
     if (!panel) return;
 
+    // Mark exercises already in current session
+    const loggedNames = new Set(currentSession.exercises.map(e => e.name));
+
     panel.innerHTML = `
       <div class="exercise-header">
         <span class="exercise-icon">${data.icon}</span>
         <div>
           <h3 class="exercise-title">${data.label}</h3>
-          <p class="exercise-subtitle">${data.exercises.length} exercises · tap any to add to your log</p>
+          <p class="exercise-subtitle">${data.exercises.length} exercises · tap to log any to your session</p>
         </div>
       </div>
       <div class="exercise-grid">
         ${data.exercises.map(ex => `
-          <div class="exercise-card">
+          <div class="exercise-card${loggedNames.has(ex.name) ? " exercise-logged" : ""}"
+               data-exercise="${ex.name.replace(/"/g, "&quot;")}"
+               data-sets="${ex.sets.replace(/"/g, "&quot;")}"
+               data-muscle="${muscleKey}">
             <div class="exercise-card-top">
               <span class="exercise-name">${ex.name}</span>
               <span class="exercise-sets-badge">${ex.sets}</span>
             </div>
             <span class="exercise-equip">${ex.equipment}</span>
             <p class="exercise-tip">💡 ${ex.tip}</p>
+            <button class="log-exercise-btn${loggedNames.has(ex.name) ? " log-exercise-btn--done" : ""}">
+              ${loggedNames.has(ex.name) ? "✓ Logged" : "+ Log"}
+            </button>
           </div>
         `).join("")}
       </div>
@@ -230,13 +251,11 @@
 
   // ── Select a muscle ───────────────────────────────────────────────────────
   const selectMuscle = (muscleKey) => {
-    // Deselect all
     document.querySelectorAll(".muscle-group").forEach(el => {
       el.classList.remove("muscle-selected", "muscle-active");
     });
 
     if (selectedMuscle === muscleKey) {
-      // Toggle off
       selectedMuscle = null;
       const panel = document.getElementById("muscle-exercises");
       if (panel) panel.classList.add("hidden");
@@ -245,8 +264,6 @@
     }
 
     selectedMuscle = muscleKey;
-
-    // Highlight selected muscle
     document.querySelectorAll(`.muscle-group[data-muscle="${muscleKey}"]`).forEach(el => {
       el.classList.add("muscle-selected");
     });
@@ -260,7 +277,14 @@
     const legend = document.getElementById("muscle-legend");
     if (!legend) return;
     if (muscles.size === 0) {
-      legend.innerHTML = `<p class="legend-empty">Tap a muscle to see exercises</p>`;
+      const trained = getTrainedThisWeek();
+      if (trained.size > 0) {
+        legend.innerHTML = `
+          <p class="legend-trained-hint">🔥 Trained this week: ${[...trained].map(m => EXERCISES[m]?.label || m).join(", ")}</p>
+          <p class="legend-empty">Tap a muscle to see exercises</p>`;
+      } else {
+        legend.innerHTML = `<p class="legend-empty">Tap a muscle to see exercises</p>`;
+      }
       return;
     }
     legend.innerHTML = [...muscles]
@@ -288,6 +312,32 @@
       });
     });
     updateLegend(muscles);
+  };
+
+  // ── Highlight muscles trained this week ───────────────────────────────────
+  const getTrainedThisWeek = () => {
+    const log = loadWorkoutLog();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffKey = cutoff.toISOString().slice(0, 10);
+    const trained = new Set();
+    log.filter(w => w.date >= cutoffKey).forEach(w => {
+      (w.muscles || []).forEach(m => trained.add(m));
+    });
+    return trained;
+  };
+
+  const highlightTrainedThisWeek = () => {
+    const trained = getTrainedThisWeek();
+    document.querySelectorAll(".muscle-group").forEach(el => {
+      el.classList.remove("muscle-trained");
+    });
+    trained.forEach(muscle => {
+      document.querySelectorAll(`.muscle-group[data-muscle="${muscle}"]`).forEach(el => {
+        el.classList.add("muscle-trained");
+      });
+    });
+    updateLegend(new Set());
   };
 
   // ── Render markdown plan ──────────────────────────────────────────────────
@@ -324,7 +374,6 @@
 
   // ── Local plan templates (fallback when API unavailable) ─────────────────
   const LOCAL_PLANS = {
-    // Fat loss / cut goals → cardio-heavy PPL
     lose: `# Fat Loss — Push / Pull / Legs + Cardio
 ## Training Split
 Push/Pull/Legs 3× per week with cardio on off-days. Designed to preserve lean muscle while maximising calorie burn.
@@ -371,7 +420,6 @@ Push/Pull/Legs 3× per week with cardio on off-days. Designed to preserve lean m
 ## Recovery Tip
 Aim for 7–9 hours of sleep. Cortisol from poor sleep drives fat storage and muscle loss.`,
 
-    // Muscle gain / bulk goals → upper/lower
     gain: `# Muscle Gain — Upper / Lower Split
 ## Training Split
 Upper/Lower 4× per week. Progressive overload is the key driver — add weight or reps each session.
@@ -418,7 +466,6 @@ Upper/Lower 4× per week. Progressive overload is the key driver — add weight 
 ## Recovery Tip
 Sleep 8+ hours. Growth hormone peaks during deep sleep — this is when muscle is actually built.`,
 
-    // Maintain / recomp → full body 3×
     maintain: `# Maintenance — Full Body 3× / Week
 ## Training Split
 Full body sessions Monday / Wednesday / Friday. Balanced volume keeps all muscle groups stimulated.
@@ -462,7 +509,6 @@ Full body sessions Monday / Wednesday / Friday. Balanced volume keeps all muscle
 Take one full rest day between each training session. Consistency over intensity wins long-term.`,
   };
 
-  // Map alias goals → template key
   const planKey = (goal) => {
     if (["lose","shred","diet"].includes(goal)) return "lose";
     if (["gain","bulk","recomp"].includes(goal))  return "gain";
@@ -488,7 +534,6 @@ Take one full rest day between each training session. Consistency over intensity
     let planText = "";
     let source   = "local";
 
-    // Try API if signed in
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       try {
@@ -510,13 +555,11 @@ Take one full rest day between each training session. Consistency over intensity
       } catch (_) { /* fall through to local */ }
     }
 
-    // Local fallback
     if (!planText) {
       planText = LOCAL_PLANS[planKey(goal)];
       source = "local";
     }
 
-    // Highlight muscles
     const muscles = parseMuscles(planText);
     highlightPlanMuscles(muscles);
     const exPanel = document.getElementById("muscle-exercises");
@@ -531,17 +574,229 @@ Take one full rest day between each training session. Consistency over intensity
     if (btn) { btn.textContent = "Generate My Workout Plan"; btn.disabled = false; }
   };
 
+  // ── Log Exercise Modal ────────────────────────────────────────────────────
+  const openLogModal = (exerciseName, defaultSets, muscleKey) => {
+    pendingLogExercise = { name: exerciseName, muscleKey };
+    const modal = document.getElementById("log-exercise-modal");
+    if (!modal) return;
+
+    const nameEl = document.getElementById("log-ex-name");
+    if (nameEl) nameEl.textContent = exerciseName;
+
+    // Parse "4 × 6–8" → sets=4, reps="6–8"
+    const setsNum = parseInt(defaultSets) || 3;
+    const repsPart = defaultSets.includes("×") ? defaultSets.split("×")[1].trim() : "10";
+    const setsInput = document.getElementById("log-ex-sets");
+    const repsInput = document.getElementById("log-ex-reps");
+    if (setsInput) setsInput.value = setsNum;
+    if (repsInput) repsInput.value = repsPart;
+    const weightInput = document.getElementById("log-ex-weight");
+    if (weightInput) { weightInput.value = ""; weightInput.focus(); }
+
+    modal.removeAttribute("hidden");
+    requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add("is-open")));
+  };
+
+  const closeLogModal = () => {
+    const modal = document.getElementById("log-exercise-modal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    setTimeout(() => modal.setAttribute("hidden", ""), 300);
+    pendingLogExercise = null;
+  };
+
+  // ── Session management ────────────────────────────────────────────────────
+  const addToSession = () => {
+    if (!pendingLogExercise) return;
+    const sets   = parseInt(document.getElementById("log-ex-sets")?.value) || 3;
+    const reps   = document.getElementById("log-ex-reps")?.value || "10";
+    const weight = parseFloat(document.getElementById("log-ex-weight")?.value) || 0;
+    const unit   = document.getElementById("log-ex-unit")?.value || "lb";
+
+    currentSession.exercises.push({
+      name: pendingLogExercise.name,
+      sets, reps, weight, unit,
+      muscleKey: pendingLogExercise.muscleKey,
+    });
+    if (pendingLogExercise.muscleKey) currentSession.muscles.add(pendingLogExercise.muscleKey);
+
+    closeLogModal();
+    updateSessionBar();
+
+    // Re-render exercise list to show logged state
+    if (selectedMuscle) renderExercises(selectedMuscle);
+  };
+
+  const updateSessionBar = () => {
+    const bar = document.getElementById("session-bar");
+    if (!bar) return;
+    const count = currentSession.exercises.length;
+    if (count === 0) { bar.setAttribute("hidden", ""); return; }
+
+    bar.removeAttribute("hidden");
+    const countEl = document.getElementById("session-count");
+    if (countEl) countEl.textContent = `${count} exercise${count !== 1 ? "s" : ""}`;
+    const musclesEl = document.getElementById("session-muscles");
+    if (musclesEl) {
+      const labels = [...currentSession.muscles].map(m => EXERCISES[m]?.label || m);
+      musclesEl.textContent = labels.join(" · ");
+    }
+  };
+
+  // ── Save Session Modal ────────────────────────────────────────────────────
+  const openSaveModal = () => {
+    const modal = document.getElementById("save-session-modal");
+    if (!modal) return;
+    const muscles = [...currentSession.muscles];
+    const suggested = muscles.length
+      ? muscles.map(m => EXERCISES[m]?.label || m).slice(0, 2).join(" & ") + " Day"
+      : "Workout";
+    const nameInput = document.getElementById("save-session-name");
+    const durInput  = document.getElementById("save-session-duration");
+    if (nameInput) nameInput.value = suggested;
+    if (durInput)  durInput.value  = "";
+    modal.removeAttribute("hidden");
+    requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add("is-open")));
+  };
+
+  const closeSaveModal = () => {
+    const modal = document.getElementById("save-session-modal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    setTimeout(() => modal.setAttribute("hidden", ""), 300);
+  };
+
+  const confirmSaveSession = () => {
+    const name     = document.getElementById("save-session-name")?.value?.trim() || "Workout";
+    const duration = parseInt(document.getElementById("save-session-duration")?.value) || 45;
+    const today    = new Date().toISOString().slice(0, 10);
+
+    const log = loadWorkoutLog();
+    log.push({
+      id:             Date.now(),
+      date:           today,
+      name,
+      duration,
+      muscles:        [...currentSession.muscles],
+      exercises:      currentSession.exercises,
+      caloriesBurned: Math.round(duration * 6),
+    });
+    saveWorkoutLog(log);
+
+    // Reset
+    currentSession = { exercises: [], muscles: new Set() };
+    updateSessionBar();
+    closeSaveModal();
+    renderWorkoutHistory();
+    highlightTrainedThisWeek();
+    if (selectedMuscle) renderExercises(selectedMuscle);
+
+    const statusEl = document.getElementById("workout-status");
+    if (statusEl) {
+      statusEl.textContent = `✓ ${name} saved — ${duration} min, ~${Math.round(duration * 6)} kcal burned`;
+      setTimeout(() => { if (statusEl.textContent.startsWith("✓")) statusEl.textContent = ""; }, 5000);
+    }
+  };
+
+  // ── Workout History ───────────────────────────────────────────────────────
+  const calcStreak = (log) => {
+    if (!log.length) return 0;
+    const dates = [...new Set(log.map(w => w.date))].sort().reverse();
+    let streak = 0;
+    let d = new Date();
+    // Allow today or yesterday as start of streak
+    d.setHours(0, 0, 0, 0);
+    let expected = d.toISOString().slice(0, 10);
+    for (const date of dates) {
+      if (date === expected) {
+        streak++;
+        const prev = new Date(d);
+        prev.setDate(prev.getDate() - 1);
+        expected = prev.toISOString().slice(0, 10);
+        d = prev;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const formatHistoryDate = (dateStr) => {
+    const today     = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (dateStr === today)     return "Today";
+    if (dateStr === yesterday) return "Yesterday";
+    const d = new Date(`${dateStr}T00:00:00`);
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  };
+
+  const renderWorkoutHistory = () => {
+    const list = document.getElementById("workout-history-list");
+    if (!list) return;
+
+    const allLog = loadWorkoutLog();
+    const log    = allLog.slice().reverse().slice(0, 10);
+    const streak = calcStreak(allLog);
+
+    // Streak badge
+    const badge = document.getElementById("workout-streak-badge");
+    if (badge) {
+      if (streak > 0) {
+        badge.textContent = `🔥 ${streak} day${streak !== 1 ? "s" : ""}`;
+        badge.removeAttribute("hidden");
+      } else {
+        badge.setAttribute("hidden", "");
+      }
+    }
+
+    // Workouts this week count
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const thisWeek = allLog.filter(w => w.date >= cutoff.toISOString().slice(0, 10)).length;
+    const weekEl = document.getElementById("workouts-this-week");
+    if (weekEl) weekEl.textContent = thisWeek;
+
+    if (log.length === 0) {
+      list.innerHTML = `<p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Tap a muscle above, then hit <strong>+ Log</strong> on any exercise.</p>`;
+      return;
+    }
+
+    list.innerHTML = log.map(w => {
+      const dateLabel  = formatHistoryDate(w.date);
+      const exCount    = w.exercises?.length || 0;
+      const stats      = [];
+      if (w.duration) stats.push(`${w.duration} min`);
+      if (exCount)    stats.push(`${exCount} ex`);
+      if (w.caloriesBurned) stats.push(`~${w.caloriesBurned} kcal`);
+
+      const muscleChips = (w.muscles || [])
+        .map(m => `<span class="history-muscle-chip">${EXERCISES[m]?.label || m}</span>`)
+        .join("");
+
+      return `
+        <div class="workout-history-item">
+          <div class="workout-history-top">
+            <div class="workout-history-name-wrap">
+              <span class="workout-history-name">${w.name}</span>
+              <span class="workout-history-date">${dateLabel}</span>
+            </div>
+            <span class="workout-history-stats">${stats.join(" · ")}</span>
+          </div>
+          ${muscleChips ? `<div class="history-muscle-chips">${muscleChips}</div>` : ""}
+        </div>`;
+    }).join("");
+  };
+
   // ── Init ──────────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
     prefillFromProfile();
 
-    // Show auth notice if not signed in
     if (!localStorage.getItem(TOKEN_KEY)) {
       const notice = document.getElementById("workout-auth-notice");
       if (notice) notice.classList.remove("hidden");
     }
 
-    // Make all muscle groups clickable
+    // Muscle body map clicks
     document.querySelectorAll(".muscle-group").forEach(el => {
       el.addEventListener("click", () => {
         const muscle = el.getAttribute("data-muscle");
@@ -549,13 +804,59 @@ Take one full rest day between each training session. Consistency over intensity
       });
     });
 
-    // Init legend hint
     updateLegend(new Set());
+    highlightTrainedThisWeek();
+    renderWorkoutHistory();
 
     // Generate plan buttons
     document.getElementById("workout-generate-btn")
       ?.addEventListener("click", generatePlan);
     document.getElementById("workout-regenerate-btn")
       ?.addEventListener("click", generatePlan);
+
+    // ── Exercise card log button (delegated) ──────────────────────────────
+    document.addEventListener("click", e => {
+      const logBtn = e.target.closest(".log-exercise-btn");
+      if (logBtn) {
+        const card = logBtn.closest(".exercise-card");
+        if (card) {
+          openLogModal(
+            card.dataset.exercise,
+            card.dataset.sets,
+            card.dataset.muscle
+          );
+        }
+      }
+    });
+
+    // ── Log modal buttons ─────────────────────────────────────────────────
+    document.getElementById("log-ex-close")
+      ?.addEventListener("click", closeLogModal);
+    document.getElementById("log-exercise-modal")
+      ?.querySelector(".log-ex-backdrop")
+      ?.addEventListener("click", closeLogModal);
+    document.getElementById("log-ex-add")
+      ?.addEventListener("click", addToSession);
+
+    // ── Session bar buttons ───────────────────────────────────────────────
+    document.getElementById("session-save-btn")
+      ?.addEventListener("click", openSaveModal);
+    document.getElementById("session-discard-btn")
+      ?.addEventListener("click", () => {
+        if (confirm("Discard current session?")) {
+          currentSession = { exercises: [], muscles: new Set() };
+          updateSessionBar();
+          if (selectedMuscle) renderExercises(selectedMuscle);
+        }
+      });
+
+    // ── Save modal buttons ────────────────────────────────────────────────
+    document.getElementById("save-session-close")
+      ?.addEventListener("click", closeSaveModal);
+    document.getElementById("save-session-modal")
+      ?.querySelector(".log-ex-backdrop")
+      ?.addEventListener("click", closeSaveModal);
+    document.getElementById("save-session-confirm")
+      ?.addEventListener("click", confirmSaveSession);
   });
 })();

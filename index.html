@@ -407,8 +407,8 @@
           </div>
         </section>
 
-        <!-- ── Stats & Macro Calc (hidden until Edit Stats) ── -->
-        <section class="grid">
+        <!-- ── Stats & Macro Calc — hidden; shown only when Edit Stats clicked ── -->
+        <section class="grid" id="stats-edit-section" hidden>
           <div class="panel">
             <div class="panel-header">
               <div>
@@ -722,6 +722,27 @@
       </div><!-- /scanner-modal-sheet -->
     </div><!-- /scanner-modal -->
 
+    <!-- ═══════════════════════════════════════════════
+         ALWAYS-VISIBLE SCAN BUTTONS
+    ═══════════════════════════════════════════════ -->
+    <div class="scan-always">
+      <button class="scan-always-btn" id="always-barcode" type="button" aria-label="Scan barcode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4"/>
+          <line x1="7" y1="5" x2="7" y2="19"/><line x1="10" y1="5" x2="10" y2="19"/>
+          <line x1="13" y1="5" x2="13" y2="19"/><line x1="17" y1="7" x2="17" y2="19"/>
+        </svg>
+        <span>Barcode</span>
+      </button>
+      <button class="scan-always-btn" id="always-camera" type="button" aria-label="Scan nutrition label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Camera</span>
+      </button>
+    </div>
+
     <script>
     // ─── Scanner Modal Logic ────────────────────────────────
     (function() {
@@ -817,6 +838,13 @@
         setTimeout(() => { if (!modal.hidden) closeModal(); }, 600);
       });
 
+      // Always-visible scan buttons
+      document.getElementById("always-barcode")?.addEventListener("click", () => openModal("barcode"));
+      document.getElementById("always-camera")?.addEventListener("click",  () => {
+        openModal("photo");
+        setTimeout(() => document.getElementById("label-input")?.click(), 350);
+      });
+
       // Tab switching
       document.querySelectorAll(".scanner-tab").forEach(tab => {
         tab.addEventListener("click", () => switchTab(tab.dataset.tab));
@@ -832,6 +860,29 @@
 
       // Expose openModal globally so app.js hooks can use it
       window.openScannerModal = openModal;
+    })();
+
+    // ─── Stats edit panel show/hide ────────────────────────
+    (function() {
+      const statsSection = document.getElementById("stats-edit-section");
+      if (!statsSection) return;
+
+      function showStats() {
+        statsSection.hidden = false;
+        statsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      function hideStats() {
+        statsSection.hidden = true;
+      }
+
+      // "Edit Stats" buttons in account section
+      document.getElementById("auth-edit-stats")?.addEventListener("click", showStats);
+      document.getElementById("targets-edit")?.addEventListener("click", showStats);
+
+      // Hide after save
+      document.getElementById("targets-save")?.addEventListener("click", () => {
+        setTimeout(hideStats, 800);
+      });
     })();
     </script>
   </body>

@@ -2022,10 +2022,15 @@ const updateMealSummary = () => {
 };
 
 const addMealToLog = async () => {
-  const calories = Number.parseFloat(elements.mealCalories.textContent.replace(/,/g, "")) || 0;
+  // Always recompute from inputs — never rely on potentially stale display element
+  updateMealSummary();
+
+  const servings  = parseNumber(elements.servingsEaten.value) || 1;
+  const perServing = parseNumber(elements.labelCalories.value) || 0;
+  const override  = parseNumber(elements.caloriesOverride.value);
+  const calories  = override ? override : Math.round(perServing * servings);
   if (!calories) return;
 
-  const servings = parseNumber(elements.servingsEaten.value) || 1;
   const protein  = Math.round((parseNumber(elements.labelProtein.value) || 0) * servings);
   const carbs    = Math.round((parseNumber(elements.labelCarbs.value)   || 0) * servings);
   const fat      = Math.round((parseNumber(elements.labelFat.value)     || 0) * servings);

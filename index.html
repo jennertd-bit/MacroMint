@@ -1072,6 +1072,11 @@
         setVal("label-protein",  prot);
         setVal("label-serving",  srv);
         setVal("meal-name",      name);
+        // Fire input event so updateMealSummary recalculates meal-calories display
+        ["label-calories","label-fat","label-carbs","label-protein"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.dispatchEvent(new Event("input", { bubbles: true }));
+        });
         // Switch to photo tab to show the Scan Insights form
         document.querySelector('.scanner-tab[data-tab="photo"]')?.click();
         // Scroll to form

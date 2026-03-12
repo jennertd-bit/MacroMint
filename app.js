@@ -1075,12 +1075,30 @@ const saveFoodToLibrary = () => {
     return;
   }
 
+  // Auto-guess category from name/brand keywords
+  const autoCategory = (() => {
+    const hay = (name + " " + brand).toLowerCase();
+    if (/starbucks|dunkin|mcdonald|chick.fil|wendy|burger|panera|subway|chipotle|five.guys|taco.bell/.test(hay)) return "restaurant";
+    if (/trader joe|amy'?s|kodiak|rxbar|quest|kind bar|clif|fairlife|siggi/.test(hay)) return "packaged";
+    if (/shake|smoothie|juice|coffee|latte|tea|water|milk|oat.?milk|protein.shake/.test(hay)) return "drinks";
+    if (/yogurt|cheese|cottage|whey|dairy|kefir|cream/.test(hay)) return "dairy";
+    if (/oatmeal|oats|waffle|pancake|bagel|toast|muffin|cereal|granola|french.toast/.test(hay)) return "breakfast";
+    if (/salmon|tuna|chicken|beef|pork|shrimp|turkey|steak|lamb|egg/.test(hay)) return "protein";
+    if (/salad|wrap|sandwich|bowl|soup|burrito|taco|panini/.test(hay)) return "lunch";
+    if (/pasta|stir.fry|curry|enchilada|casserole|roast|bake/.test(hay)) return "dinner";
+    if (/apple|banana|berry|grape|avocado|broccoli|spinach|kale|carrot|fruit|vegetable|veggie/.test(hay)) return "produce";
+    if (/rice|quinoa|couscous|bread|noodle|grain|oat|corn/.test(hay)) return "grains";
+    if (/nuts|bar|cracker|chip|pretzel|popcorn|hummus|edamame/.test(hay)) return "snack";
+    return "other";
+  })();
+
   const newItem = {
     id:        `pantry_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
     name,
     brand,
     barcode,
     serving,
+    category:  autoCategory,
     nutrition: { calories, protein, carbs, fat },
     savedAt:   new Date().toISOString(),
     lastUsed:  null,

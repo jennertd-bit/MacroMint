@@ -38,7 +38,7 @@
         <section class="panel">
           <p class="eyebrow">Food Bank</p>
           <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin:4px 0 6px;">My Pantry</h2>
-          <p class="muted">Your saved foods. The more you use an item, the more likely it is to appear in your Meal Ideas.</p>
+          <p class="muted">Your saved foods. Frequently used items appear in your Meal Ideas automatically.</p>
         </section>
 
         <!-- Stats row -->
@@ -59,8 +59,27 @@
           </div>
         </section>
 
+        <!-- Category filter tabs -->
+        <section class="panel" style="padding-bottom:0;overflow:hidden">
+          <div id="pantry-cat-tabs" class="pantry-cat-tabs">
+            <button class="pantry-cat-tab active" data-cat="all">All</button>
+            <button class="pantry-cat-tab" data-cat="breakfast">🥞 Breakfast</button>
+            <button class="pantry-cat-tab" data-cat="lunch">🥗 Lunch</button>
+            <button class="pantry-cat-tab" data-cat="dinner">🍽️ Dinner</button>
+            <button class="pantry-cat-tab" data-cat="snack">🍎 Snack</button>
+            <button class="pantry-cat-tab" data-cat="protein">🥩 Protein</button>
+            <button class="pantry-cat-tab" data-cat="dairy">🥛 Dairy</button>
+            <button class="pantry-cat-tab" data-cat="produce">🥦 Produce</button>
+            <button class="pantry-cat-tab" data-cat="grains">🌾 Grains</button>
+            <button class="pantry-cat-tab" data-cat="drinks">🥤 Drinks</button>
+            <button class="pantry-cat-tab" data-cat="restaurant">🏪 Restaurant</button>
+            <button class="pantry-cat-tab" data-cat="packaged">📦 Packaged</button>
+            <button class="pantry-cat-tab" data-cat="other">📁 Other</button>
+          </div>
+        </section>
+
         <!-- Search + sort -->
-        <section class="panel" style="padding-bottom:8px">
+        <section class="panel" style="padding-top:10px;padding-bottom:8px">
           <div class="pantry-toolbar">
             <input id="pantry-search" type="search" placeholder="Search your pantry…" class="pantry-search-input" />
             <select id="pantry-sort" class="pantry-sort-select">
@@ -72,11 +91,13 @@
           </div>
         </section>
 
-        <!-- Food list -->
+        <!-- Food list — grouped by category when "All" is active -->
         <section class="panel" style="padding:0">
-          <ul id="pantry-list" class="pantry-list">
-            <li class="pantry-empty">Loading your pantry…</li>
-          </ul>
+          <div id="pantry-list-wrap">
+            <ul id="pantry-list" class="pantry-list">
+              <li class="pantry-empty">Loading your pantry…</li>
+            </ul>
+          </div>
         </section>
       </main>
     </div>
@@ -86,7 +107,7 @@
       <div class="log-ex-backdrop" id="edit-food-backdrop"></div>
       <div class="log-ex-sheet" id="edit-food-sheet">
         <div class="log-ex-handle"></div>
-        <h3 id="edit-food-title" class="log-ex-title">Edit Food</h3>
+        <h3 class="log-ex-title">Edit Food</h3>
         <input type="hidden" id="edit-food-id" />
         <div class="log-ex-fields">
           <div class="form-field">
@@ -97,9 +118,28 @@
             <label for="edit-food-brand">Brand</label>
             <input id="edit-food-brand" type="text" placeholder="Optional" />
           </div>
-          <div class="form-field">
-            <label for="edit-food-serving">Serving Size</label>
-            <input id="edit-food-serving" type="text" placeholder="e.g. 1 cup (240ml)" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-field">
+              <label for="edit-food-cat">Category</label>
+              <select id="edit-food-cat">
+                <option value="other">📁 Other</option>
+                <option value="breakfast">🥞 Breakfast</option>
+                <option value="lunch">🥗 Lunch</option>
+                <option value="dinner">🍽️ Dinner</option>
+                <option value="snack">🍎 Snack</option>
+                <option value="protein">🥩 Protein</option>
+                <option value="dairy">🥛 Dairy</option>
+                <option value="produce">🥦 Produce</option>
+                <option value="grains">🌾 Grains</option>
+                <option value="drinks">🥤 Drinks</option>
+                <option value="restaurant">🏪 Restaurant</option>
+                <option value="packaged">📦 Packaged</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="edit-food-serving">Serving Size</label>
+              <input id="edit-food-serving" type="text" placeholder="e.g. 1 cup" />
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div class="form-field">
@@ -129,26 +169,88 @@
     </div>
 
     <script>
-    // ── Pantry page logic ─────────────────────────────────────────────────
     (function() {
       const PANTRY_KEY = "macromint_pantry";
+      const getPantry  = () => { try { return JSON.parse(localStorage.getItem(PANTRY_KEY) || "[]"); } catch { return []; } };
+      const savePantry = (items) => { try { localStorage.setItem(PANTRY_KEY, JSON.stringify(items)); } catch {} };
 
-      const getPantry = () => {
-        try { return JSON.parse(localStorage.getItem(PANTRY_KEY) || "[]"); } catch { return []; }
+      // ── Category definitions ─────────────────────────────────────────────
+      const CATS = {
+        breakfast:  { label: "🥞 Breakfast",  color: "#f5a623" },
+        lunch:      { label: "🥗 Lunch",       color: "#7ed321" },
+        dinner:     { label: "🍽️ Dinner",      color: "#9b59b6" },
+        snack:      { label: "🍎 Snack",       color: "#e74c3c" },
+        protein:    { label: "🥩 Protein",     color: "#e67e22" },
+        dairy:      { label: "🥛 Dairy",       color: "#5dade2" },
+        produce:    { label: "🥦 Produce",     color: "#27ae60" },
+        grains:     { label: "🌾 Grains",      color: "#d4a843" },
+        drinks:     { label: "🥤 Drinks",      color: "#3498db" },
+        restaurant: { label: "🏪 Restaurant",  color: "#00e5cc" },
+        packaged:   { label: "📦 Packaged",    color: "#95a5a6" },
+        other:      { label: "📁 Other",       color: "#7f8c8d" },
       };
-      const savePantry = (items) => {
-        try { localStorage.setItem(PANTRY_KEY, JSON.stringify(items)); } catch {}
-      };
+
+      // ── Auto-guess category from name/brand keywords ─────────────────────
+      function guessCategory(food) {
+        const hay = (food.name + " " + (food.brand || "")).toLowerCase();
+        if (/starbucks|dunkin|mcdonald|chick.fil|wendy|burger|panera|subway|chipotle|five.guys|taco.bell/.test(hay)) return "restaurant";
+        if (/trader joe|amy'?s|kodiak|rxbar|quest|kind bar|clif|fairlife|siggi/.test(hay)) return "packaged";
+        if (/shake|smoothie|juice|coffee|latte|tea|water|milk|oat.?milk|protein.shake/.test(hay)) return "drinks";
+        if (/yogurt|cheese|cottage|whey|dairy|kefir|cream/.test(hay)) return "dairy";
+        if (/oatmeal|oats|waffle|pancake|bagel|toast|muffin|cereal|granola|french.toast|wrap|bread|rice.cake/.test(hay)) return "breakfast";
+        if (/salmon|tuna|chicken|beef|pork|shrimp|turkey|steak|lamb|egg/.test(hay)) return "protein";
+        if (/salad|wrap|sandwich|bowl|soup|burrito|taco|panini/.test(hay)) return "lunch";
+        if (/pasta|stir.fry|curry|enchilada|casserole|roast|bake/.test(hay)) return "dinner";
+        if (/apple|banana|berry|grape|mango|peach|pear|avocado|broccoli|spinach|kale|carrot|fruit|vegetable|veggie/.test(hay)) return "produce";
+        if (/rice|quinoa|couscous|bread|noodle|grain|oat|corn/.test(hay)) return "grains";
+        if (/nuts|bar|cracker|chip|pretzel|popcorn|hummus|edamame/.test(hay)) return "snack";
+        return "other";
+      }
 
       const listEl   = document.getElementById("pantry-list");
       const searchEl = document.getElementById("pantry-search");
       const sortEl   = document.getElementById("pantry-sort");
+      let activecat  = "all";
 
       // ── Stats ────────────────────────────────────────────────────────────
       function renderStats(pantry) {
-        document.getElementById("pantry-count").textContent  = pantry.length;
-        document.getElementById("pantry-faves").textContent  = pantry.filter(f => (f.useCount || 0) >= 3).length;
-        document.getElementById("pantry-uses").textContent   = pantry.reduce((s, f) => s + (f.useCount || 0), 0);
+        document.getElementById("pantry-count").textContent = pantry.length;
+        document.getElementById("pantry-faves").textContent = pantry.filter(f => (f.useCount || 0) >= 3).length;
+        document.getElementById("pantry-uses").textContent  = pantry.reduce((s, f) => s + (f.useCount || 0), 0);
+      }
+
+      // ── Render item ──────────────────────────────────────────────────────
+      function renderItem(food) {
+        const li  = document.createElement("li");
+        li.className  = "pantry-item";
+        li.dataset.id = food.id;
+
+        const cat   = CATS[food.category] || CATS.other;
+        const uses  = food.useCount || 0;
+        const stars = uses >= 5 ? " ⭐⭐" : uses >= 3 ? " ⭐" : "";
+        const n     = food.nutrition || {};
+
+        li.innerHTML = `
+          <div class="pantry-item-main">
+            <div class="pantry-item-name">${food.name}${stars}</div>
+            <div class="pantry-item-cat-row">
+              <span class="pantry-cat-badge" style="background:${cat.color}22;color:${cat.color};border-color:${cat.color}44">${cat.label}</span>
+              ${food.brand ? `<span class="pantry-item-brand">${food.brand}</span>` : ""}
+            </div>
+            <div class="pantry-item-macro">
+              <span class="pantry-kcal">${n.calories || 0} kcal</span>
+              <span class="plan-macro-chip plan-macro-p">${Math.round(n.protein || 0)}P</span>
+              <span class="plan-macro-chip plan-macro-c">${Math.round(n.carbs   || 0)}C</span>
+              <span class="plan-macro-chip plan-macro-f">${Math.round(n.fat     || 0)}F</span>
+            </div>
+            <div class="pantry-item-meta">${food.serving || "1 serving"} · Used ${uses}×${food.lastUsed ? " · Last: " + new Date(food.lastUsed).toLocaleDateString() : ""}</div>
+          </div>
+          <div class="pantry-item-actions">
+            <button class="pantry-btn-edit"   data-id="${food.id}" aria-label="Edit">✏️</button>
+            <button class="pantry-btn-delete" data-id="${food.id}" aria-label="Delete">🗑️</button>
+          </div>
+        `;
+        return li;
       }
 
       // ── Main render ──────────────────────────────────────────────────────
@@ -156,58 +258,72 @@
         let pantry = getPantry();
         renderStats(pantry);
 
+        // Backfill category for items that don't have one
+        let dirty = false;
+        pantry.forEach(f => {
+          if (!f.category) { f.category = guessCategory(f); dirty = true; }
+        });
+        if (dirty) savePantry(pantry);
+
         const q = (searchEl.value || "").toLowerCase().trim();
         if (q) pantry = pantry.filter(f =>
-          f.name.toLowerCase().includes(q) || (f.brand || "").toLowerCase().includes(q)
+          f.name.toLowerCase().includes(q) || (f.brand || "").toLowerCase().includes(q) ||
+          (CATS[f.category]?.label || "").toLowerCase().includes(q)
         );
 
+        if (activecat !== "all") pantry = pantry.filter(f => (f.category || "other") === activecat);
+
         const sort = sortEl.value;
-        if (sort === "used")   pantry.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
-        else if (sort === "az") pantry.sort((a, b) => a.name.localeCompare(b.name));
+        if (sort === "used")  pantry.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
+        else if (sort === "az")   pantry.sort((a, b) => a.name.localeCompare(b.name));
         else if (sort === "kcal") pantry.sort((a, b) => (a.nutrition?.calories || 0) - (b.nutrition?.calories || 0));
-        // "recent" is default (array is newest-first)
 
         listEl.innerHTML = "";
 
         if (!pantry.length) {
           const li = document.createElement("li");
           li.className = "pantry-empty";
-          li.textContent = q ? "No foods match your search." : "Your pantry is empty. Scan a food and tap "Save to Pantry".";
+          li.textContent = q ? "No foods match your search." :
+            activecat !== "all" ? `Nothing in ${CATS[activecat]?.label || activecat} yet.` :
+            "Your pantry is empty. Scan a food and tap \u201cSave to Pantry\u201d.";
           listEl.appendChild(li);
           return;
         }
 
-        pantry.forEach(food => {
-          const li   = document.createElement("li");
-          li.className = "pantry-item";
-          li.dataset.id = food.id;
-
-          const uses   = food.useCount || 0;
-          const stars  = uses >= 5 ? "⭐⭐" : uses >= 3 ? "⭐" : "";
-          const n      = food.nutrition || {};
-
-          li.innerHTML = `
-            <div class="pantry-item-main">
-              <div class="pantry-item-name">${food.name}${stars ? " " + stars : ""}</div>
-              ${food.brand ? `<div class="pantry-item-brand">${food.brand}</div>` : ""}
-              <div class="pantry-item-macro">
-                <span class="pantry-kcal">${n.calories || 0} kcal</span>
-                <span class="plan-macro-chip plan-macro-p">${Math.round(n.protein || 0)}P</span>
-                <span class="plan-macro-chip plan-macro-c">${Math.round(n.carbs || 0)}C</span>
-                <span class="plan-macro-chip plan-macro-f">${Math.round(n.fat || 0)}F</span>
-              </div>
-              <div class="pantry-item-meta">${food.serving || "1 serving"} · Used ${uses}×${food.lastUsed ? " · Last: " + new Date(food.lastUsed).toLocaleDateString() : ""}</div>
-            </div>
-            <div class="pantry-item-actions">
-              <button class="pantry-btn-edit"   data-id="${food.id}" aria-label="Edit">✏️</button>
-              <button class="pantry-btn-delete" data-id="${food.id}" aria-label="Delete">🗑️</button>
-            </div>
-          `;
-          listEl.appendChild(li);
-        });
+        // When showing all, group by category
+        if (activecat === "all" && !q && sort === "recent") {
+          const groups = {};
+          pantry.forEach(f => {
+            const cat = f.category || "other";
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(f);
+          });
+          const catOrder = ["breakfast","lunch","dinner","snack","protein","dairy","produce","grains","drinks","restaurant","packaged","other"];
+          catOrder.forEach(cat => {
+            const items = groups[cat];
+            if (!items?.length) return;
+            const header = document.createElement("li");
+            header.className = "pantry-group-header";
+            header.innerHTML = `<span>${CATS[cat].label}</span><span class="pantry-group-count">${items.length}</span>`;
+            listEl.appendChild(header);
+            items.forEach(f => listEl.appendChild(renderItem(f)));
+          });
+        } else {
+          pantry.forEach(f => listEl.appendChild(renderItem(f)));
+        }
       }
 
-      // ── Edit modal ───────────────────────────────────────────────────────
+      // ── Category tab clicks ───────────────────────────────────────────────
+      document.getElementById("pantry-cat-tabs")?.addEventListener("click", (e) => {
+        const tab = e.target.closest(".pantry-cat-tab");
+        if (!tab) return;
+        document.querySelectorAll(".pantry-cat-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        activecat = tab.dataset.cat;
+        render();
+      });
+
+      // ── Edit modal ────────────────────────────────────────────────────────
       const modal     = document.getElementById("edit-food-modal");
       const backdrop  = document.getElementById("edit-food-backdrop");
       const cancelBtn = document.getElementById("edit-food-cancel");
@@ -221,8 +337,9 @@
         const n = food.nutrition || {};
         document.getElementById("edit-food-id").value       = food.id;
         document.getElementById("edit-food-name").value     = food.name;
-        document.getElementById("edit-food-brand").value    = food.brand || "";
+        document.getElementById("edit-food-brand").value    = food.brand   || "";
         document.getElementById("edit-food-serving").value  = food.serving || "1 serving";
+        document.getElementById("edit-food-cat").value      = food.category || guessCategory(food);
         document.getElementById("edit-food-cal").value      = n.calories  || "";
         document.getElementById("edit-food-prot").value     = n.protein   || "";
         document.getElementById("edit-food-carbs").value    = n.carbs     || "";
@@ -242,15 +359,14 @@
         const pantry = getPantry();
         const idx = pantry.findIndex(f => f.id === id);
         if (idx === -1) return;
-
         const name = document.getElementById("edit-food-name").value.trim();
         if (!name) { if (msgEl) msgEl.textContent = "Name is required."; return; }
-
         pantry[idx] = {
           ...pantry[idx],
           name,
-          brand:   document.getElementById("edit-food-brand").value.trim(),
-          serving: document.getElementById("edit-food-serving").value.trim() || "1 serving",
+          brand:    document.getElementById("edit-food-brand").value.trim(),
+          serving:  document.getElementById("edit-food-serving").value.trim() || "1 serving",
+          category: document.getElementById("edit-food-cat").value,
           nutrition: {
             calories: parseFloat(document.getElementById("edit-food-cal").value)   || 0,
             protein:  parseFloat(document.getElementById("edit-food-prot").value)  || 0,
@@ -261,34 +377,30 @@
         };
         savePantry(pantry);
         if (msgEl) msgEl.textContent = "✓ Saved!";
-        setTimeout(() => { closeEdit(); render(); }, 600);
+        setTimeout(() => { closeEdit(); render(); }, 500);
       });
 
       backdrop?.addEventListener("click", closeEdit);
       cancelBtn?.addEventListener("click", closeEdit);
 
-      // ── Delegated clicks: edit / delete ──────────────────────────────────
+      // ── Delegated clicks ──────────────────────────────────────────────────
       listEl.addEventListener("click", (e) => {
         const editBtn = e.target.closest(".pantry-btn-edit");
         if (editBtn) { openEdit(editBtn.dataset.id); return; }
-
         const delBtn = e.target.closest(".pantry-btn-delete");
         if (delBtn) {
           const id = delBtn.dataset.id;
           const pantry = getPantry();
           const food = pantry.find(f => f.id === id);
           if (!food) return;
-          if (!confirm(`Remove "${food.name}" from your pantry?`)) return;
+          if (!confirm(`Remove \u201c${food.name}\u201d from your pantry?`)) return;
           savePantry(pantry.filter(f => f.id !== id));
           render();
         }
       });
 
-      // ── Search & sort ─────────────────────────────────────────────────────
       searchEl?.addEventListener("input",  render);
       sortEl?.addEventListener("change",   render);
-
-      // ── Initial render ────────────────────────────────────────────────────
       render();
     })();
     </script>

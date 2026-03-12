@@ -489,6 +489,44 @@ button, input, select, textarea { font-family: inherit; }
 .pantry-btn-edit:hover   { border-color: var(--teal); background: rgba(0,229,204,0.08); }
 .pantry-btn-delete:hover { border-color: #ff6b6b; background: rgba(255,107,107,0.08); }
 
+/* Category filter tabs */
+.pantry-cat-tabs {
+  display: flex; gap: 6px;
+  overflow-x: auto; padding-bottom: 12px;
+  scrollbar-width: none;
+}
+.pantry-cat-tabs::-webkit-scrollbar { display: none; }
+.pantry-cat-tab {
+  white-space: nowrap; flex-shrink: 0;
+  padding: 5px 12px; border-radius: 100px; font-size: 0.75rem;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.pantry-cat-tab:hover  { border-color: var(--teal); color: var(--text); }
+.pantry-cat-tab.active { background: var(--teal); border-color: var(--teal); color: #000; font-weight: 600; }
+
+/* Category badge on item */
+.pantry-item-cat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
+.pantry-cat-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 0.65rem; font-weight: 600; border: 1px solid; letter-spacing: 0.02em;
+}
+.pantry-item-brand { font-size: 0.72rem; color: var(--muted); }
+
+/* Group headers when showing all */
+.pantry-group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px 6px;
+  background: var(--surface-2);
+  font-size: 0.75rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+}
+.pantry-group-count {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 100px; padding: 1px 8px; font-size: 0.65rem;
+}
+
 .product-info {
   background: var(--surface); border: 1px solid var(--border-hi);
   border-radius: var(--radius-sm); padding: 12px;

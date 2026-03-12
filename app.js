@@ -2106,23 +2106,22 @@ const init = async () => {
 
 document.addEventListener("DOMContentLoaded", init);
 
-// ── Auto-trigger scanner from floating bubble deep-links ──────────────────
-// Other pages link to index.html?scan=barcode or ?scan=camera
+// ── Auto-trigger scanner modal from deep-links ────────────────────────────
+// Other pages navigate to index.html?scan=barcode or ?scan=camera
 document.addEventListener("DOMContentLoaded", () => {
   const scanParam = new URLSearchParams(window.location.search).get("scan");
   if (!scanParam) return;
-  // Small delay to let the page init settle
+  // Wait for modal logic to initialise (it uses DOMContentLoaded too)
   setTimeout(() => {
-    const sec = document.getElementById("scanner");
-    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    setTimeout(() => {
+    if (typeof window.openScannerModal === "function") {
       if (scanParam === "barcode") {
-        document.getElementById("barcode-start")?.click();
+        window.openScannerModal("barcode");
       } else if (scanParam === "camera") {
-        document.getElementById("label-input")?.click();
+        window.openScannerModal("photo");
+        setTimeout(() => document.getElementById("label-input")?.click(), 400);
       }
-    }, 500);
-  }, 600);
+    }
+  }, 300);
 });
 
 if ("serviceWorker" in navigator) {

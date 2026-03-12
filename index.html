@@ -30,7 +30,6 @@
       function updateDashboard() {
         const total    = parseFloat(document.getElementById("daily-total")?.textContent) || 0;
         const target   = parseFloat(document.getElementById("target-value")?.textContent) || 0;
-        const remaining = parseFloat(document.getElementById("daily-remaining")?.textContent) || 0;
 
         // Update arc display
         const arcLogged    = document.getElementById("arc-logged");
@@ -60,7 +59,6 @@
         }
       }
 
-      // Poll every second for changes (simple, reliable)
       setInterval(updateDashboard, 1000);
       document.addEventListener("DOMContentLoaded", updateDashboard);
     })();
@@ -75,7 +73,7 @@
       <a class="nav-item" href="workouts.html">
         <span class="nav-icon">💪</span>Workouts
       </a>
-      <a class="nav-fab" href="#scanner" aria-label="Scan label">＋</a>
+      <button class="nav-fab" id="fab-btn" type="button" aria-label="Scan food" aria-expanded="false">＋</button>
       <a class="nav-item" href="overview.html">
         <span class="nav-icon">📈</span>Trends
       </a>
@@ -83,6 +81,29 @@
         <span class="nav-icon">👤</span>Account
       </a>
     </nav>
+
+    <!-- FAB Speed-dial menu -->
+    <div class="fab-speed-dial" id="fab-speed-dial" hidden>
+      <button class="fab-dial-btn" id="fab-camera" type="button">
+        <span class="fab-dial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </span>
+        <span class="fab-dial-label">Camera</span>
+      </button>
+      <button class="fab-dial-btn" id="fab-barcode" type="button">
+        <span class="fab-dial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4"/>
+            <line x1="7" y1="5" x2="7" y2="19"/><line x1="10" y1="5" x2="10" y2="19"/>
+            <line x1="13" y1="5" x2="13" y2="19"/><line x1="17" y1="7" x2="17" y2="19"/>
+          </svg>
+        </span>
+        <span class="fab-dial-label">Barcode</span>
+      </button>
+    </div>
 
     <div class="app">
       <header class="app-header">
@@ -93,7 +114,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="chip" type="button" data-scroll="scanner">Scan Label</button>
+          <button class="chip" id="header-scan-btn" type="button">Scan Label</button>
         </div>
       </header>
 
@@ -168,43 +189,144 @@
             </div>
           </div>
         </section>
-        <section class="hero">
-          <div>
-            <p class="eyebrow">Smart Calorie Intake</p>
-            <h2>Plan, scan, and hit your targets.</h2>
-            <p class="muted">
-              Set your daily goal from standard BMR/TDEE formulas, then use your phone camera to read a
-              nutrition label and log meals in seconds.
-            </p>
-            <div class="hero-tags">
-              <span>On-device OCR</span>
-              <span>Goal presets</span>
-              <span>Macro calories</span>
+
+        <!-- ── Daily Intake Log ── -->
+        <section id="log" class="panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Today</p>
+              <h3>Daily Intake</h3>
+              <p class="muted">Compare your intake to your target.</p>
+            </div>
+            <div class="totals">
+              <div class="total-card">
+                <span>Total Intake</span>
+                <strong id="daily-total">0</strong>
+              </div>
+              <div class="total-card highlight">
+                <span>Remaining</span>
+                <strong id="daily-remaining">--</strong>
+              </div>
             </div>
           </div>
-          <div class="hero-card">
-            <h3>Daily Summary</h3>
-            <div class="summary-grid">
-              <div class="summary-item">
-                <span>At-rest calories</span>
-                <strong id="bmr-value">--</strong>
-                <small>Baseline burn (BMR)</small>
+          <div id="log-list" class="log-list"></div>
+          <div class="log-actions">
+            <button id="clear-log" class="button ghost" type="button">Clear Today</button>
+          </div>
+          <p class="disclaimer">Not medical advice. Consult a professional for personalized guidance.</p>
+        </section>
+
+        <!-- ── Plan Suggestions ── -->
+        <section class="panel plan-panel" id="plan">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">Today</p>
+              <h3>Meal Ideas</h3>
+              <p class="muted">Smart meal suggestions based on your remaining macros.</p>
+            </div>
+            <div id="plan-status" class="plan-status"></div>
+          </div>
+          <div class="plan-grid">
+            <div class="plan-remaining">
+              <div class="metric-card">
+                <span>Remaining Calories</span>
+                <strong id="plan-remaining-calories">--</strong>
               </div>
-              <div class="summary-item">
-                <span>Daily burn</span>
-                <strong id="tdee-value">--</strong>
-                <small>With activity (TDEE)</small>
+              <div class="metric-card">
+                <span>Remaining Protein</span>
+                <strong id="plan-remaining-protein">--</strong>
               </div>
-              <div class="summary-item highlight">
-                <span>Daily target</span>
-                <strong id="target-value">--</strong>
-                <small id="goal-label">Daily target</small>
+              <div class="metric-card">
+                <span>Remaining Carbs</span>
+                <strong id="plan-remaining-carbs">--</strong>
+              </div>
+              <div class="metric-card">
+                <span>Remaining Fat</span>
+                <strong id="plan-remaining-fat">--</strong>
               </div>
             </div>
+            <div id="plan-suggestions" class="plan-suggestions"></div>
           </div>
         </section>
 
-                        <section id="account-auth" class="panel auth-panel">
+        <!-- ── Workout ── -->
+        <section id="workout" class="panel workout-panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">AI-Powered</p>
+              <h3>Workout Plan</h3>
+              <p class="muted">Get a personalised weekly workout plan generated from your TDEE, goal, and stats.</p>
+            </div>
+            <div id="workout-status" class="plan-status"></div>
+          </div>
+          <div class="workout-actions">
+            <button id="workout-generate-btn" class="button" type="button">Generate My Workout Plan</button>
+          </div>
+          <div id="workout-output" class="workout-output" hidden></div>
+        </section>
+
+        <!-- ── Weight Log ── -->
+        <section id="weight" class="panel">
+          <div class="panel-header split">
+            <div>
+              <p class="eyebrow">MacroFactor-style</p>
+              <h3>Weight Log</h3>
+              <p class="muted">Log your weight daily. We'll calculate your trend and adaptive expenditure.</p>
+            </div>
+            <div id="weight-trend-badge" class="trend-badge" hidden>
+              <span class="trend-label">Trend</span>
+              <strong id="weight-trend-value">--</strong>
+              <small id="weight-trend-unit">kg</small>
+            </div>
+          </div>
+
+          <div class="weight-entry-grid">
+            <div class="weight-entry-card">
+              <h4>Today's Weigh-in</h4>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="weight-entry-value">Weight</label>
+                  <input id="weight-entry-value" type="number" inputmode="decimal" step="0.1" min="20" max="500" placeholder="185" />
+                </div>
+                <div class="form-field">
+                  <label for="weight-entry-unit">Unit</label>
+                  <select id="weight-entry-unit">
+                    <option value="lb">lb</option>
+                    <option value="kg">kg</option>
+                  </select>
+                </div>
+              </div>
+              <button id="weight-log-btn" class="button" type="button">Log Weight</button>
+              <p id="weight-log-message" class="help"></p>
+            </div>
+
+            <div class="weight-stats-card">
+              <h4>This Week</h4>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span>Current Trend</span>
+                  <strong id="weight-current-trend">--</strong>
+                  <small id="weight-current-trend-unit">log to see</small>
+                </div>
+                <div class="summary-item">
+                  <span>7-day Change</span>
+                  <strong id="weight-week-change">--</strong>
+                  <small>vs last week trend</small>
+                </div>
+                <div class="summary-item highlight">
+                  <span>Adaptive TDEE</span>
+                  <strong id="weight-adaptive-tdee">--</strong>
+                  <small>estimated from data</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="weight-history-list" class="weight-history-list"></div>
+        </section>
+
+        <!-- ── Account (sign-in / out) ── -->
+        <section id="account-auth" class="panel auth-panel">
           <div class="panel-header split">
             <div>
               <p class="eyebrow">Account</p>
@@ -285,6 +407,7 @@
           </div>
         </section>
 
+        <!-- ── Stats & Macro Calc (hidden until Edit Stats) ── -->
         <section class="grid">
           <div class="panel">
             <div class="panel-header">
@@ -432,103 +555,74 @@
             </div>
           </div>
         </section>
+      </main>
+    </div>
 
-        <section id="weight" class="panel">
-          <div class="panel-header split">
-            <div>
-              <p class="eyebrow">MacroFactor-style</p>
-              <h3>Weight Log</h3>
-              <p class="muted">Log your weight daily. We'll calculate your trend and adaptive expenditure.</p>
-            </div>
-            <div id="weight-trend-badge" class="trend-badge" hidden>
-              <span class="trend-label">Trend</span>
-              <strong id="weight-trend-value">--</strong>
-              <small id="weight-trend-unit">kg</small>
+    <!-- ═══════════════════════════════════════════════
+         SCANNER MODAL — full-screen overlay
+    ═══════════════════════════════════════════════ -->
+    <div id="scanner-modal" class="scanner-modal" hidden aria-modal="true" role="dialog" aria-label="Food Scanner">
+      <div class="scanner-modal-backdrop" id="scanner-backdrop"></div>
+      <div class="scanner-modal-sheet">
+        <!-- Modal header -->
+        <div class="scanner-modal-header">
+          <div class="scanner-modal-drag"></div>
+          <h2 class="scanner-modal-title">Scan Food</h2>
+          <button class="scanner-modal-close" id="scanner-close" type="button" aria-label="Close scanner">✕</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="scanner-tabs" role="tablist">
+          <button class="scanner-tab active" id="tab-barcode" role="tab" type="button" data-tab="barcode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4"/>
+              <line x1="7" y1="5" x2="7" y2="19"/><line x1="10" y1="5" x2="10" y2="19"/>
+              <line x1="13" y1="5" x2="13" y2="19"/><line x1="17" y1="7" x2="17" y2="19"/>
+            </svg>
+            Barcode
+          </button>
+          <button class="scanner-tab" id="tab-photo" role="tab" type="button" data-tab="photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            Photo Label
+          </button>
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="scanner-modal-body">
+
+          <!-- ── BARCODE TAB PANEL ── -->
+          <div id="panel-barcode" class="scanner-panel" role="tabpanel">
+            <div id="scanner" class="scan-grid-modal">
+              <div class="scan-card scan-card-barcode">
+                <p class="muted" style="margin-bottom:10px">Scan a barcode to auto-fill nutrition data.</p>
+                <div class="barcode-actions">
+                  <button id="barcode-start" class="button" type="button">Start Scanner</button>
+                  <button id="barcode-stop" class="button ghost" type="button" disabled>Stop</button>
+                </div>
+                <div id="barcode-reader" class="barcode-reader" aria-live="polite"></div>
+                <div class="form-field" style="margin-top:12px">
+                  <label for="barcode-input">Or enter barcode manually</label>
+                  <input id="barcode-input" type="text" inputmode="numeric" placeholder="012345678905" />
+                </div>
+                <button id="barcode-lookup" class="button ghost" type="button">Lookup Product</button>
+                <div id="barcode-status" class="barcode-status">Ready to scan.</div>
+                <div id="product-info" class="product-info" hidden>
+                  <strong id="product-name">Product name</strong>
+                  <span id="product-brand">Brand</span>
+                  <span id="product-source">Source</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="weight-entry-grid">
-            <div class="weight-entry-card">
-              <h4>Today's Weigh-in</h4>
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="weight-entry-value">Weight</label>
-                  <input id="weight-entry-value" type="number" inputmode="decimal" step="0.1" min="20" max="500" placeholder="185" />
-                </div>
-                <div class="form-field">
-                  <label for="weight-entry-unit">Unit</label>
-                  <select id="weight-entry-unit">
-                    <option value="lb">lb</option>
-                    <option value="kg">kg</option>
-                  </select>
-                </div>
-              </div>
-              <button id="weight-log-btn" class="button" type="button">Log Weight</button>
-              <p id="weight-log-message" class="help"></p>
-            </div>
-
-            <div class="weight-stats-card">
-              <h4>This Week</h4>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <span>Current Trend</span>
-                  <strong id="weight-current-trend">--</strong>
-                  <small id="weight-current-trend-unit">log to see</small>
-                </div>
-                <div class="summary-item">
-                  <span>7-day Change</span>
-                  <strong id="weight-week-change">--</strong>
-                  <small>vs last week trend</small>
-                </div>
-                <div class="summary-item highlight">
-                  <span>Adaptive TDEE</span>
-                  <strong id="weight-adaptive-tdee">--</strong>
-                  <small>estimated from data</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="weight-history-list" class="weight-history-list"></div>
-        </section>
-
-        <section id="scanner" class="panel">
-          <div class="panel-header split">
-            <div>
-              <p class="eyebrow">Scanner</p>
-              <h3>Nutrition Label OCR</h3>
-              <p class="muted">Capture a clear label, then confirm the numbers.</p>
-            </div>
-            <div class="tips">
-              <span>Tip: avoid glare</span>
-              <span>Tip: fill the frame</span>
-            </div>
-          </div>
-          <div class="scan-grid">
-            <div class="scan-card scan-card-barcode">
-              <h4>1. Barcode</h4>
-              <p class="muted">Scan a barcode to auto-fill nutrition data.</p>
-              <div class="barcode-actions">
-                <button id="barcode-start" class="button" type="button">Start Scanner</button>
-                <button id="barcode-stop" class="button ghost" type="button" disabled>Stop</button>
-              </div>
-              <div id="barcode-reader" class="barcode-reader" aria-live="polite"></div>
-              <div class="form-field">
-                <label for="barcode-input">Enter barcode</label>
-                <input id="barcode-input" type="text" inputmode="numeric" placeholder="012345678905" />
-              </div>
-              <button id="barcode-lookup" class="button ghost" type="button">Lookup Product</button>
-              <div id="barcode-status" class="barcode-status">Ready to scan.</div>
-              <div id="product-info" class="product-info" hidden>
-                <strong id="product-name">Product name</strong>
-                <span id="product-brand">Brand</span>
-                <span id="product-source">Source</span>
-              </div>
-            </div>
+          <!-- ── PHOTO TAB PANEL ── -->
+          <div id="panel-photo" class="scanner-panel" role="tabpanel" hidden>
             <div class="scan-card scan-card-photo">
-              <h4>2. Photo</h4>
-              <p class="muted">Use your camera or upload an image.</p>
-              <label class="button" for="label-input">Scan / Upload</label>
+              <p class="muted" style="margin-bottom:10px">Use your camera or upload an image of the label.</p>
+              <label class="button" for="label-input" style="display:inline-block;margin-bottom:12px">📷 Open Camera / Upload</label>
               <input id="label-input" type="file" accept="image/*" capture="environment" hidden />
               <div class="preview" id="preview-wrap" hidden>
                 <img id="label-preview" alt="Nutrition label preview" />
@@ -538,196 +632,207 @@
                 <progress id="ocr-progress" value="0" max="1" hidden></progress>
               </div>
             </div>
-            <div class="scan-card scan-card-insights">
-              <h4>3. Scan Insights</h4>
-              <div class="form-grid">
-                <div class="form-field">
-                  <label for="label-calories">Calories (per serving)</label>
-                  <input id="label-calories" type="number" inputmode="numeric" min="0" />
-                </div>
-                <div class="form-field">
-                  <label for="label-serving">Serving Size</label>
-                  <input id="label-serving" type="text" placeholder="2/3 cup (55g)" />
-                </div>
-                <div class="form-row">
-                  <div class="form-field">
-                    <label for="label-servings">Servings per container</label>
-                    <input id="label-servings" type="number" inputmode="decimal" min="0" step="0.1" />
-                  </div>
-                  <div class="form-field">
-                    <label for="servings-eaten">Servings eaten</label>
-                    <input id="servings-eaten" type="number" inputmode="decimal" min="0" step="0.1" value="1" />
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-field">
-                    <label for="label-fat">Total Fat (g)</label>
-                    <input id="label-fat" type="number" inputmode="decimal" min="0" step="0.1" />
-                  </div>
-                  <div class="form-field">
-                    <label for="label-carbs">Total Carbs (g)</label>
-                    <input id="label-carbs" type="number" inputmode="decimal" min="0" step="0.1" />
-                  </div>
-                  <div class="form-field">
-                    <label for="label-protein">Protein (g)</label>
-                    <input id="label-protein" type="number" inputmode="decimal" min="0" step="0.1" />
-                  </div>
-                </div>
-              </div>
-              <div class="scan-actions">
-                <button id="save-food" class="button ghost" type="button">Save Food to Library</button>
-                <p id="save-food-message" class="help"></p>
-              </div>
-              <details class="ocr-raw">
-                <summary>View raw OCR text</summary>
-                <pre id="ocr-raw-text">No OCR yet.</pre>
-              </details>
-            </div>
-            <div class="scan-card scan-card-meal">
-              <h4>4. Meal Log</h4>
-              <div class="form-grid">
-                <div class="form-field">
-                  <label for="meal-type">Meal Type</label>
-                  <select id="meal-type">
-                    <option value="breakfast">Breakfast</option>
-                    <option value="lunch">Lunch</option>
-                    <option value="dinner">Dinner</option>
-                    <option value="snack">Snack</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-                <div class="form-field">
-                  <label for="meal-name">Meal Name</label>
-                  <input id="meal-name" type="text" placeholder="Greek yogurt" />
-                </div>
-                <div class="form-field">
-                  <label for="calories-override">Override Calories (optional)</label>
-                  <input id="calories-override" type="number" inputmode="numeric" min="0" />
-                </div>
-              </div>
-              <div class="meal-summary">
-                <div>
-                  <span>Estimated Calories</span>
-                  <strong id="meal-calories">0</strong>
-                </div>
-                <div>
-                  <span>From Macros</span>
-                  <strong id="macro-check">0</strong>
-                </div>
-              </div>
-              <p class="help" id="macro-mismatch"></p>
-              <button id="add-meal" class="button" type="button">Add to Today</button>
-            </div>
           </div>
-        </section>
 
-        <section id="log" class="panel">
-          <div class="panel-header split">
-            <div>
-              <p class="eyebrow">Today</p>
-              <h3>Daily Intake</h3>
-              <p class="muted">Compare your intake to your target.</p>
-            </div>
-            <div class="totals">
-              <div class="total-card">
-                <span>Total Intake</span>
-                <strong id="daily-total">0</strong>
+          <!-- ── SCAN INSIGHTS (always visible below tabs) ── -->
+          <div class="scan-card scan-card-insights">
+            <h4>Scan Insights</h4>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="label-calories">Calories (per serving)</label>
+                <input id="label-calories" type="number" inputmode="numeric" min="0" />
               </div>
-              <div class="total-card highlight">
-                <span>Remaining</span>
-                <strong id="daily-remaining">--</strong>
+              <div class="form-field">
+                <label for="label-serving">Serving Size</label>
+                <input id="label-serving" type="text" placeholder="2/3 cup (55g)" />
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="label-servings">Servings per container</label>
+                  <input id="label-servings" type="number" inputmode="decimal" min="0" step="0.1" />
+                </div>
+                <div class="form-field">
+                  <label for="servings-eaten">Servings eaten</label>
+                  <input id="servings-eaten" type="number" inputmode="decimal" min="0" step="0.1" value="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="label-fat">Total Fat (g)</label>
+                  <input id="label-fat" type="number" inputmode="decimal" min="0" step="0.1" />
+                </div>
+                <div class="form-field">
+                  <label for="label-carbs">Total Carbs (g)</label>
+                  <input id="label-carbs" type="number" inputmode="decimal" min="0" step="0.1" />
+                </div>
+                <div class="form-field">
+                  <label for="label-protein">Protein (g)</label>
+                  <input id="label-protein" type="number" inputmode="decimal" min="0" step="0.1" />
+                </div>
               </div>
             </div>
+            <div class="scan-actions">
+              <button id="save-food" class="button ghost" type="button">Save Food to Library</button>
+              <p id="save-food-message" class="help"></p>
+            </div>
+            <details class="ocr-raw">
+              <summary>View raw OCR text</summary>
+              <pre id="ocr-raw-text">No OCR yet.</pre>
+            </details>
           </div>
-          <div id="log-list" class="log-list"></div>
-          <div class="log-actions">
-            <button id="clear-log" class="button ghost" type="button">Clear Today</button>
-          </div>
-          <p class="disclaimer">Not medical advice. Consult a professional for personalized guidance.</p>
-        </section>
 
-        <section id="workout" class="panel workout-panel">
-          <div class="panel-header split">
-            <div>
-              <p class="eyebrow">AI-Powered</p>
-              <h3>Workout Plan</h3>
-              <p class="muted">Get a personalised weekly workout plan generated from your TDEE, goal, and stats.</p>
+          <!-- ── MEAL LOG ── -->
+          <div class="scan-card scan-card-meal">
+            <h4>Log This Meal</h4>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="meal-type">Meal Type</label>
+                <select id="meal-type">
+                  <option value="breakfast">Breakfast</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="dinner">Dinner</option>
+                  <option value="snack">Snack</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="meal-name">Meal Name</label>
+                <input id="meal-name" type="text" placeholder="Greek yogurt" />
+              </div>
+              <div class="form-field">
+                <label for="calories-override">Override Calories (optional)</label>
+                <input id="calories-override" type="number" inputmode="numeric" min="0" />
+              </div>
             </div>
-            <div id="workout-status" class="plan-status">Sign in to generate a plan.</div>
+            <div class="meal-summary">
+              <div>
+                <span>Estimated Calories</span>
+                <strong id="meal-calories">0</strong>
+              </div>
+              <div>
+                <span>From Macros</span>
+                <strong id="macro-check">0</strong>
+              </div>
+            </div>
+            <p class="help" id="macro-mismatch"></p>
+            <button id="add-meal" class="button" type="button" style="width:100%">Add to Today ✓</button>
           </div>
-          <div class="workout-actions">
-            <button id="workout-generate-btn" class="button" type="button">Generate My Workout Plan</button>
-          </div>
-          <div id="workout-output" class="workout-output" hidden></div>
-        </section>
 
-        <section class="panel plan-panel" id="plan">
-          <div class="panel-header split">
-            <div>
-              <p class="eyebrow">Today</p>
-              <h3>Plan Suggestions</h3>
-              <p class="muted">Remaining macros plus quick ideas based on your logged foods.</p>
-            </div>
-            <div id="plan-status" class="plan-status">Sign in to generate suggestions.</div>
-          </div>
-          <div class="plan-grid">
-            <div class="plan-remaining">
-              <div class="metric-card">
-                <span>Remaining Calories</span>
-                <strong id="plan-remaining-calories">--</strong>
-              </div>
-              <div class="metric-card">
-                <span>Remaining Protein</span>
-                <strong id="plan-remaining-protein">--</strong>
-              </div>
-              <div class="metric-card">
-                <span>Remaining Carbs</span>
-                <strong id="plan-remaining-carbs">--</strong>
-              </div>
-              <div class="metric-card">
-                <span>Remaining Fat</span>
-                <strong id="plan-remaining-fat">--</strong>
-              </div>
-            </div>
-            <div id="plan-suggestions" class="plan-suggestions"></div>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <!-- Floating scan bubbles -->
-    <div class="scan-float">
-      <button class="scan-bubble" id="float-barcode" title="Scan barcode" aria-label="Open barcode scanner" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)">
-          <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4"/>
-          <line x1="7" y1="5" x2="7" y2="19"/><line x1="10" y1="5" x2="10" y2="19"/>
-          <line x1="13" y1="5" x2="13" y2="19"/><line x1="17" y1="7" x2="17" y2="19"/>
-        </svg>
-        <span class="scan-bubble-label">Barcode</span>
-      </button>
-      <button class="scan-bubble" id="float-camera" title="Scan nutrition label" aria-label="Open camera scanner" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-        <span class="scan-bubble-label">Camera</span>
-      </button>
-    </div>
+        </div><!-- /scanner-modal-body -->
+      </div><!-- /scanner-modal-sheet -->
+    </div><!-- /scanner-modal -->
 
     <script>
-      // Floating bubble triggers for index.html (direct DOM interaction)
-      document.getElementById("float-barcode")?.addEventListener("click", () => {
-        const sec = document.getElementById("scanner");
-        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => document.getElementById("barcode-start")?.click(), 400);
+    // ─── Scanner Modal Logic ────────────────────────────────
+    (function() {
+      const modal     = document.getElementById("scanner-modal");
+      const backdrop  = document.getElementById("scanner-backdrop");
+      const closeBtn  = document.getElementById("scanner-close");
+      const fabBtn    = document.getElementById("fab-btn");
+      const speedDial = document.getElementById("fab-speed-dial");
+      const fabBarcode = document.getElementById("fab-barcode");
+      const fabCamera  = document.getElementById("fab-camera");
+      const headerScan = document.getElementById("header-scan-btn");
+      const addMeal    = document.getElementById("add-meal");
+
+      let dialOpen = false;
+
+      function openModal(initialTab) {
+        closeDial();
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() => modal.classList.add("is-open"));
+        if (initialTab) switchTab(initialTab);
+      }
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        document.body.style.overflow = "";
+        setTimeout(() => { modal.hidden = true; }, 320);
+        // Stop barcode scanner if running
+        const stopBtn = document.getElementById("barcode-stop");
+        if (stopBtn && !stopBtn.disabled) stopBtn.click();
+      }
+
+      function openDial() {
+        dialOpen = true;
+        speedDial.hidden = false;
+        fabBtn.setAttribute("aria-expanded", "true");
+        fabBtn.classList.add("is-open");
+        requestAnimationFrame(() => speedDial.classList.add("is-open"));
+      }
+
+      function closeDial() {
+        dialOpen = false;
+        speedDial.classList.remove("is-open");
+        fabBtn.setAttribute("aria-expanded", "false");
+        fabBtn.classList.remove("is-open");
+        setTimeout(() => { if (!dialOpen) speedDial.hidden = true; }, 250);
+      }
+
+      function switchTab(tabName) {
+        document.querySelectorAll(".scanner-tab").forEach(t => {
+          t.classList.toggle("active", t.dataset.tab === tabName);
+        });
+        document.getElementById("panel-barcode").hidden = (tabName !== "barcode");
+        document.getElementById("panel-photo").hidden   = (tabName !== "photo");
+      }
+
+      // FAB toggles dial
+      fabBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dialOpen ? closeDial() : openDial();
       });
-      document.getElementById("float-camera")?.addEventListener("click", () => {
-        const sec = document.getElementById("scanner");
-        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => document.getElementById("label-input")?.click(), 400);
+
+      fabBarcode.addEventListener("click", () => openModal("barcode"));
+      fabCamera.addEventListener("click",  () => {
+        openModal("photo");
+        setTimeout(() => document.getElementById("label-input")?.click(), 350);
       });
+
+      // Header "Scan Label" button
+      headerScan?.addEventListener("click", () => openModal("barcode"));
+
+      // Close on backdrop / close button
+      closeBtn.addEventListener("click", closeModal);
+      backdrop.addEventListener("click", closeModal);
+
+      // Close on ESC
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (!modal.hidden) closeModal();
+          else if (dialOpen) closeDial();
+        }
+      });
+
+      // Close dial on outside click
+      document.addEventListener("click", (e) => {
+        if (dialOpen && !speedDial.contains(e.target) && !fabBtn.contains(e.target)) {
+          closeDial();
+        }
+      });
+
+      // Auto-close modal after "Add to Today"
+      addMeal?.addEventListener("click", () => {
+        setTimeout(() => { if (!modal.hidden) closeModal(); }, 600);
+      });
+
+      // Tab switching
+      document.querySelectorAll(".scanner-tab").forEach(tab => {
+        tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+      });
+
+      // Legacy: data-scroll on nav items
+      document.querySelectorAll("[data-scroll]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.dataset.scroll);
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      // Expose openModal globally so app.js hooks can use it
+      window.openScannerModal = openModal;
+    })();
     </script>
   </body>
 </html>
-
-

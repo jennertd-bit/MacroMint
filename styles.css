@@ -487,14 +487,46 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .overview-list     { display: flex; flex-direction: column; gap: 8px; }
 
 /* ─── Plan panel ────────────────────────────────────────── */
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.plan-remaining { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.plan-status {
-  font-size: 0.72rem; color: var(--muted); padding: 6px 10px;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); white-space: nowrap;
+.plan-grid { display: flex; flex-direction: column; gap: 10px; }
+
+/* Remaining macros — single slim horizontal strip */
+.plan-remaining {
+  display: flex; flex-wrap: wrap; gap: 6px;
 }
-.plan-suggestions { display: flex; flex-direction: column; gap: 10px; }
+.plan-remaining .metric-card {
+  flex: 1; min-width: 0;
+  padding: 7px 10px;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.plan-remaining .metric-card span { font-size: 0.65rem; }
+.plan-remaining .metric-card strong { font-size: 0.85rem; }
+
+.plan-status {
+  font-size: 0.68rem; color: var(--muted);
+  white-space: normal; line-height: 1.4;
+}
+/* Suggestions list — compact rows */
+.plan-suggestions { display: flex; flex-direction: column; gap: 4px; }
+.plan-slot {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.plan-slot h4 {
+  font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--teal); font-family: "DM Mono", monospace;
+  white-space: nowrap; flex-shrink: 0; min-width: 64px; padding-top: 1px;
+}
+.plan-option { flex: 1; }
+.plan-option > small.muted { display: none; } /* hide "Option 1/2" label */
+.plan-item { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.plan-item > div { font-size: 0.82rem; font-weight: 500; color: var(--text); }
+.plan-item small {
+  font-size: 0.65rem; color: var(--muted);
+  font-family: "DM Mono", monospace; white-space: nowrap;
+}
 
 /* ─── Workout ───────────────────────────────────────────── */
 .workout-actions { margin-bottom: 12px; }
@@ -939,39 +971,10 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
   margin: 0;
 }
 
-/* ─── Meal Suggestion Cards ─────────────────────────────── */
-.plan-meal-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-bottom: 10px;
-}
-.plan-meal-name {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 4px;
-}
-.plan-meal-macros {
-  font-size: 0.72rem;
-  font-family: "DM Mono", monospace;
-  color: var(--text-muted);
-}
-.plan-meal-kcal {
-  font-size: 0.72rem;
-  color: var(--teal);
-  font-family: "DM Mono", monospace;
-}
-.plan-slot-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin: 12px 0 6px;
-  font-family: "DM Mono", monospace;
-}
-.plan-slot-label:first-child { margin-top: 0; }
+/* ─── Meal Suggestion Cards (legacy, kept for compat) ───── */
+.plan-meal-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; }
+.plan-meal-name { font-size: 0.82rem; font-weight: 600; }
+.plan-meal-macros, .plan-meal-kcal, .plan-slot-label { font-size: 0.65rem; font-family: "DM Mono", monospace; color: var(--muted); }
 
 /* ─── Animations ────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -1119,7 +1122,7 @@ body.onboard-body {
   .grid { grid-template-columns: 1fr; }
   .charts-grid { grid-template-columns: 1fr; }
   .weight-entry-grid { grid-template-columns: 1fr; }
-  .plan-grid { grid-template-columns: 1fr; }
+  .plan-grid { flex-direction: column; }
   .overview-grid { grid-template-columns: 1fr; }
   .auth-grid { grid-template-columns: 1fr; }
   .onboard-step { padding: 24px 18px; }

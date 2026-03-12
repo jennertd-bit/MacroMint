@@ -1488,6 +1488,217 @@ body.onboard-body {
 .success-wrap .step-sub { margin-bottom: 28px; }
 
 /* ═══════════════════════════════════════════════════════════
+   WORKOUT PROGRAMS — plan type tabs, day tabs, sections
+═══════════════════════════════════════════════════════════ */
+
+/* Plan type selector (Full Body / PPL) */
+.plan-type-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.plan-type-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  text-align: left;
+}
+.plan-type-tab:hover {
+  border-color: var(--border-hi);
+  background: var(--surface-3);
+}
+.plan-type-tab.active {
+  border-color: var(--teal);
+  background: var(--teal-glow);
+}
+.plan-type-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.plan-type-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.plan-type-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+.plan-type-tab.active .plan-type-label {
+  color: var(--teal);
+}
+.plan-type-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+/* Plan description */
+.plan-description {
+  font-size: 0.83rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Day tabs (A / B / C  or  Push / Pull / Legs) */
+.plan-day-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.plan-day-tabs::-webkit-scrollbar { display: none; }
+.plan-day-tab {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-width: 90px;
+}
+.plan-day-tab:hover {
+  border-color: var(--border-hi);
+  background: var(--surface-3);
+}
+.plan-day-tab.active {
+  border-color: var(--teal);
+  background: var(--teal-glow);
+}
+.plan-day-tab-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.plan-day-tab.active .plan-day-tab-label {
+  color: var(--teal);
+}
+.plan-day-tab-tag {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Plan content container */
+.plan-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Plan section (Compound / Abs / Cardio) */
+.plan-section {}
+.plan-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--teal);
+}
+.plan-section-icon {
+  font-size: 1.1rem;
+}
+.plan-section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+.plan-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.plan-section-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* Exercise grid for cardio (full-width) */
+.exercise-grid--cardio {
+  grid-template-columns: 1fr !important;
+}
+
+/* Exercise card metadata row (rest / mechanic tags) */
+.exercise-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.ex-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.ex-tag--rest {
+  background: rgba(99,102,241,0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+.ex-tag--compound {
+  background: rgba(0,229,204,0.1);
+  color: var(--teal-dim);
+  border: 1px solid rgba(0,229,204,0.18);
+}
+.ex-tag--isolation {
+  background: rgba(139,92,246,0.1);
+  color: #a78bfa;
+  border: 1px solid rgba(139,92,246,0.18);
+}
+.ex-tag--cardio {
+  background: rgba(249,115,22,0.12);
+  color: var(--orange);
+  border: 1px solid rgba(249,115,22,0.2);
+}
+
+/* Cardio exercise card variant */
+.exercise-card--cardio {
+  border-color: rgba(249,115,22,0.22);
+  background: linear-gradient(135deg, rgba(249,115,22,0.05), var(--surface-2));
+}
+.exercise-card--cardio .exercise-sets-badge {
+  background: rgba(249,115,22,0.15);
+  color: var(--orange);
+  border-color: rgba(249,115,22,0.2);
+}
+.cardio-note {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--orange);
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {

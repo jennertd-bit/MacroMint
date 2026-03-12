@@ -965,7 +965,8 @@ const mapMealLogToEntry = (meal) => {
 const loadLogForToday = async () => {
   const today = getTodayKey();
   if (!state.isAuthenticated) {
-    state.log = [];
+    // Load from localStorage — works without an account
+    state.log = getLocalLogForDate(today);
     renderLog();
     queuePlanUpdate();
     return;
@@ -1016,6 +1017,41 @@ const parseServingSize = (text) => {
     grams: gramMatch ? Number.parseFloat(gramMatch[1]) : null,
     ml: mlMatch ? Number.parseFloat(mlMatch[1]) : null,
   };
+};
+
+// ── Local daily food log (no auth required) ───────────────────────────────
+const LOCAL_LOG_KEY = "macromint_daily_log";
+
+const getLocalLog = () => {
+  try { return JSON.parse(localStorage.getItem(LOCAL_LOG_KEY) || "{}"); } catch { return {}; }
+};
+
+const saveLocalLog = (byDate) => {
+  try { localStorage.setItem(LOCAL_LOG_KEY, JSON.stringify(byDate)); } catch {}
+};
+
+const getLocalLogForDate = (dateKey) => {
+  const all = getLocalLog();
+  return all[dateKey] || [];
+};
+
+const addLocalLogEntry = (entry) => {
+  const all = getLocalLog();
+  const date = entry.date || getTodayKey();
+  all[date] = [entry, ...(all[date] || [])];
+  // prune old dates — keep last 30 days
+  const keys = Object.keys(all).sort().slice(-30);
+  const pruned = {};
+  keys.forEach(k => { pruned[k] = all[k]; });
+  saveLocalLog(pruned);
+};
+
+const removeLocalLogEntry = (entryId, dateKey) => {
+  const all = getLocalLog();
+  if (all[dateKey]) {
+    all[dateKey] = all[dateKey].filter(e => e.id !== entryId);
+    saveLocalLog(all);
+  }
 };
 
 // ── Pantry: localStorage-based food library ───────────────────────────────
@@ -1531,9 +1567,12 @@ const renderLog = () => {
     return;
   }
 
-  let total = 0;
+  let total = 0, totalP = 0, totalC = 0, totalF = 0;
   todaysLog.forEach((entry) => {
-    total += entry.calories;
+    total  += entry.calories || 0;
+    totalP += entry.protein  || 0;
+    totalC += entry.carbs    || 0;
+    totalF += entry.fat      || 0;
     const item = document.createElement("div");
     item.className = "log-item";
 
@@ -1557,7 +1596,11 @@ const renderLog = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    info.textContent = `${entry.calories} kcal · ${time}`;
+    const hasMacros = (entry.protein || entry.carbs || entry.fat);
+    const macroStr  = hasMacros
+      ? ` · ${entry.protein || 0}P ${entry.carbs || 0}C ${entry.fat || 0}F`
+      : "";
+    info.textContent = `${entry.calories} kcal${macroStr} · ${time}`;
 
     row.appendChild(title);
     row.appendChild(typePill);
@@ -1570,14 +1613,10 @@ const renderLog = () => {
     remove.textContent = "Remove";
     remove.addEventListener("click", async () => {
       if (!state.isAuthenticated) {
-        await requireAuth(
-          async () => {
-            await apiFetch(`/api/meals/${entry.id}`, { method: "DELETE" });
-            state.log = state.log.filter((item) => item.id !== entry.id);
-            renderLog();
-          },
-          { message: "You need an account to save changes." }
-        );
+        removeLocalLogEntry(entry.id, entry.date || getTodayKey());
+        state.log = state.log.filter((item) => item.id !== entry.id);
+        renderLog();
+        queuePlanUpdate();
         return;
       }
 
@@ -1597,6 +1636,17 @@ const renderLog = () => {
 
   elements.dailyTotal.textContent = Math.round(total).toLocaleString();
   updateRemaining();
+
+  // Update macro tracker from local totals (unauthenticated path)
+  if (!state.isAuthenticated && (totalP || totalC || totalF)) {
+    const targetRaw  = elements.targetValue?.textContent?.replace(/,/g, "") || "0";
+    const targetKcal = Number.parseFloat(targetRaw) || 2000;
+    const remainKcal = Math.max(targetKcal - total, 0);
+    if (elements.remainingCalories) elements.remainingCalories.textContent = Math.round(remainKcal).toLocaleString();
+    if (elements.remainingProtein)  elements.remainingProtein.textContent  = `${Math.round(totalP)}g`;
+    if (elements.remainingCarbs)    elements.remainingCarbs.textContent    = `${Math.round(totalC)}g`;
+    if (elements.remainingFat)      elements.remainingFat.textContent      = `${Math.round(totalF)}g`;
+  }
 };
 
 const collectProfileFromForm = () => ({
@@ -1992,22 +2042,37 @@ const updateMealSummary = () => {
 };
 
 const addMealToLog = async () => {
-  if (!state.isAuthenticated) {
-    await requireAuth(() => addMealToLog(), { message: "You need an account to save changes." });
-    return;
-  }
-
   const calories = Number.parseFloat(elements.mealCalories.textContent.replace(/,/g, "")) || 0;
   if (!calories) return;
+
+  const servings = parseNumber(elements.servingsEaten.value) || 1;
+  const protein  = Math.round((parseNumber(elements.labelProtein.value) || 0) * servings);
+  const carbs    = Math.round((parseNumber(elements.labelCarbs.value)   || 0) * servings);
+  const fat      = Math.round((parseNumber(elements.labelFat.value)     || 0) * servings);
 
   const entry = {
     id: window.crypto?.randomUUID ? window.crypto.randomUUID() : String(Date.now()),
     name: elements.mealName.value.trim() || "Meal",
     type: elements.mealType?.value || "custom",
     calories: Math.round(calories),
+    protein,
+    carbs,
+    fat,
     date: getTodayKey(),
     timestamp: Date.now(),
   };
+
+  // ── Local save — no auth required ────────────────────────────────────────
+  if (!state.isAuthenticated) {
+    addLocalLogEntry(entry);
+    state.log = [entry, ...state.log];
+    renderLog();
+    queuePlanUpdate();
+    elements.mealName.value = "";
+    elements.caloriesOverride.value = "";
+    updateMealNameFromType();
+    return;
+  }
 
   try {
     const mealSlot = entry.type ? entry.type.toUpperCase() : "CUSTOM";

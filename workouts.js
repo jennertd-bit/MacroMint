@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const API_BASE  = () => (window.MACROMINT_API || "https://macromint-1.onrender.com").replace(/\/$/, "");
+  const API_BASE         = () => (window.MACROMINT_API || "https://macromint-1.onrender.com").replace(/\/$/, "");
   const TOKEN_KEY        = "macromint_token";
   const PROFILE_KEY      = "macromint_profile";
   const WORKOUT_LOG_KEY  = "macromint_workout_log";
@@ -192,10 +192,245 @@
     calves:       ["calf", "calves", "calf raise"],
   };
 
+  // ── Structured Workout Plans ───────────────────────────────────────────────
+  const WORKOUT_PLANS = {
+    fullbody: {
+      label: "Full Body",
+      subtitle: "3× per week · A / B / C rotation",
+      description: "Hit every major muscle group each session. Rotate through Days A, B, and C so you never repeat the same workout back-to-back. Ideal for any level.",
+      days: [
+        {
+          key: "A",
+          label: "Day A",
+          tag: "Squat · Press · Row",
+          sections: [
+            {
+              title: "Compound Lifts",
+              icon: "🏋️",
+              exercises: [
+                { name: "Back Squat",            sets: "4 × 5–8",   equipment: "Barbell",    rest: "2–3 min", mechanic: "compound",  muscles: ["quads","glutes","lower-back"], tip: "Knees track over toes. Break parallel. Chest tall throughout the lift." },
+                { name: "Barbell Bench Press",   sets: "4 × 6–8",   equipment: "Barbell",    rest: "2 min",   mechanic: "compound",  muscles: ["chest","shoulders","triceps"],  tip: "Plant feet firmly. Lower bar to lower chest with elbows at ~45°." },
+                { name: "Bent-Over Barbell Row", sets: "4 × 6–8",   equipment: "Barbell",    rest: "2 min",   mechanic: "compound",  muscles: ["lats","lower-back","biceps"],   tip: "Hinge to ~45°. Pull to your belly button — lead with elbows." },
+                { name: "Dumbbell Lateral Raise",sets: "3 × 12–15", equipment: "Dumbbell",   rest: "60s",     mechanic: "isolation", muscles: ["shoulders"],                   tip: "Lead with elbows, slight forward lean. Don't shrug at the top." },
+                { name: "Barbell Curl",          sets: "3 × 8–10",  equipment: "Barbell",    rest: "60s",     mechanic: "isolation", muscles: ["biceps"],                      tip: "Elbows pinned to sides. Full extension at the bottom every rep." },
+                { name: "Lying Leg Curl",        sets: "3 × 10–12", equipment: "Machine",    rest: "60s",     mechanic: "isolation", muscles: ["hamstrings"],                  tip: "Point toes down slightly. Curl through full range, hold 1s at top." },
+              ]
+            },
+            {
+              title: "Abs & Core",
+              icon: "🧱",
+              exercises: [
+                { name: "Ab Wheel Rollout",  sets: "3 × 8–12",  equipment: "Equipment",  rest: "60s", mechanic: "compound",  muscles: ["abs"], tip: "Keep hips aligned with spine throughout. Squeeze hard to pull back in." },
+                { name: "Plank",             sets: "3 × 45–60s",equipment: "Bodyweight", rest: "30s", mechanic: "isolation", muscles: ["abs"], tip: "Squeeze glutes and brace your abs. Don't let hips sag or rise." },
+              ]
+            },
+            {
+              title: "Cardio Finisher",
+              icon: "🏃",
+              exercises: [
+                { name: "Treadmill or Stationary Bike", sets: "20 min", equipment: "Machine", rest: "—", mechanic: "cardio", muscles: [], tip: "Moderate pace at 65% max HR. Great fat-burn zone — burns ~120–160 kcal. No excuses." },
+              ]
+            },
+          ]
+        },
+        {
+          key: "B",
+          label: "Day B",
+          tag: "Deadlift · Press · Pull",
+          sections: [
+            {
+              title: "Compound Lifts",
+              icon: "🏋️",
+              exercises: [
+                { name: "Deadlift",               sets: "4 × 4–6",   equipment: "Barbell",    rest: "2–3 min", mechanic: "compound",  muscles: ["lower-back","hamstrings","glutes"], tip: "Neutral spine, big breath into belly, engage lats before you pull." },
+                { name: "Overhead Press (Barbell)",sets: "4 × 5–8",  equipment: "Barbell",    rest: "2 min",   mechanic: "compound",  muscles: ["shoulders","triceps"],              tip: "Bar starts at collarbone level. Drive your head through at the top." },
+                { name: "Pull-Up",                sets: "4 × Max",   equipment: "Bodyweight", rest: "2 min",   mechanic: "compound",  muscles: ["lats","biceps"],                    tip: "Dead hang start. Drive elbows down and back — think 'lat spread'." },
+                { name: "Incline Dumbbell Press", sets: "3 × 8–10",  equipment: "Dumbbell",   rest: "90s",     mechanic: "compound",  muscles: ["chest","shoulders"],                tip: "Set bench 30–45°. Squeeze at top, slow on the way down." },
+                { name: "Rope Pushdown",          sets: "3 × 12–15", equipment: "Cable",      rest: "60s",     mechanic: "isolation", muscles: ["triceps"],                         tip: "Split the rope at the bottom. Keep elbows locked to your sides." },
+                { name: "Romanian Deadlift",      sets: "3 × 10–12", equipment: "Barbell",    rest: "90s",     mechanic: "compound",  muscles: ["hamstrings","glutes","lower-back"],  tip: "Push hips back — bar stays close to legs. Deep hamstring stretch." },
+              ]
+            },
+            {
+              title: "Abs & Core",
+              icon: "🧱",
+              exercises: [
+                { name: "Hanging Leg Raise", sets: "3 × 12–15", equipment: "Bodyweight", rest: "60s", mechanic: "compound",  muscles: ["abs"],          tip: "Control the swing on the way down. Bend knees to make it easier." },
+                { name: "Bicycle Crunch",    sets: "3 × 20ea",  equipment: "Bodyweight", rest: "30s", mechanic: "isolation", muscles: ["abs","obliques"],tip: "Slow and deliberate — elbow to opposite knee. No rushing through." },
+              ]
+            },
+            {
+              title: "Cardio Finisher",
+              icon: "🏃",
+              exercises: [
+                { name: "Rowing Machine or Elliptical", sets: "20 min", equipment: "Machine", rest: "—", mechanic: "cardio", muscles: [], tip: "Full-body cardio. Row at 24–26 spm or elliptical at moderate resistance. Aim for conversational pace." },
+              ]
+            },
+          ]
+        },
+        {
+          key: "C",
+          label: "Day C",
+          tag: "Squat · Dips · Row",
+          sections: [
+            {
+              title: "Compound Lifts",
+              icon: "🏋️",
+              exercises: [
+                { name: "Front Squat",          sets: "3 × 6–8",   equipment: "Barbell",    rest: "2 min",  mechanic: "compound",  muscles: ["quads","glutes"],              tip: "More quad, less lower back than back squat. Keep torso vertical." },
+                { name: "Dips (Chest Focus)",   sets: "3 × 10–12", equipment: "Bodyweight", rest: "90s",    mechanic: "compound",  muscles: ["chest","triceps","shoulders"],  tip: "Lean forward ~30° and let elbows flare slightly for chest emphasis." },
+                { name: "Seated Cable Row",     sets: "4 × 10–12", equipment: "Cable",      rest: "90s",    mechanic: "compound",  muscles: ["lats","biceps"],               tip: "Chest tall, pull to belly button. Squeeze shoulder blades together." },
+                { name: "Arnold Press",         sets: "3 × 10–12", equipment: "Dumbbell",   rest: "75s",    mechanic: "compound",  muscles: ["shoulders","triceps"],         tip: "Start with palms facing you and rotate outward as you press overhead." },
+                { name: "Hammer Curl",          sets: "3 × 10–12", equipment: "Dumbbell",   rest: "60s",    mechanic: "isolation", muscles: ["biceps"],                     tip: "Neutral grip hits brachialis too — gives arms thickness and fullness." },
+                { name: "Hip Thrust (Barbell)", sets: "4 × 10–12", equipment: "Barbell",    rest: "90s",    mechanic: "compound",  muscles: ["glutes","hamstrings"],         tip: "Drive through heels. Squeeze glutes hard at the top. Chin to chest." },
+              ]
+            },
+            {
+              title: "Abs & Core",
+              icon: "🧱",
+              exercises: [
+                { name: "Cable Crunch", sets: "3 × 15",     equipment: "Cable",      rest: "45s", mechanic: "isolation", muscles: ["abs"],     tip: "Round your spine toward your pelvis — don't just hinge at the hips." },
+                { name: "Side Plank",   sets: "3 × 30–45s", equipment: "Bodyweight", rest: "30s", mechanic: "isolation", muscles: ["obliques"],tip: "Hips stacked. Top hip slightly forward to engage obliques more." },
+              ]
+            },
+            {
+              title: "Cardio Finisher",
+              icon: "🏃",
+              exercises: [
+                { name: "Stairmaster or Bike", sets: "20 min", equipment: "Machine", rest: "—", mechanic: "cardio", muscles: [], tip: "High-output, low-impact. Stairmaster burns ~8–10 kcal/min and the glutes will feel it." },
+              ]
+            },
+          ]
+        },
+      ]
+    },
+
+    ppl: {
+      label: "Push · Pull · Legs",
+      subtitle: "3–6× per week · rotating split",
+      description: "Maximum volume per muscle group. Run as 3 days (Push → Pull → Legs) or 6 days (repeat the rotation twice). Each day targets specific movement patterns.",
+      days: [
+        {
+          key: "push",
+          label: "Push",
+          tag: "Chest · Shoulders · Triceps",
+          sections: [
+            {
+              title: "Chest",
+              icon: "🫁",
+              exercises: [
+                { name: "Barbell Bench Press",   sets: "4 × 5–8",   equipment: "Barbell",  rest: "2–3 min", mechanic: "compound",  muscles: ["chest","shoulders","triceps"], tip: "Plant feet firmly. Lower bar to lower chest with elbows at ~45°." },
+                { name: "Incline Dumbbell Press",sets: "3 × 8–10",  equipment: "Dumbbell", rest: "90s",     mechanic: "compound",  muscles: ["chest","shoulders"],            tip: "Set bench to 30–45°. Squeeze at the top, slow controlled descent." },
+                { name: "Cable Chest Flye",      sets: "3 × 12–15", equipment: "Cable",    rest: "60s",     mechanic: "isolation", muscles: ["chest"],                       tip: "Slight elbow bend throughout. Think 'hugging a tree' — feel the stretch." },
+              ]
+            },
+            {
+              title: "Shoulders",
+              icon: "🏋️",
+              exercises: [
+                { name: "Seated DB Shoulder Press",sets: "4 × 8–10", equipment: "Dumbbell", rest: "90s", mechanic: "compound",  muscles: ["shoulders","triceps"], tip: "Press straight up. Control the descent — don't arch your back." },
+                { name: "Dumbbell Lateral Raise",  sets: "4 × 15",   equipment: "Dumbbell", rest: "45s", mechanic: "isolation", muscles: ["shoulders"],          tip: "Lead with elbows. Slight forward lean to hit medial delt harder." },
+                { name: "Face Pull",               sets: "3 × 15–20",equipment: "Cable",    rest: "45s", mechanic: "isolation", muscles: ["shoulders"],          tip: "Rope to face, elbows high and wide. Non-negotiable for shoulder health." },
+              ]
+            },
+            {
+              title: "Triceps",
+              icon: "🔱",
+              exercises: [
+                { name: "Skull Crusher",             sets: "3 × 10–12", equipment: "Barbell", rest: "75s", mechanic: "isolation", muscles: ["triceps"], tip: "Lower bar toward forehead. Slow negative — great mass builder for the long head." },
+                { name: "Rope Pushdown",             sets: "3 × 12–15", equipment: "Cable",   rest: "45s", mechanic: "isolation", muscles: ["triceps"], tip: "Split the rope at the bottom. Keep elbows locked to your sides throughout." },
+                { name: "Overhead Tricep Extension", sets: "3 × 10–12", equipment: "Dumbbell",rest: "60s", mechanic: "isolation", muscles: ["triceps"], tip: "Stretch the long head fully. Hold at bottom — biggest ROM = biggest gains." },
+              ]
+            },
+          ]
+        },
+
+        {
+          key: "pull",
+          label: "Pull",
+          tag: "Back · Biceps · Rear Delts",
+          sections: [
+            {
+              title: "Back",
+              icon: "🪽",
+              exercises: [
+                { name: "Pull-Up",                     sets: "4 × Max",   equipment: "Bodyweight", rest: "2 min", mechanic: "compound",  muscles: ["lats","biceps"],           tip: "Dead hang start. Drive elbows down and back — think 'lat spread'. Add weight if easy." },
+                { name: "Bent-Over Barbell Row",       sets: "4 × 6–8",   equipment: "Barbell",    rest: "2 min", mechanic: "compound",  muscles: ["lats","lower-back","biceps"],tip: "Hinge to ~45°. Pull bar to belly button — lead with elbows." },
+                { name: "Lat Pulldown",                sets: "3 × 10–12", equipment: "Cable",      rest: "90s",   mechanic: "compound",  muscles: ["lats"],                    tip: "Slight lean back, drive bar to upper chest. Really squeeze the lats." },
+                { name: "Cable Straight-Arm Pulldown", sets: "3 × 12–15", equipment: "Cable",      rest: "60s",   mechanic: "isolation", muscles: ["lats"],                    tip: "Keep arms straight throughout. Feel lats fully stretch at the top." },
+              ]
+            },
+            {
+              title: "Rear Delts & Traps",
+              icon: "🏋️",
+              exercises: [
+                { name: "Face Pull",     sets: "3 × 15–20", equipment: "Cable",   rest: "45s", mechanic: "isolation", muscles: ["shoulders"], tip: "Rope to face, elbows high. Key for posture, shoulder health, and rear delt mass." },
+                { name: "Barbell Shrug", sets: "3 × 12–15", equipment: "Barbell", rest: "60s", mechanic: "isolation", muscles: ["traps"],     tip: "Drive shoulders straight up — no rolling. Hold 1s at the top. Heavy." },
+              ]
+            },
+            {
+              title: "Biceps",
+              icon: "💪",
+              exercises: [
+                { name: "Barbell Curl",        sets: "3 × 8–10",  equipment: "Barbell",  rest: "75s", mechanic: "isolation", muscles: ["biceps"], tip: "Elbows pinned to sides. Full extension at the bottom every rep." },
+                { name: "Hammer Curl",         sets: "3 × 10–12", equipment: "Dumbbell", rest: "60s", mechanic: "isolation", muscles: ["biceps"], tip: "Neutral grip. Hits brachialis — gives arms depth and thickness." },
+                { name: "Incline Dumbbell Curl",sets: "3 × 10–12",equipment: "Dumbbell", rest: "60s", mechanic: "isolation", muscles: ["biceps"], tip: "Arms hang behind you for full stretch of the long head. Huge stretch = huge pump." },
+              ]
+            },
+          ]
+        },
+
+        {
+          key: "legs",
+          label: "Legs",
+          tag: "Quads · Hamstrings · Glutes · Calves",
+          sections: [
+            {
+              title: "Quads & Glutes",
+              icon: "🦵",
+              exercises: [
+                { name: "Back Squat",           sets: "4 × 5–8",   equipment: "Barbell",  rest: "2–3 min", mechanic: "compound",  muscles: ["quads","glutes","lower-back"], tip: "Knees track over toes. Break parallel. Chest tall the whole way." },
+                { name: "Leg Press",            sets: "3 × 10–12", equipment: "Machine",  rest: "90s",     mechanic: "compound",  muscles: ["quads","glutes"],               tip: "Feet hip-width, full range of motion — don't lock knees at the top." },
+                { name: "Bulgarian Split Squat",sets: "3 × 10ea",  equipment: "Dumbbell", rest: "90s",     mechanic: "compound",  muscles: ["quads","glutes"],               tip: "Front foot far forward. Sink straight down. Squeeze glute at the top." },
+                { name: "Leg Extension",        sets: "3 × 12–15", equipment: "Machine",  rest: "60s",     mechanic: "isolation", muscles: ["quads"],                       tip: "Great quad isolation finisher. Slow negative. Hold 1s contracted at top." },
+              ]
+            },
+            {
+              title: "Hamstrings",
+              icon: "🔗",
+              exercises: [
+                { name: "Romanian Deadlift", sets: "4 × 8–10",  equipment: "Barbell", rest: "90s", mechanic: "compound",  muscles: ["hamstrings","glutes","lower-back"],tip: "Push hips back — bar stays close to legs. Deep hamstring stretch each rep." },
+                { name: "Lying Leg Curl",    sets: "3 × 10–12", equipment: "Machine", rest: "60s", mechanic: "isolation", muscles: ["hamstrings"],                      tip: "Point toes slightly down. Full range of motion, hold 1s at the top." },
+                { name: "Nordic Curl",       sets: "3 × 5–8",   equipment: "Bodyweight",rest:"90s", mechanic: "compound",  muscles: ["hamstrings"],                      tip: "The hardest bodyweight hamstring exercise. Lower slowly — pure eccentric strength." },
+              ]
+            },
+            {
+              title: "Calves",
+              icon: "🦷",
+              exercises: [
+                { name: "Standing Calf Raise", sets: "4 × 15–20", equipment: "Machine",    rest: "45s", mechanic: "isolation", muscles: ["calves"], tip: "Full range — deep stretch at bottom, hard squeeze at top. Slow tempo." },
+                { name: "Seated Calf Raise",   sets: "3 × 15–20", equipment: "Machine",    rest: "45s", mechanic: "isolation", muscles: ["calves"], tip: "Hits the soleus underneath. Essential for full calf development." },
+              ]
+            },
+            {
+              title: "Cardio Finisher",
+              icon: "🏃",
+              exercises: [
+                { name: "Stationary Bike", sets: "15 min", equipment: "Machine", rest: "—", mechanic: "cardio", muscles: [], tip: "Post-leg day cardio is brutal but effective. Easy pace — just keep moving. Aids recovery." },
+              ]
+            },
+          ]
+        },
+      ]
+    },
+  };
+
   // ── State ─────────────────────────────────────────────────────────────────
-  let selectedMuscle = null;
-  let currentSession = { exercises: [], muscles: new Set() };
+  let selectedMuscle  = null;
+  let currentSession  = { exercises: [], muscles: new Set() };
   let pendingLogExercise = null;
+  let activePlanType  = "fullbody";
+  let activeDayIndex  = 0;
+  let planViewActive  = false;  // track whether plan view is rendered
 
   // ── Workout Log Storage ───────────────────────────────────────────────────
   const loadWorkoutLog = () => {
@@ -206,7 +441,7 @@
     localStorage.setItem(WORKOUT_LOG_KEY, JSON.stringify(log.slice(-120)));
   };
 
-  // ── Render exercise cards ─────────────────────────────────────────────────
+  // ── Render exercise cards (muscle map panel) ──────────────────────────────
   const renderExercises = (muscleKey) => {
     const data = EXERCISES[muscleKey];
     if (!data) return;
@@ -214,7 +449,6 @@
     const panel = document.getElementById("muscle-exercises");
     if (!panel) return;
 
-    // Mark exercises already in current session
     const loggedNames = new Set(currentSession.exercises.map(e => e.name));
 
     panel.innerHTML = `
@@ -249,7 +483,117 @@
     panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
 
-  // ── Select a muscle ───────────────────────────────────────────────────────
+  // ── Render a workout day plan (programs panel) ────────────────────────────
+  const renderDayPlan = (planType, dayIndex) => {
+    const plan = WORKOUT_PLANS[planType];
+    if (!plan) return;
+    const day = plan.days[dayIndex];
+    if (!day) return;
+
+    planViewActive = true;
+    const content = document.getElementById("plan-content");
+    if (!content) return;
+
+    const loggedNames = new Set(currentSession.exercises.map(e => e.name));
+
+    content.innerHTML = day.sections.map(section => {
+      const isCardioSection = section.exercises.every(ex => ex.mechanic === "cardio");
+      return `
+        <div class="plan-section">
+          <div class="plan-section-header">
+            <span class="plan-section-icon">${section.icon}</span>
+            <div class="plan-section-title-wrap">
+              <span class="plan-section-title">${section.title}</span>
+              <span class="plan-section-count">${section.exercises.length} exercise${section.exercises.length !== 1 ? "s" : ""}</span>
+            </div>
+          </div>
+          <div class="exercise-grid${isCardioSection ? " exercise-grid--cardio" : ""}">
+            ${section.exercises.map(ex => {
+              const isCardio = ex.mechanic === "cardio";
+              const isLogged = loggedNames.has(ex.name);
+              const primaryMuscle = (ex.muscles && ex.muscles[0]) || "abs";
+              const mechanicClass = `ex-tag--${ex.mechanic}`;
+              return `
+                <div class="exercise-card${isLogged ? " exercise-logged" : ""}${isCardio ? " exercise-card--cardio" : ""}"
+                     data-exercise="${ex.name.replace(/"/g, "&quot;")}"
+                     data-sets="${ex.sets.replace(/"/g, "&quot;")}"
+                     data-muscle="${primaryMuscle}">
+                  <div class="exercise-card-top">
+                    <span class="exercise-name">${ex.name}</span>
+                    <span class="exercise-sets-badge">${ex.sets}</span>
+                  </div>
+                  <div class="exercise-card-meta">
+                    <span class="exercise-equip">${ex.equipment}</span>
+                    ${ex.rest && ex.rest !== "—" ? `<span class="ex-tag ex-tag--rest">⏱ ${ex.rest}</span>` : ""}
+                    <span class="ex-tag ${mechanicClass}">${ex.mechanic}</span>
+                  </div>
+                  <p class="exercise-tip">💡 ${ex.tip}</p>
+                  ${!isCardio ? `
+                    <button class="log-exercise-btn${isLogged ? " log-exercise-btn--done" : ""}">
+                      ${isLogged ? "✓ Logged" : "+ Log"}
+                    </button>
+                  ` : `
+                    <div class="cardio-note">🕐 Track on your machine or phone timer</div>
+                  `}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Highlight muscles on body map
+    const allMuscles = new Set();
+    day.sections.forEach(s => s.exercises.forEach(ex => (ex.muscles || []).forEach(m => allMuscles.add(m))));
+    highlightPlanMuscles(allMuscles);
+  };
+
+  // ── Plan tabs init ────────────────────────────────────────────────────────
+  const initPlanTabs = () => {
+    const planTypeTabs  = document.getElementById("plan-type-tabs");
+    const planDayTabsEl = document.getElementById("plan-day-tabs");
+    const planDesc      = document.getElementById("plan-description");
+
+    const renderDayTabs = (planType) => {
+      const plan = WORKOUT_PLANS[planType];
+      if (!planDayTabsEl || !plan) return;
+      planDayTabsEl.innerHTML = plan.days.map((day, i) => `
+        <button class="plan-day-tab${i === activeDayIndex ? " active" : ""}" data-day="${i}" type="button">
+          <span class="plan-day-tab-label">${day.label}</span>
+          ${day.tag ? `<span class="plan-day-tab-tag">${day.tag}</span>` : ""}
+        </button>
+      `).join("");
+
+      planDayTabsEl.querySelectorAll(".plan-day-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          activeDayIndex = parseInt(tab.dataset.day);
+          planDayTabsEl.querySelectorAll(".plan-day-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          renderDayPlan(activePlanType, activeDayIndex);
+        });
+      });
+    };
+
+    if (planDesc) planDesc.textContent = WORKOUT_PLANS[activePlanType].description;
+
+    planTypeTabs?.querySelectorAll(".plan-type-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        activePlanType = tab.dataset.plan;
+        activeDayIndex = 0;
+        planTypeTabs.querySelectorAll(".plan-type-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        if (planDesc) planDesc.textContent = WORKOUT_PLANS[activePlanType].description;
+        renderDayTabs(activePlanType);
+        renderDayPlan(activePlanType, 0);
+      });
+    });
+
+    renderDayTabs(activePlanType);
+    renderDayPlan(activePlanType, 0);
+  };
+
+  // ── Select a muscle (body map) ────────────────────────────────────────────
   const selectMuscle = (muscleKey) => {
     document.querySelectorAll(".muscle-group").forEach(el => {
       el.classList.remove("muscle-selected", "muscle-active");
@@ -292,7 +636,7 @@
       .join("");
   };
 
-  // ── Highlight muscles from AI plan ────────────────────────────────────────
+  // ── Highlight muscles from plan ───────────────────────────────────────────
   const parseMuscles = (text) => {
     const lower = text.toLowerCase();
     const found = new Set();
@@ -340,240 +684,6 @@
     updateLegend(new Set());
   };
 
-  // ── Render markdown plan ──────────────────────────────────────────────────
-  const renderPlan = (text) => {
-    return text
-      .replace(/^### (.+)$/gm, "<h4>$1</h4>")
-      .replace(/^## (.+)$/gm, "<h3>$1</h3>")
-      .replace(/^# (.+)$/gm, "<h3>$1</h3>")
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/^[\-\*] (.+)$/gm, "<li>$1</li>")
-      .replace(/(<li>.*<\/li>)/gs, m => `<ul>${m}</ul>`)
-      .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
-      .replace(/\n\n/g, "</p><p>")
-      .replace(/\n/g, "<br>");
-  };
-
-  // ── Profile helpers ───────────────────────────────────────────────────────
-  const loadProfile = () => {
-    try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); }
-    catch { return {}; }
-  };
-
-  const prefillFromProfile = () => {
-    const p = loadProfile();
-    if (p.goalPreset) {
-      const s = document.getElementById("workout-goal");
-      if (s) s.value = p.goalPreset;
-    }
-    if (p.activityLevel) {
-      const s = document.getElementById("workout-activity");
-      if (s) s.value = String(p.activityLevel);
-    }
-  };
-
-  // ── Local plan templates (fallback when API unavailable) ─────────────────
-  const LOCAL_PLANS = {
-    lose: `# Fat Loss — Push / Pull / Legs + Cardio
-## Training Split
-Push/Pull/Legs 3× per week with cardio on off-days. Designed to preserve lean muscle while maximising calorie burn.
-
-### Monday — Push (Chest · Shoulders · Triceps)
-- **Barbell Bench Press** — 4 × 8, rest 90s
-- **Incline Dumbbell Press** — 3 × 10, rest 60s
-- **Dumbbell Lateral Raise** — 4 × 15, rest 45s
-- **Overhead Tricep Extension** — 3 × 12, rest 60s
-- **Rope Pushdown** — 3 × 15, rest 45s
-
-### Tuesday — Cardio + Core
-- **Treadmill intervals** — 20 min (1 min sprint / 2 min walk)
-- **Plank** — 3 × 60s
-- **Hanging Leg Raise** — 3 × 12
-- **Russian Twist** — 3 × 20
-
-### Wednesday — Pull (Back · Biceps)
-- **Pull-Up** — 4 × Max, rest 90s
-- **Bent-Over Barbell Row** — 4 × 8, rest 90s
-- **Seated Cable Row** — 3 × 12, rest 60s
-- **Barbell Curl** — 3 × 10, rest 60s
-- **Hammer Curl** — 3 × 12, rest 45s
-
-### Thursday — Cardio
-- **Steady-state cardio** — 35 min (bike, elliptical, or jog at 65% max HR)
-
-### Friday — Legs
-- **Back Squat** — 4 × 8, rest 2 min
-- **Romanian Deadlift** — 3 × 10, rest 90s
-- **Leg Press** — 3 × 12, rest 60s
-- **Leg Curl** — 3 × 12, rest 60s
-- **Calf Raise** — 4 × 20, rest 45s
-
-### Saturday — Active Recovery / LISS
-- Light walk, yoga, or mobility — 30–45 min
-
-### Sunday — Rest
-
-## Nutrition Tips
-- **Protein first**: Hit 0.8–1g per lb of bodyweight to preserve muscle in a deficit.
-- **Eat around training**: Carbs before workouts, protein + veggies after.
-
-## Recovery Tip
-Aim for 7–9 hours of sleep. Cortisol from poor sleep drives fat storage and muscle loss.`,
-
-    gain: `# Muscle Gain — Upper / Lower Split
-## Training Split
-Upper/Lower 4× per week. Progressive overload is the key driver — add weight or reps each session.
-
-### Monday — Upper (Strength Focus)
-- **Barbell Bench Press** — 4 × 5, rest 2–3 min
-- **Bent-Over Barbell Row** — 4 × 5, rest 2–3 min
-- **Overhead Press** — 3 × 6, rest 2 min
-- **Weighted Pull-Up** — 3 × 6, rest 2 min
-- **Skull Crusher** — 3 × 8, rest 90s
-
-### Tuesday — Lower (Strength Focus)
-- **Back Squat** — 4 × 5, rest 2–3 min
-- **Romanian Deadlift** — 3 × 6, rest 2 min
-- **Leg Press** — 3 × 8, rest 90s
-- **Nordic Curl** — 3 × 6, rest 2 min
-- **Standing Calf Raise** — 4 × 12, rest 60s
-
-### Wednesday — Rest / Light Cardio (20 min max)
-
-### Thursday — Upper (Hypertrophy Focus)
-- **Incline Dumbbell Press** — 4 × 10, rest 60s
-- **Lat Pulldown** — 4 × 10, rest 60s
-- **Cable Chest Flye** — 3 × 15, rest 45s
-- **Face Pull** — 3 × 15, rest 45s
-- **Barbell Curl** — 3 × 12, rest 60s
-- **Rope Pushdown** — 3 × 12, rest 60s
-
-### Friday — Lower (Hypertrophy Focus)
-- **Leg Press** — 4 × 12, rest 60s
-- **Bulgarian Split Squat** — 3 × 10 each, rest 90s
-- **Lying Leg Curl** — 3 × 12, rest 60s
-- **Hip Thrust** — 3 × 12, rest 60s
-- **Seated Calf Raise** — 4 × 15, rest 45s
-
-### Saturday — Rest
-
-### Sunday — Rest
-
-## Nutrition Tips
-- **Caloric surplus**: Aim for +300–500 kcal above TDEE from whole foods.
-- **Pre-workout carbs**: 40–60g of carbs 60–90 min before training for peak performance.
-
-## Recovery Tip
-Sleep 8+ hours. Growth hormone peaks during deep sleep — this is when muscle is actually built.`,
-
-    maintain: `# Maintenance — Full Body 3× / Week
-## Training Split
-Full body sessions Monday / Wednesday / Friday. Balanced volume keeps all muscle groups stimulated.
-
-### Monday — Full Body A
-- **Back Squat** — 3 × 6, rest 2 min
-- **Barbell Bench Press** — 3 × 8, rest 90s
-- **Bent-Over Row** — 3 × 8, rest 90s
-- **Overhead Press** — 3 × 10, rest 60s
-- **Plank** — 3 × 45s
-
-### Tuesday — Cardio (optional)
-- 20–30 min moderate cardio (jog, bike, swim)
-
-### Wednesday — Full Body B
-- **Deadlift** — 3 × 5, rest 2–3 min
-- **Incline Dumbbell Press** — 3 × 10, rest 60s
-- **Pull-Up or Lat Pulldown** — 3 × 8, rest 90s
-- **Dumbbell Lateral Raise** — 3 × 12, rest 45s
-- **Hanging Leg Raise** — 3 × 10
-
-### Thursday — Rest
-
-### Friday — Full Body C
-- **Front Squat** — 3 × 8, rest 90s
-- **Cable Row** — 3 × 10, rest 60s
-- **Dips** — 3 × 10, rest 60s
-- **Barbell Curl** — 3 × 10, rest 60s
-- **Romanian Deadlift** — 3 × 10, rest 60s
-
-### Saturday — Active Recovery
-- Walk 30 min, yoga, or light mobility work
-
-### Sunday — Rest
-
-## Nutrition Tips
-- **Match calories to output**: Keep protein at 0.7–0.8g per lb to maintain muscle.
-- **Carb timing**: Eat most carbs around training for energy and recovery.
-
-## Recovery Tip
-Take one full rest day between each training session. Consistency over intensity wins long-term.`,
-  };
-
-  const planKey = (goal) => {
-    if (["lose","shred","diet"].includes(goal)) return "lose";
-    if (["gain","bulk","recomp"].includes(goal))  return "gain";
-    return "maintain";
-  };
-
-  // ── Generate plan (API → local fallback) ──────────────────────────────────
-  const generatePlan = async () => {
-    const btn         = document.getElementById("workout-generate-btn");
-    const status      = document.getElementById("workout-status");
-    const resultPanel = document.getElementById("workout-result-panel");
-    const output      = document.getElementById("workout-output");
-
-    const profile     = loadProfile();
-    const goalSel     = document.getElementById("workout-goal");
-    const activitySel = document.getElementById("workout-activity");
-    const goal        = goalSel?.value || profile.goalPreset || "maintain";
-    const activity    = parseFloat(activitySel?.value || "1.55");
-
-    if (btn) { btn.textContent = "Generating…"; btn.disabled = true; }
-    if (status) status.textContent = "Building your personalised plan…";
-
-    let planText = "";
-    let source   = "local";
-
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE()}/v1/workout/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            sex: profile.sex, age: profile.age,
-            weightKg: profile.weightKg, heightCm: profile.heightCm,
-            tdeeValue: profile.tdee, adaptiveTdeeValue: profile.adaptiveTdee,
-            goalPreset: goal, activityLevel: activity,
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          planText = data.plan || "";
-          source = "ai";
-        }
-      } catch (_) { /* fall through to local */ }
-    }
-
-    if (!planText) {
-      planText = LOCAL_PLANS[planKey(goal)];
-      source = "local";
-    }
-
-    const muscles = parseMuscles(planText);
-    highlightPlanMuscles(muscles);
-    const exPanel = document.getElementById("muscle-exercises");
-    if (exPanel) exPanel.classList.add("hidden");
-    selectedMuscle = null;
-
-    if (output) output.innerHTML = `<p>${renderPlan(planText)}</p>`;
-    if (resultPanel) resultPanel.hidden = false;
-    if (status) status.textContent = source === "ai" ? "AI plan generated." : "Plan ready — sign in to unlock personalised AI plans.";
-    resultPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    if (btn) { btn.textContent = "Generate My Workout Plan"; btn.disabled = false; }
-  };
-
   // ── Log Exercise Modal ────────────────────────────────────────────────────
   const openLogModal = (exerciseName, defaultSets, muscleKey) => {
     pendingLogExercise = { name: exerciseName, muscleKey };
@@ -583,11 +693,10 @@ Take one full rest day between each training session. Consistency over intensity
     const nameEl = document.getElementById("log-ex-name");
     if (nameEl) nameEl.textContent = exerciseName;
 
-    // Parse "4 × 6–8" → sets=4, reps="6–8"
-    const setsNum = parseInt(defaultSets) || 3;
+    const setsNum  = parseInt(defaultSets) || 3;
     const repsPart = defaultSets.includes("×") ? defaultSets.split("×")[1].trim() : "10";
-    const setsInput = document.getElementById("log-ex-sets");
-    const repsInput = document.getElementById("log-ex-reps");
+    const setsInput  = document.getElementById("log-ex-sets");
+    const repsInput  = document.getElementById("log-ex-reps");
     if (setsInput) setsInput.value = setsNum;
     if (repsInput) repsInput.value = repsPart;
     const weightInput = document.getElementById("log-ex-weight");
@@ -623,8 +732,12 @@ Take one full rest day between each training session. Consistency over intensity
     closeLogModal();
     updateSessionBar();
 
-    // Re-render exercise list to show logged state
-    if (selectedMuscle) renderExercises(selectedMuscle);
+    // Re-render whichever view is active
+    if (planViewActive) {
+      renderDayPlan(activePlanType, activeDayIndex);
+    } else if (selectedMuscle) {
+      renderExercises(selectedMuscle);
+    }
   };
 
   const updateSessionBar = () => {
@@ -647,7 +760,7 @@ Take one full rest day between each training session. Consistency over intensity
   const openSaveModal = () => {
     const modal = document.getElementById("save-session-modal");
     if (!modal) return;
-    const muscles = [...currentSession.muscles];
+    const muscles   = [...currentSession.muscles];
     const suggested = muscles.length
       ? muscles.map(m => EXERCISES[m]?.label || m).slice(0, 2).join(" & ") + " Day"
       : "Workout";
@@ -683,18 +796,20 @@ Take one full rest day between each training session. Consistency over intensity
     });
     saveWorkoutLog(log);
 
-    // Reset
     currentSession = { exercises: [], muscles: new Set() };
     updateSessionBar();
     closeSaveModal();
     renderWorkoutHistory();
     highlightTrainedThisWeek();
+    planViewActive = false;
     if (selectedMuscle) renderExercises(selectedMuscle);
+    renderDayPlan(activePlanType, activeDayIndex);
 
-    const statusEl = document.getElementById("workout-status");
+    const statusEl = document.getElementById("workout-status-msg");
     if (statusEl) {
       statusEl.textContent = `✓ ${name} saved — ${duration} min, ~${Math.round(duration * 6)} kcal burned`;
-      setTimeout(() => { if (statusEl.textContent.startsWith("✓")) statusEl.textContent = ""; }, 5000);
+      statusEl.hidden = false;
+      setTimeout(() => { statusEl.hidden = true; }, 5000);
     }
   };
 
@@ -704,7 +819,6 @@ Take one full rest day between each training session. Consistency over intensity
     const dates = [...new Set(log.map(w => w.date))].sort().reverse();
     let streak = 0;
     let d = new Date();
-    // Allow today or yesterday as start of streak
     d.setHours(0, 0, 0, 0);
     let expected = d.toISOString().slice(0, 10);
     for (const date of dates) {
@@ -738,7 +852,6 @@ Take one full rest day between each training session. Consistency over intensity
     const log    = allLog.slice().reverse().slice(0, 10);
     const streak = calcStreak(allLog);
 
-    // Streak badge
     const badge = document.getElementById("workout-streak-badge");
     if (badge) {
       if (streak > 0) {
@@ -749,7 +862,6 @@ Take one full rest day between each training session. Consistency over intensity
       }
     }
 
-    // Workouts this week count
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 7);
     const thisWeek = allLog.filter(w => w.date >= cutoff.toISOString().slice(0, 10)).length;
@@ -757,16 +869,16 @@ Take one full rest day between each training session. Consistency over intensity
     if (weekEl) weekEl.textContent = thisWeek;
 
     if (log.length === 0) {
-      list.innerHTML = `<p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Tap a muscle above, then hit <strong>+ Log</strong> on any exercise.</p>`;
+      list.innerHTML = `<p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Choose a plan below, then hit <strong>+ Log</strong> on any exercise.</p>`;
       return;
     }
 
     list.innerHTML = log.map(w => {
-      const dateLabel  = formatHistoryDate(w.date);
-      const exCount    = w.exercises?.length || 0;
-      const stats      = [];
-      if (w.duration) stats.push(`${w.duration} min`);
-      if (exCount)    stats.push(`${exCount} ex`);
+      const dateLabel = formatHistoryDate(w.date);
+      const exCount   = w.exercises?.length || 0;
+      const stats     = [];
+      if (w.duration)      stats.push(`${w.duration} min`);
+      if (exCount)         stats.push(`${exCount} ex`);
       if (w.caloriesBurned) stats.push(`~${w.caloriesBurned} kcal`);
 
       const muscleChips = (w.muscles || [])
@@ -789,18 +901,14 @@ Take one full rest day between each training session. Consistency over intensity
 
   // ── Init ──────────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
-    prefillFromProfile();
-
-    if (!localStorage.getItem(TOKEN_KEY)) {
-      const notice = document.getElementById("workout-auth-notice");
-      if (notice) notice.classList.remove("hidden");
-    }
-
-    // Muscle body map clicks
+    // Body map clicks
     document.querySelectorAll(".muscle-group").forEach(el => {
       el.addEventListener("click", () => {
         const muscle = el.getAttribute("data-muscle");
-        if (muscle) selectMuscle(muscle);
+        if (muscle) {
+          planViewActive = false;
+          selectMuscle(muscle);
+        }
       });
     });
 
@@ -808,11 +916,8 @@ Take one full rest day between each training session. Consistency over intensity
     highlightTrainedThisWeek();
     renderWorkoutHistory();
 
-    // Generate plan buttons
-    document.getElementById("workout-generate-btn")
-      ?.addEventListener("click", generatePlan);
-    document.getElementById("workout-regenerate-btn")
-      ?.addEventListener("click", generatePlan);
+    // Init plan tabs
+    initPlanTabs();
 
     // ── Exercise card log button (delegated) ──────────────────────────────
     document.addEventListener("click", e => {
@@ -846,7 +951,9 @@ Take one full rest day between each training session. Consistency over intensity
         if (confirm("Discard current session?")) {
           currentSession = { exercises: [], muscles: new Set() };
           updateSessionBar();
+          planViewActive = false;
           if (selectedMuscle) renderExercises(selectedMuscle);
+          renderDayPlan(activePlanType, activeDayIndex);
         }
       });
 

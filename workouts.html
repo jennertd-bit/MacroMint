@@ -39,7 +39,7 @@
         <section class="panel workout-intro-panel">
           <p class="eyebrow">Training</p>
           <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin:4px 0 6px;">Your Workout Plan</h2>
-          <p class="muted">Tap any muscle below to see exercises. Generate a full AI plan with the button below.</p>
+          <p class="muted">Tap any muscle to explore exercises, or choose a structured plan below — Full Body or Push / Pull / Legs.</p>
         </section>
 
         <!-- Body outline -->
@@ -142,55 +142,43 @@
             <div id="muscle-exercises" class="hidden"></div>
         </section>
 
-        <!-- Generate Plan -->
-        <section class="panel">
+        <!-- Programs -->
+        <section class="panel" id="plan-section">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">AI-Powered</p>
-              <h3>Generate Full Plan</h3>
-              <p class="muted">Get a personalised weekly schedule from your stats. Sign in first.</p>
+              <p class="eyebrow">Programs</p>
+              <h3>Choose Your Plan</h3>
             </div>
           </div>
 
-          <!-- Quick goal override -->
-          <div class="workout-controls">
-            <div class="form-field">
-              <label for="workout-goal">Goal</label>
-              <select id="workout-goal" class="workout-select">
-                <option value="lose">Lose Fat</option>
-                <option value="maintain" selected>Maintain</option>
-                <option value="gain">Build Muscle</option>
-                <option value="recomp">Recomposition</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="workout-activity">Activity Level</label>
-              <select id="workout-activity" class="workout-select">
-                <option value="1.2">Sedentary</option>
-                <option value="1.375">Lightly Active</option>
-                <option value="1.55" selected>Moderately Active</option>
-                <option value="1.725">Very Active</option>
-                <option value="1.9">Athlete</option>
-              </select>
-            </div>
+          <!-- Plan type selector -->
+          <div class="plan-type-tabs" id="plan-type-tabs">
+            <button class="plan-type-tab active" data-plan="fullbody" type="button">
+              <span class="plan-type-icon">🔄</span>
+              <div class="plan-type-text">
+                <span class="plan-type-label">Full Body</span>
+                <span class="plan-type-sub">3× / week · A / B / C</span>
+              </div>
+            </button>
+            <button class="plan-type-tab" data-plan="ppl" type="button">
+              <span class="plan-type-icon">⚡</span>
+              <div class="plan-type-text">
+                <span class="plan-type-label">Push · Pull · Legs</span>
+                <span class="plan-type-sub">3–6× / week · split</span>
+              </div>
+            </button>
           </div>
 
-          <button id="workout-generate-btn" class="button" type="button">
-            Generate My Workout Plan
-          </button>
-          <p id="workout-status" class="help"></p>
-        </section>
+          <p class="plan-description muted" id="plan-description"></p>
 
-        <!-- Plan output -->
-        <section class="panel" id="workout-result-panel" hidden>
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Your Plan</p>
-              <h3 id="workout-plan-title">Weekly Workout Plan</h3>
-            </div>
-            <button id="workout-regenerate-btn" class="chip" type="button">Regenerate</button>
-          </div>
-          <div id="workout-output" class="workout-output"></div>
+          <!-- Day tabs -->
+          <div class="plan-day-tabs" id="plan-day-tabs"></div>
+
+          <!-- Save status message -->
+          <p id="workout-status-msg" class="help" hidden></p>
+
+          <!-- Day plan content (exercise cards rendered here) -->
+          <div id="plan-content" class="plan-content"></div>
         </section>
 
         <!-- ── Training Journal ── -->
@@ -207,7 +195,7 @@
             </div>
           </div>
           <div id="workout-history-list" class="workout-history-list">
-            <p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Tap a muscle above, then hit <strong>+ Log</strong> on any exercise.</p>
+            <p class="muted" style="font-size:0.85rem;padding:12px 0">No workouts logged yet. Pick a plan above, then hit <strong>+ Log</strong> on any exercise to start your session.</p>
           </div>
         </section>
       </main>
@@ -287,23 +275,5 @@
       </div>
     </div>
 
-    <!-- Always-visible scan buttons — navigate to scanner modal on index -->
-    <div class="scan-always">
-      <a class="scan-always-btn" href="index.html?scan=barcode" aria-label="Scan barcode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4"/>
-          <line x1="7" y1="5" x2="7" y2="19"/><line x1="10" y1="5" x2="10" y2="19"/>
-          <line x1="13" y1="5" x2="13" y2="19"/><line x1="17" y1="7" x2="17" y2="19"/>
-        </svg>
-        <span>Barcode</span>
-      </a>
-      <a class="scan-always-btn" href="index.html?scan=camera" aria-label="Scan nutrition label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-        <span>Camera</span>
-      </a>
-    </div>
   </body>
 </html>

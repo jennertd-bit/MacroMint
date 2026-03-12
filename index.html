@@ -25,33 +25,66 @@
     <script src="config.js"></script>
     <script src="app.js" defer></script>
     <script>
-    // Arc + macro bar updater — watches daily-total and syncs the dashboard
+    // Arc + macro arc updater — watches daily-total and syncs the dashboard
     (function() {
-      function updateDashboard() {
-        const total    = parseFloat(document.getElementById("daily-total")?.textContent) || 0;
-        const target   = parseFloat(document.getElementById("target-value")?.textContent) || 0;
+      const CIRC_MAIN  = 2 * Math.PI * 80;  // calorie arc r=80
+      const CIRC_MACRO = 2 * Math.PI * 32;  // macro arc  r=32
 
-        // Update arc display
+      function setArc(el, pct) {
+        if (!el) return;
+        el.style.strokeDasharray  = CIRC_MACRO;
+        el.style.strokeDashoffset = CIRC_MACRO * (1 - Math.min(pct, 1));
+      }
+
+      function updateDashboard() {
+        const total  = parseFloat(document.getElementById("daily-total")?.textContent?.replace(/,/g,"")) || 0;
+        const target = parseFloat(document.getElementById("target-value")?.textContent?.replace(/,/g,"")) || 0;
+
+        // ── Calorie arc ──────────────────────────────────────────────────
         const arcLogged    = document.getElementById("arc-logged");
         const arcTarget    = document.getElementById("arc-target");
         const arcRemaining = document.getElementById("arc-remaining");
         const arcCircle    = document.getElementById("arc-circle");
-        if (arcLogged)    arcLogged.textContent = Math.round(total).toLocaleString();
-        if (arcTarget)    arcTarget.textContent  = target ? Math.round(target).toLocaleString() : "--";
+        if (arcLogged)  arcLogged.textContent = Math.round(total).toLocaleString();
+        if (arcTarget)  arcTarget.textContent  = target ? Math.round(target).toLocaleString() : "--";
         if (arcRemaining && target) {
           const rem = target - total;
           arcRemaining.textContent = rem >= 0
             ? Math.round(rem).toLocaleString() + " left"
             : Math.abs(Math.round(rem)).toLocaleString() + " over";
         }
-        if (arcCircle && target > 0) {
-          const pct = Math.min(total / target, 1);
-          const circumference = 2 * Math.PI * 80;
-          arcCircle.style.strokeDashoffset = circumference * (1 - pct);
-          arcCircle.classList.toggle("over-budget", total > target);
+        if (arcCircle) {
+          arcCircle.style.strokeDasharray  = CIRC_MAIN;
+          if (target > 0) {
+            arcCircle.style.strokeDashoffset = CIRC_MAIN * (1 - Math.min(total / target, 1));
+            arcCircle.classList.toggle("over-budget", total > target);
+          } else {
+            arcCircle.style.strokeDashoffset = CIRC_MAIN;
+          }
         }
 
-        // Date
+        // ── Macro arcs ───────────────────────────────────────────────────
+        const prot = parseFloat(document.getElementById("daily-protein")?.textContent) || 0;
+        const carb = parseFloat(document.getElementById("daily-carbs")?.textContent)   || 0;
+        const fat  = parseFloat(document.getElementById("daily-fat")?.textContent)     || 0;
+
+        // Targets: use standard 30/40/30 split from calorie goal
+        const protTarget = target > 0 ? Math.round(target * 0.30 / 4) : 150;
+        const carbTarget = target > 0 ? Math.round(target * 0.40 / 4) : 200;
+        const fatTarget  = target > 0 ? Math.round(target * 0.30 / 9) : 67;
+
+        const valP = document.getElementById("val-protein");
+        const valC = document.getElementById("val-carbs");
+        const valF = document.getElementById("val-fat");
+        if (valP) valP.textContent = Math.round(prot);
+        if (valC) valC.textContent = Math.round(carb);
+        if (valF) valF.textContent = Math.round(fat);
+
+        setArc(document.getElementById("arc-protein"), prot / protTarget);
+        setArc(document.getElementById("arc-carbs"),   carb / carbTarget);
+        setArc(document.getElementById("arc-fat"),     fat  / fatTarget);
+
+        // ── Date ─────────────────────────────────────────────────────────
         const dateEl = document.getElementById("dash-date");
         if (dateEl) {
           const now = new Date();
@@ -206,30 +239,67 @@
                 <div class="arc-remaining" id="arc-remaining"></div>
               </div>
             </div>
-            <!-- Macro bars -->
-            <div class="macro-rings">
-              <div class="macro-ring-item">
-                <div class="macro-ring-info">
-                  <span class="macro-ring-label">Protein</span>
-                  <div class="macro-ring-bar"><div class="macro-ring-fill protein" id="bar-protein"></div></div>
+            <!-- Macro arc rings -->
+            <div class="macro-arcs">
+              <div class="macro-arc-item">
+                <div class="macro-arc-wrap">
+                  <svg class="macro-arc-svg" viewBox="0 0 80 80" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="gradP" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00e5cc"/><stop offset="100%" stop-color="#00bfa8"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="macro-arc-track" cx="40" cy="40" r="32"/>
+                    <circle class="macro-arc-fill macro-arc-protein" id="arc-protein" cx="40" cy="40" r="32"/>
+                  </svg>
+                  <div class="macro-arc-center">
+                    <span class="macro-arc-val" id="val-protein">0</span>
+                    <span class="macro-arc-unit">g</span>
+                  </div>
                 </div>
-                <span class="macro-ring-val protein" id="val-protein">0g</span>
+                <span class="macro-arc-label">Protein</span>
               </div>
-              <div class="macro-ring-item">
-                <div class="macro-ring-info">
-                  <span class="macro-ring-label">Carbs</span>
-                  <div class="macro-ring-bar"><div class="macro-ring-fill carbs" id="bar-carbs"></div></div>
+              <div class="macro-arc-item">
+                <div class="macro-arc-wrap">
+                  <svg class="macro-arc-svg" viewBox="0 0 80 80" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="gradC" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6d28d9"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="macro-arc-track" cx="40" cy="40" r="32"/>
+                    <circle class="macro-arc-fill macro-arc-carbs" id="arc-carbs" cx="40" cy="40" r="32"/>
+                  </svg>
+                  <div class="macro-arc-center">
+                    <span class="macro-arc-val" id="val-carbs">0</span>
+                    <span class="macro-arc-unit">g</span>
+                  </div>
                 </div>
-                <span class="macro-ring-val carbs" id="val-carbs">0g</span>
+                <span class="macro-arc-label">Carbs</span>
               </div>
-              <div class="macro-ring-item">
-                <div class="macro-ring-info">
-                  <span class="macro-ring-label">Fat</span>
-                  <div class="macro-ring-bar"><div class="macro-ring-fill fat" id="bar-fat"></div></div>
+              <div class="macro-arc-item">
+                <div class="macro-arc-wrap">
+                  <svg class="macro-arc-svg" viewBox="0 0 80 80" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="gradF" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="macro-arc-track" cx="40" cy="40" r="32"/>
+                    <circle class="macro-arc-fill macro-arc-fat" id="arc-fat" cx="40" cy="40" r="32"/>
+                  </svg>
+                  <div class="macro-arc-center">
+                    <span class="macro-arc-val" id="val-fat">0</span>
+                    <span class="macro-arc-unit">g</span>
+                  </div>
                 </div>
-                <span class="macro-ring-val fat" id="val-fat">0g</span>
+                <span class="macro-arc-label">Fat</span>
               </div>
             </div>
+            <!-- Hidden live macro totals (written by renderLog, read by updateDashboard) -->
+            <span id="daily-protein" hidden>0</span>
+            <span id="daily-carbs" hidden>0</span>
+            <span id="daily-fat" hidden>0</span>
           </div>
           <!-- Quick stats -->
           <div class="quick-stats">

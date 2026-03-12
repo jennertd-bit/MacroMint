@@ -171,23 +171,49 @@ button, input, select, textarea { font-family: inherit; }
 .arc-target { font-size: 0.72rem; color: var(--teal); font-family: "DM Mono", monospace; margin-top: 4px; }
 .arc-remaining { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
 
-/* Macro bars */
-.macro-rings { display: flex; flex-direction: column; gap: 18px; }
-.macro-ring-item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-.macro-ring-info { display: flex; flex-direction: column; gap: 5px; }
-.macro-ring-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.macro-ring-bar { height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
-.macro-ring-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); width: 0; }
-.macro-ring-fill.protein { background: var(--protein-color); box-shadow: 0 0 8px rgba(0,229,204,0.35); }
-.macro-ring-fill.carbs   { background: var(--carbs-color);   box-shadow: 0 0 8px rgba(139,92,246,0.35); }
-.macro-ring-fill.fat     { background: var(--fat-color);     box-shadow: 0 0 8px rgba(249,115,22,0.35); }
-.macro-ring-val {
-  font-family: "DM Mono", monospace; font-size: 0.82rem; font-weight: 500;
-  min-width: 50px; text-align: right;
+/* Macro arc rings */
+.macro-arcs {
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 10px;
+  flex: 1;
 }
-.macro-ring-val.protein { color: var(--protein-color); }
-.macro-ring-val.carbs   { color: var(--carbs-color); }
-.macro-ring-val.fat     { color: var(--fat-color); }
+.macro-arc-item {
+  display: flex; align-items: center; gap: 12px;
+}
+.macro-arc-wrap {
+  position: relative; width: 52px; height: 52px; flex-shrink: 0;
+}
+.macro-arc-svg {
+  width: 100%; height: 100%; transform: rotate(-90deg);
+}
+.macro-arc-track {
+  fill: none; stroke: var(--surface-2); stroke-width: 8;
+}
+.macro-arc-fill {
+  fill: none; stroke-width: 8; stroke-linecap: round;
+  stroke-dasharray: 201; stroke-dashoffset: 201;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+.macro-arc-protein { stroke: url(#gradP); }
+.macro-arc-carbs   { stroke: url(#gradC); }
+.macro-arc-fat     { stroke: url(#gradF); }
+.macro-arc-center {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 0;
+}
+.macro-arc-val {
+  font-family: "DM Mono", monospace; font-size: 0.78rem;
+  font-weight: 600; color: var(--text); line-height: 1;
+}
+.macro-arc-unit {
+  font-family: "DM Mono", monospace; font-size: 0.6rem;
+  color: var(--muted); align-self: flex-end; margin-bottom: 1px;
+}
+.macro-arc-label {
+  font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+}
 
 /* Quick stats */
 .quick-stats {

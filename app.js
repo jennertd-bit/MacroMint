@@ -1606,6 +1606,15 @@ const renderLog = () => {
   });
 
   elements.dailyTotal.textContent = Math.round(total).toLocaleString();
+
+  // Feed macro totals to the dashboard arc rings via hidden data elements
+  const dpEl = document.getElementById("daily-protein");
+  const dcEl = document.getElementById("daily-carbs");
+  const dfEl = document.getElementById("daily-fat");
+  if (dpEl) dpEl.textContent = Math.round(totalP);
+  if (dcEl) dcEl.textContent = Math.round(totalC);
+  if (dfEl) dfEl.textContent = Math.round(totalF);
+
   updateRemaining();
 
   // Update macro tracker from local totals (unauthenticated path)

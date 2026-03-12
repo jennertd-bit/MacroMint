@@ -749,103 +749,106 @@
       const modal     = document.getElementById("scanner-modal");
       const backdrop  = document.getElementById("scanner-backdrop");
       const closeBtn  = document.getElementById("scanner-close");
-      const fabBtn    = document.getElementById("fab-btn");
-      const speedDial = document.getElementById("fab-speed-dial");
-      const fabBarcode = document.getElementById("fab-barcode");
-      const fabCamera  = document.getElementById("fab-camera");
-      const headerScan = document.getElementById("header-scan-btn");
-      const addMeal    = document.getElementById("add-meal");
+      const addMeal   = document.getElementById("add-meal");
 
-      let dialOpen = false;
-
+      // ── open / close ──────────────────────────────────────
       function openModal(initialTab) {
-        closeDial();
-        modal.hidden = false;
+        if (!modal) return;
+        modal.removeAttribute("hidden");
         document.body.style.overflow = "hidden";
-        requestAnimationFrame(() => modal.classList.add("is-open"));
+        // Double rAF: first removes display:none, second triggers transition
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => modal.classList.add("is-open"));
+        });
         if (initialTab) switchTab(initialTab);
       }
 
       function closeModal() {
+        if (!modal) return;
         modal.classList.remove("is-open");
         document.body.style.overflow = "";
-        setTimeout(() => { modal.hidden = true; }, 320);
-        // Stop barcode scanner if running
+        setTimeout(() => { modal.setAttribute("hidden", ""); }, 350);
         const stopBtn = document.getElementById("barcode-stop");
         if (stopBtn && !stopBtn.disabled) stopBtn.click();
       }
 
+      // ── tabs ──────────────────────────────────────────────
+      function switchTab(tabName) {
+        document.querySelectorAll(".scanner-tab").forEach(t =>
+          t.classList.toggle("active", t.dataset.tab === tabName)
+        );
+        const pb = document.getElementById("panel-barcode");
+        const pp = document.getElementById("panel-photo");
+        if (pb) pb.hidden = (tabName !== "barcode");
+        if (pp) pp.hidden = (tabName !== "photo");
+      }
+
+      // ── FAB speed-dial ────────────────────────────────────
+      const fabBtn    = document.getElementById("fab-btn");
+      const speedDial = document.getElementById("fab-speed-dial");
+      let dialOpen = false;
+
       function openDial() {
+        if (!speedDial || !fabBtn) return;
         dialOpen = true;
-        speedDial.hidden = false;
-        fabBtn.setAttribute("aria-expanded", "true");
+        speedDial.removeAttribute("hidden");
         fabBtn.classList.add("is-open");
-        requestAnimationFrame(() => speedDial.classList.add("is-open"));
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => speedDial.classList.add("is-open"));
+        });
       }
 
       function closeDial() {
+        if (!speedDial || !fabBtn) return;
         dialOpen = false;
         speedDial.classList.remove("is-open");
-        fabBtn.setAttribute("aria-expanded", "false");
         fabBtn.classList.remove("is-open");
-        setTimeout(() => { if (!dialOpen) speedDial.hidden = true; }, 250);
+        setTimeout(() => { if (!dialOpen) speedDial.setAttribute("hidden",""); }, 260);
       }
 
-      function switchTab(tabName) {
-        document.querySelectorAll(".scanner-tab").forEach(t => {
-          t.classList.toggle("active", t.dataset.tab === tabName);
+      if (fabBtn) {
+        fabBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dialOpen ? closeDial() : openDial();
         });
-        document.getElementById("panel-barcode").hidden = (tabName !== "barcode");
-        document.getElementById("panel-photo").hidden   = (tabName !== "photo");
       }
 
-      // FAB toggles dial
-      fabBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        dialOpen ? closeDial() : openDial();
-      });
+      document.getElementById("fab-barcode")?.addEventListener("click", () => { closeDial(); openModal("barcode"); });
+      document.getElementById("fab-camera")?.addEventListener("click",  () => { closeDial(); openModal("photo"); setTimeout(() => document.getElementById("label-input")?.click(), 400); });
 
-      fabBarcode.addEventListener("click", () => openModal("barcode"));
-      fabCamera.addEventListener("click",  () => {
+      // ── Scan buttons (always visible) ─────────────────────
+      document.getElementById("always-barcode")?.addEventListener("click", () => openModal("barcode"));
+      document.getElementById("always-camera")?.addEventListener("click",  () => {
         openModal("photo");
-        setTimeout(() => document.getElementById("label-input")?.click(), 350);
+        setTimeout(() => document.getElementById("label-input")?.click(), 400);
       });
 
-      // Header "Scan Label" button
-      headerScan?.addEventListener("click", () => openModal("barcode"));
+      // ── Header "Scan Label" chip ──────────────────────────
+      document.getElementById("header-scan-btn")?.addEventListener("click", () => openModal("barcode"));
 
-      // Close on backdrop / close button
-      closeBtn.addEventListener("click", closeModal);
-      backdrop.addEventListener("click", closeModal);
+      // ── Close triggers ────────────────────────────────────
+      closeBtn?.addEventListener("click", closeModal);
+      backdrop?.addEventListener("click", closeModal);
 
-      // Close on ESC
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          if (!modal.hidden) closeModal();
+          if (modal && !modal.hidden) closeModal();
           else if (dialOpen) closeDial();
         }
       });
 
-      // Close dial on outside click
       document.addEventListener("click", (e) => {
-        if (dialOpen && !speedDial.contains(e.target) && !fabBtn.contains(e.target)) {
+        if (dialOpen && speedDial && fabBtn &&
+            !speedDial.contains(e.target) && !fabBtn.contains(e.target)) {
           closeDial();
         }
       });
 
-      // Auto-close modal after "Add to Today"
       addMeal?.addEventListener("click", () => {
-        setTimeout(() => { if (!modal.hidden) closeModal(); }, 600);
+        setTimeout(() => { if (modal && !modal.hidden) closeModal(); }, 700);
       });
 
-      // Always-visible scan buttons
-      document.getElementById("always-barcode")?.addEventListener("click", () => openModal("barcode"));
-      document.getElementById("always-camera")?.addEventListener("click",  () => {
-        openModal("photo");
-        setTimeout(() => document.getElementById("label-input")?.click(), 350);
-      });
-
-      // Tab switching
+      // ── Tab buttons ───────────────────────────────────────
       document.querySelectorAll(".scanner-tab").forEach(tab => {
         tab.addEventListener("click", () => switchTab(tab.dataset.tab));
       });

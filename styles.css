@@ -230,6 +230,8 @@ button, input, select, textarea { font-family: inherit; }
 .panel-header h3 { font-family: "Syne", sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .panel-header p.muted { font-size: 0.8rem; color: var(--muted); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+/* Ensure [hidden] always wins, even against display:grid/flex classes */
+[hidden] { display: none !important; }
 
 /* ─── Chips ────────────────────────────────────────────── */
 .chip {

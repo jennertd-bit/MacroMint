@@ -322,78 +322,213 @@
     }
   };
 
-  // ── Generate AI plan ──────────────────────────────────────────────────────
+  // ── Local plan templates (fallback when API unavailable) ─────────────────
+  const LOCAL_PLANS = {
+    // Fat loss / cut goals → cardio-heavy PPL
+    lose: `# Fat Loss — Push / Pull / Legs + Cardio
+## Training Split
+Push/Pull/Legs 3× per week with cardio on off-days. Designed to preserve lean muscle while maximising calorie burn.
+
+### Monday — Push (Chest · Shoulders · Triceps)
+- **Barbell Bench Press** — 4 × 8, rest 90s
+- **Incline Dumbbell Press** — 3 × 10, rest 60s
+- **Dumbbell Lateral Raise** — 4 × 15, rest 45s
+- **Overhead Tricep Extension** — 3 × 12, rest 60s
+- **Rope Pushdown** — 3 × 15, rest 45s
+
+### Tuesday — Cardio + Core
+- **Treadmill intervals** — 20 min (1 min sprint / 2 min walk)
+- **Plank** — 3 × 60s
+- **Hanging Leg Raise** — 3 × 12
+- **Russian Twist** — 3 × 20
+
+### Wednesday — Pull (Back · Biceps)
+- **Pull-Up** — 4 × Max, rest 90s
+- **Bent-Over Barbell Row** — 4 × 8, rest 90s
+- **Seated Cable Row** — 3 × 12, rest 60s
+- **Barbell Curl** — 3 × 10, rest 60s
+- **Hammer Curl** — 3 × 12, rest 45s
+
+### Thursday — Cardio
+- **Steady-state cardio** — 35 min (bike, elliptical, or jog at 65% max HR)
+
+### Friday — Legs
+- **Back Squat** — 4 × 8, rest 2 min
+- **Romanian Deadlift** — 3 × 10, rest 90s
+- **Leg Press** — 3 × 12, rest 60s
+- **Leg Curl** — 3 × 12, rest 60s
+- **Calf Raise** — 4 × 20, rest 45s
+
+### Saturday — Active Recovery / LISS
+- Light walk, yoga, or mobility — 30–45 min
+
+### Sunday — Rest
+
+## Nutrition Tips
+- **Protein first**: Hit 0.8–1g per lb of bodyweight to preserve muscle in a deficit.
+- **Eat around training**: Carbs before workouts, protein + veggies after.
+
+## Recovery Tip
+Aim for 7–9 hours of sleep. Cortisol from poor sleep drives fat storage and muscle loss.`,
+
+    // Muscle gain / bulk goals → upper/lower
+    gain: `# Muscle Gain — Upper / Lower Split
+## Training Split
+Upper/Lower 4× per week. Progressive overload is the key driver — add weight or reps each session.
+
+### Monday — Upper (Strength Focus)
+- **Barbell Bench Press** — 4 × 5, rest 2–3 min
+- **Bent-Over Barbell Row** — 4 × 5, rest 2–3 min
+- **Overhead Press** — 3 × 6, rest 2 min
+- **Weighted Pull-Up** — 3 × 6, rest 2 min
+- **Skull Crusher** — 3 × 8, rest 90s
+
+### Tuesday — Lower (Strength Focus)
+- **Back Squat** — 4 × 5, rest 2–3 min
+- **Romanian Deadlift** — 3 × 6, rest 2 min
+- **Leg Press** — 3 × 8, rest 90s
+- **Nordic Curl** — 3 × 6, rest 2 min
+- **Standing Calf Raise** — 4 × 12, rest 60s
+
+### Wednesday — Rest / Light Cardio (20 min max)
+
+### Thursday — Upper (Hypertrophy Focus)
+- **Incline Dumbbell Press** — 4 × 10, rest 60s
+- **Lat Pulldown** — 4 × 10, rest 60s
+- **Cable Chest Flye** — 3 × 15, rest 45s
+- **Face Pull** — 3 × 15, rest 45s
+- **Barbell Curl** — 3 × 12, rest 60s
+- **Rope Pushdown** — 3 × 12, rest 60s
+
+### Friday — Lower (Hypertrophy Focus)
+- **Leg Press** — 4 × 12, rest 60s
+- **Bulgarian Split Squat** — 3 × 10 each, rest 90s
+- **Lying Leg Curl** — 3 × 12, rest 60s
+- **Hip Thrust** — 3 × 12, rest 60s
+- **Seated Calf Raise** — 4 × 15, rest 45s
+
+### Saturday — Rest
+
+### Sunday — Rest
+
+## Nutrition Tips
+- **Caloric surplus**: Aim for +300–500 kcal above TDEE from whole foods.
+- **Pre-workout carbs**: 40–60g of carbs 60–90 min before training for peak performance.
+
+## Recovery Tip
+Sleep 8+ hours. Growth hormone peaks during deep sleep — this is when muscle is actually built.`,
+
+    // Maintain / recomp → full body 3×
+    maintain: `# Maintenance — Full Body 3× / Week
+## Training Split
+Full body sessions Monday / Wednesday / Friday. Balanced volume keeps all muscle groups stimulated.
+
+### Monday — Full Body A
+- **Back Squat** — 3 × 6, rest 2 min
+- **Barbell Bench Press** — 3 × 8, rest 90s
+- **Bent-Over Row** — 3 × 8, rest 90s
+- **Overhead Press** — 3 × 10, rest 60s
+- **Plank** — 3 × 45s
+
+### Tuesday — Cardio (optional)
+- 20–30 min moderate cardio (jog, bike, swim)
+
+### Wednesday — Full Body B
+- **Deadlift** — 3 × 5, rest 2–3 min
+- **Incline Dumbbell Press** — 3 × 10, rest 60s
+- **Pull-Up or Lat Pulldown** — 3 × 8, rest 90s
+- **Dumbbell Lateral Raise** — 3 × 12, rest 45s
+- **Hanging Leg Raise** — 3 × 10
+
+### Thursday — Rest
+
+### Friday — Full Body C
+- **Front Squat** — 3 × 8, rest 90s
+- **Cable Row** — 3 × 10, rest 60s
+- **Dips** — 3 × 10, rest 60s
+- **Barbell Curl** — 3 × 10, rest 60s
+- **Romanian Deadlift** — 3 × 10, rest 60s
+
+### Saturday — Active Recovery
+- Walk 30 min, yoga, or light mobility work
+
+### Sunday — Rest
+
+## Nutrition Tips
+- **Match calories to output**: Keep protein at 0.7–0.8g per lb to maintain muscle.
+- **Carb timing**: Eat most carbs around training for energy and recovery.
+
+## Recovery Tip
+Take one full rest day between each training session. Consistency over intensity wins long-term.`,
+  };
+
+  // Map alias goals → template key
+  const planKey = (goal) => {
+    if (["lose","shred","diet"].includes(goal)) return "lose";
+    if (["gain","bulk","recomp"].includes(goal))  return "gain";
+    return "maintain";
+  };
+
+  // ── Generate plan (API → local fallback) ──────────────────────────────────
   const generatePlan = async () => {
     const btn         = document.getElementById("workout-generate-btn");
     const status      = document.getElementById("workout-status");
     const resultPanel = document.getElementById("workout-result-panel");
     const output      = document.getElementById("workout-output");
 
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      const notice = document.getElementById("workout-auth-notice");
-      if (notice) notice.classList.remove("hidden");
-      if (status) status.textContent = "Sign in to generate a personalised plan.";
-      return;
-    }
-
     const profile     = loadProfile();
     const goalSel     = document.getElementById("workout-goal");
     const activitySel = document.getElementById("workout-activity");
+    const goal        = goalSel?.value || profile.goalPreset || "maintain";
+    const activity    = parseFloat(activitySel?.value || "1.55");
 
-    const payload = {
-      sex:           profile.sex,
-      age:           profile.age,
-      weightKg:      profile.weightKg,
-      heightCm:      profile.heightCm,
-      tdeeValue:     profile.tdee,
-      adaptiveTdeeValue: profile.adaptiveTdee,
-      goalPreset:    goalSel?.value || profile.goalPreset || "maintain",
-      activityLevel: parseFloat(activitySel?.value || "1.55"),
-    };
-
-    btn.textContent = "Generating…";
-    btn.disabled    = true;
+    if (btn) { btn.textContent = "Generating…"; btn.disabled = true; }
     if (status) status.textContent = "Building your personalised plan…";
 
-    try {
-      const res = await fetch(`${API_BASE()}/v1/workout/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+    let planText = "";
+    let source   = "local";
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || `Error ${res.status}`);
-      }
-
-      const data     = await res.json();
-      const planText = data.plan || "";
-
-      // Light up muscles from plan text
-      const muscles = parseMuscles(planText);
-      highlightPlanMuscles(muscles);
-
-      // Hide click-mode exercise panel when plan is shown
-      const exPanel = document.getElementById("muscle-exercises");
-      if (exPanel) exPanel.classList.add("hidden");
-      selectedMuscle = null;
-
-      if (output) output.innerHTML = `<p>${renderPlan(planText)}</p>`;
-      if (resultPanel) resultPanel.hidden = false;
-      if (status) status.textContent = "";
-      resultPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    } catch (err) {
-      if (status) status.textContent = err.message || "Failed to generate plan. Try again.";
-    } finally {
-      btn.textContent = "Generate My Workout Plan";
-      btn.disabled    = false;
+    // Try API if signed in
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE()}/v1/workout/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            sex: profile.sex, age: profile.age,
+            weightKg: profile.weightKg, heightCm: profile.heightCm,
+            tdeeValue: profile.tdee, adaptiveTdeeValue: profile.adaptiveTdee,
+            goalPreset: goal, activityLevel: activity,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          planText = data.plan || "";
+          source = "ai";
+        }
+      } catch (_) { /* fall through to local */ }
     }
+
+    // Local fallback
+    if (!planText) {
+      planText = LOCAL_PLANS[planKey(goal)];
+      source = "local";
+    }
+
+    // Highlight muscles
+    const muscles = parseMuscles(planText);
+    highlightPlanMuscles(muscles);
+    const exPanel = document.getElementById("muscle-exercises");
+    if (exPanel) exPanel.classList.add("hidden");
+    selectedMuscle = null;
+
+    if (output) output.innerHTML = `<p>${renderPlan(planText)}</p>`;
+    if (resultPanel) resultPanel.hidden = false;
+    if (status) status.textContent = source === "ai" ? "AI plan generated." : "Plan ready — sign in to unlock personalised AI plans.";
+    resultPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (btn) { btn.textContent = "Generate My Workout Plan"; btn.disabled = false; }
   };
 
   // ── Init ──────────────────────────────────────────────────────────────────

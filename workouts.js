@@ -517,7 +517,8 @@
                 <div class="exercise-card${isLogged ? " exercise-logged" : ""}${isCardio ? " exercise-card--cardio" : ""}"
                      data-exercise="${ex.name.replace(/"/g, "&quot;")}"
                      data-sets="${ex.sets.replace(/"/g, "&quot;")}"
-                     data-muscle="${primaryMuscle}">
+                     data-muscle="${primaryMuscle}"
+                     data-all-muscles="${(ex.muscles || []).join(",")}">
                   <div class="exercise-card-top">
                     <span class="exercise-name">${ex.name}</span>
                     <span class="exercise-sets-badge">${ex.sets}</span>
@@ -685,8 +686,8 @@
   };
 
   // ── Log Exercise Modal ────────────────────────────────────────────────────
-  const openLogModal = (exerciseName, defaultSets, muscleKey) => {
-    pendingLogExercise = { name: exerciseName, muscleKey };
+  const openLogModal = (exerciseName, defaultSets, muscleKey, allMuscles) => {
+    pendingLogExercise = { name: exerciseName, muscleKey, allMuscles: allMuscles || [] };
     const modal = document.getElementById("log-exercise-modal");
     if (!modal) return;
 
@@ -727,7 +728,13 @@
       sets, reps, weight, unit,
       muscleKey: pendingLogExercise.muscleKey,
     });
-    if (pendingLogExercise.muscleKey) currentSession.muscles.add(pendingLogExercise.muscleKey);
+    // Add all muscles hit by this exercise (plan exercises may target multiple)
+    if (pendingLogExercise.muscleKey) {
+      currentSession.muscles.add(pendingLogExercise.muscleKey);
+    }
+    if (pendingLogExercise.allMuscles) {
+      pendingLogExercise.allMuscles.forEach(m => currentSession.muscles.add(m));
+    }
 
     closeLogModal();
     updateSessionBar();
@@ -933,10 +940,12 @@
       if (logBtn) {
         const card = logBtn.closest(".exercise-card");
         if (card) {
+          const allMuscles = card.dataset.allMuscles ? card.dataset.allMuscles.split(",").filter(Boolean) : [];
           openLogModal(
             card.dataset.exercise,
             card.dataset.sets,
-            card.dataset.muscle
+            card.dataset.muscle,
+            allMuscles
           );
         }
       }

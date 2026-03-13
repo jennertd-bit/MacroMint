@@ -2083,13 +2083,59 @@ body.onboard-body {
   display: flex; align-items: flex-start; gap: 14px; width: 100%;
 }
 .wc-svg-col {
-  flex-shrink: 0; width: 86px;
+  flex-shrink: 0; width: 110px;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
 }
-.wc-svg-wrap { width: 86px; }
+.wc-svg-wrap { width: 110px; }
 .wc-glow-hint {
   font-size: 0.62rem; color: var(--muted); margin: 0;
   text-align: center; line-height: 1.3;
+}
+
+/* Body image + invisible SVG overlay */
+.wc-body-container {
+  position: relative; width: 100%;
+}
+.wc-view-toggle {
+  position: absolute; top: 4px; right: 4px; z-index: 3;
+  background: rgba(0,229,204,0.18); border: 1px solid rgba(0,229,204,0.35);
+  color: #00e5cc; font-size: 0.58rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 8px; cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s, transform 0.15s;
+}
+.wc-view-toggle:active { transform: scale(0.93); }
+.wc-view-toggle:hover  { background: rgba(0,229,204,0.3); }
+.wc-body-img {
+  width: 100%; height: auto; display: block;
+  border-radius: 10px;
+  pointer-events: none;
+  -webkit-user-select: none; user-select: none;
+}
+.wc-body-zones {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.muscle-zone {
+  fill: transparent; stroke: none;
+  transition: fill 0.35s ease, filter 0.35s ease;
+  pointer-events: none;
+}
+.muscle-zone.muscle-active {
+  fill: rgba(0, 229, 204, 0.45);
+  stroke: rgba(0, 255, 230, 0.5);
+  stroke-width: 0.4;
+  animation: muscle-pulse 1.6s ease-in-out infinite;
+}
+@keyframes muscle-pulse {
+  0%, 100% {
+    fill: rgba(0,229,204,0.35);
+    filter: drop-shadow(0 0 4px #00e5cc) drop-shadow(0 0 8px rgba(0,229,204,0.5));
+  }
+  50% {
+    fill: rgba(0,229,204,0.6);
+    filter: drop-shadow(0 0 10px #00e5cc) drop-shadow(0 0 22px rgba(0,229,204,0.7)) drop-shadow(0 0 36px rgba(0,229,204,0.25));
+  }
 }
 .wc-info-col {
   flex: 1; min-width: 0;
@@ -2124,26 +2170,7 @@ body.onboard-body {
   font-size: 0.7rem; color: var(--teal); margin: 0; font-weight: 600;
 }
 
-/* Muscle active states — pure CSS drop-shadow (no url() refs) */
-.muscle-part {
-  transition: fill 0.35s ease, opacity 0.35s ease, filter 0.35s ease;
-}
-.muscle-active {
-  fill: #00e5cc !important;
-  stroke: rgba(0,255,230,0.55) !important;
-  stroke-width: 0.7 !important;
-  animation: muscle-pulse 1.6s ease-in-out infinite;
-}
-@keyframes muscle-pulse {
-  0%, 100% {
-    opacity: 0.82;
-    filter: drop-shadow(0 0 4px #00e5cc) drop-shadow(0 0 9px rgba(0,229,204,0.65));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 9px #00e5cc) drop-shadow(0 0 20px rgba(0,229,204,0.85)) drop-shadow(0 0 32px rgba(0,229,204,0.3));
-  }
-}
+/* (old .muscle-part rules removed — replaced by .muscle-zone above) */
 
 /* Close button */
 .wc-close-btn {

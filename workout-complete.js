@@ -1,5 +1,5 @@
 // workout-complete.js — Workout completion celebration modal
-// Shows animated glowing muscle figure + motivational quote
+// Shows glowing body image with teal muscle overlays + motivational quote
 
 (function () {
 
@@ -47,7 +47,7 @@
     { text: "This is the long game. And you're still playing it. That's rare.", author: "MacroMint" },
   ];
 
-  // ── Muscle → SVG IDs map ──────────────────────────────────────────────────
+  // ── Muscle → SVG zone IDs map ─────────────────────────────────────────────
   const MUSCLE_SVG_MAP = {
     chest:        ["svg-chest-l", "svg-chest-r"],
     shoulders:    ["svg-shoulder-l", "svg-shoulder-r"],
@@ -57,7 +57,7 @@
     biceps:       ["svg-bicep-l", "svg-bicep-r"],
     triceps:      ["svg-tricep-l", "svg-tricep-r"],
     forearms:     ["svg-forearm-l", "svg-forearm-r"],
-    abs:          ["svg-abs-1", "svg-abs-2", "svg-abs-3", "svg-abs-4", "svg-abs-5", "svg-abs-6"],
+    abs:          ["svg-abs"],
     obliques:     ["svg-oblique-l", "svg-oblique-r"],
     glutes:       ["svg-glute-l", "svg-glute-r"],
     quads:        ["svg-quad-l", "svg-quad-r"],
@@ -66,79 +66,99 @@
     cardio:       ["svg-quad-l", "svg-quad-r", "svg-ham-l", "svg-ham-r", "svg-calf-l", "svg-calf-r"],
   };
 
-  // ── Build the muscle SVG — neon hologram athletic body ────────────────────
-  function buildMuscleSVG() {
-    return `<svg id="muscle-svg" viewBox="0 0 100 242" xmlns="http://www.w3.org/2000/svg"
-      style="width:100%;display:block;filter:drop-shadow(0 0 6px rgba(0,160,255,0.65)) drop-shadow(0 0 18px rgba(0,80,220,0.32)) drop-shadow(0 0 36px rgba(0,50,180,0.16))">
+  // ── Current state ──────────────────────────────────────────────────────────
+  let currentView = "front";   // "front" | "back"
+  let lastMuscleKeys = [];     // remember for view toggle re-activation
 
-      <!-- BASE BODY — neon hologram fill + glowing cyan outline -->
-      <g fill="rgba(10,45,130,0.72)" stroke="rgba(60,170,255,0.92)" stroke-width="0.9" stroke-linejoin="round">
-        <ellipse cx="50" cy="11" rx="10" ry="11"/>
-        <path d="M46,21 C46,25 54,25 54,21 L54,28 C54,31 46,31 46,28Z"/>
-        <path d="M10,32 C7,37 6,43 9,49 C11,55 14,65 15,77 C16,89 16,103 16,115 C16,125 17,135 18,143 C19,151 20,157 21,163 L44,163 L56,163 L79,163 C80,157 81,151 82,143 C83,135 84,125 84,115 C84,103 84,89 85,77 C86,65 89,55 91,49 C94,43 93,37 90,32 C82,27 66,24 50,24 C34,24 18,27 10,32Z"/>
-        <path d="M6,34 C2,44 1,58 2,70 C3,82 5,94 8,100 C11,106 15,107 18,101 C20,93 20,81 18,69 C16,55 13,43 10,35Z"/>
-        <path d="M94,34 C98,44 99,58 98,70 C97,82 95,94 92,100 C89,106 85,107 82,101 C80,93 80,81 82,69 C84,55 87,43 90,35Z"/>
-        <path d="M3,102 C0,114 0,129 2,139 C4,147 7,151 11,150 C14,148 16,141 15,131 C14,120 12,107 9,102Z"/>
-        <path d="M97,102 C100,114 100,129 98,139 C96,147 93,151 89,150 C86,148 85,141 85,131 C86,120 88,107 91,102Z"/>
-        <path d="M18,164 C13,178 12,198 13,214 C14,228 18,238 24,240 C30,242 36,240 40,233 C43,224 44,210 43,194 C41,178 38,164 32,161Z"/>
-        <path d="M82,164 C87,178 88,198 87,214 C86,228 82,238 76,240 C70,242 64,240 60,233 C57,224 56,210 57,194 C59,178 62,164 68,161Z"/>
-        <path d="M13,240 C10,252 10,263 12,269 C14,274 18,277 22,275 C26,274 28,268 28,259 C28,250 26,241 23,239Z"/>
-        <path d="M87,240 C90,252 90,263 88,269 C86,274 82,277 78,275 C74,274 72,268 72,259 C72,250 74,241 77,239Z"/>
-      </g>
+  // ── Front view SVG zones (mapped to body-front.png) ───────────────────────
+  const FRONT_ZONES = `
+    <path id="svg-trap-l"      class="muscle-zone" d="M41,22 L35,25 L39,28 L44,25Z"/>
+    <path id="svg-trap-r"      class="muscle-zone" d="M59,22 L65,25 L61,28 L56,25Z"/>
+    <path id="svg-shoulder-l"  class="muscle-zone" d="M28,25 C25,28 24,33 26,37 C28,39 32,39 35,36 C37,33 37,29 35,26 C33,24 30,24 28,25Z"/>
+    <path id="svg-shoulder-r"  class="muscle-zone" d="M72,25 C75,28 76,33 74,37 C72,39 68,39 65,36 C63,33 63,29 65,26 C67,24 70,24 72,25Z"/>
+    <path id="svg-chest-l"     class="muscle-zone" d="M35,28 C33,32 33,38 35,42 C37,45 41,47 45,46 C48,44 50,40 50,36 C50,32 47,28 43,27 C40,26 37,26 35,28Z"/>
+    <path id="svg-chest-r"     class="muscle-zone" d="M65,28 C67,32 67,38 65,42 C63,45 59,47 55,46 C52,44 50,40 50,36 C50,32 53,28 57,27 C60,26 63,26 65,28Z"/>
+    <path id="svg-lat-l"       class="muscle-zone" d="M30,37 C28,43 28,51 29,57 C30,62 32,65 35,63 C37,61 38,55 37,48 C36,42 34,37 31,36Z"/>
+    <path id="svg-lat-r"       class="muscle-zone" d="M70,37 C72,43 72,51 71,57 C70,62 68,65 65,63 C63,61 62,55 63,48 C64,42 66,37 69,36Z"/>
+    <path id="svg-bicep-l"     class="muscle-zone" d="M24,30 C22,35 21,42 23,48 C25,53 28,55 30,52 C32,48 32,42 30,36 C28,31 26,28 24,30Z"/>
+    <path id="svg-bicep-r"     class="muscle-zone" d="M76,30 C78,35 79,42 77,48 C75,53 72,55 70,52 C68,48 68,42 70,36 C72,31 74,28 76,30Z"/>
+    <path id="svg-tricep-l"    class="muscle-zone" d="M26,30 C24,36 23,43 24,49 C22,46 21,40 22,34 C23,30 25,28 26,30Z"/>
+    <path id="svg-tricep-r"    class="muscle-zone" d="M74,30 C76,36 77,43 76,49 C78,46 79,40 78,34 C77,30 75,28 74,30Z"/>
+    <path id="svg-forearm-l"   class="muscle-zone" d="M22,54 C20,60 20,67 22,72 C24,76 27,77 28,74 C29,70 29,64 27,58 C26,54 24,52 22,54Z"/>
+    <path id="svg-forearm-r"   class="muscle-zone" d="M78,54 C80,60 80,67 78,72 C76,76 73,77 72,74 C71,70 71,64 73,58 C74,54 76,52 78,54Z"/>
+    <path id="svg-abs"         class="muscle-zone" d="M42,46 C41,50 41,56 42,62 C43,66 45,68 50,68 C55,68 57,66 58,62 C59,56 59,50 58,46 C56,43 44,43 42,46Z"/>
+    <path id="svg-oblique-l"   class="muscle-zone" d="M33,50 C31,56 31,64 33,70 C35,74 38,75 40,72 C41,68 41,62 40,56 C39,51 36,48 33,50Z"/>
+    <path id="svg-oblique-r"   class="muscle-zone" d="M67,50 C69,56 69,64 67,70 C65,74 62,75 60,72 C59,68 59,62 60,56 C61,51 64,48 67,50Z"/>
+    <path id="svg-lower-back"  class="muscle-zone" d="M40,66 C39,70 40,74 42,76 C45,78 55,78 58,76 C60,74 61,70 60,66 C57,63 43,63 40,66Z"/>
+    <path id="svg-glute-l"     class="muscle-zone" d="M34,75 C31,80 31,86 34,90 C37,93 42,93 45,89 C47,85 47,80 45,76 C43,73 38,73 34,75Z"/>
+    <path id="svg-glute-r"     class="muscle-zone" d="M66,75 C69,80 69,86 66,90 C63,93 58,93 55,89 C53,85 53,80 55,76 C57,73 62,73 66,75Z"/>
+    <path id="svg-quad-l"      class="muscle-zone" d="M33,90 C30,97 29,107 30,116 C31,122 34,126 38,126 C42,126 45,122 46,116 C47,108 46,98 43,91 C40,87 36,87 33,90Z"/>
+    <path id="svg-quad-r"      class="muscle-zone" d="M67,90 C70,97 71,107 70,116 C69,122 66,126 62,126 C58,126 55,122 54,116 C53,108 54,98 57,91 C60,87 64,87 67,90Z"/>
+    <path id="svg-ham-l"       class="muscle-zone" d="M43,92 C46,100 47,112 46,120 C45,126 42,128 39,126 C36,122 34,112 35,102 C36,96 39,90 43,92Z"/>
+    <path id="svg-ham-r"       class="muscle-zone" d="M57,92 C54,100 53,112 54,120 C55,126 58,128 61,126 C64,122 66,112 65,102 C64,96 61,90 57,92Z"/>
+    <path id="svg-calf-l"      class="muscle-zone" d="M30,128 C28,134 28,140 30,145 C32,148 35,149 38,147 C40,144 41,138 40,132 C39,128 36,126 33,126Z"/>
+    <path id="svg-calf-r"      class="muscle-zone" d="M70,128 C72,134 72,140 70,145 C68,148 65,149 62,147 C60,144 59,138 60,132 C61,128 64,126 67,126Z"/>`;
 
-      <!-- MUSCLE ZONES — transparent at rest, intense teal when active -->
-      <g fill="rgba(25,80,200,0.14)" stroke="rgba(100,200,255,0.25)" stroke-width="0.45">
-        <path id="svg-trap-l"     class="muscle-part" d="M46,24 C40,26 30,28 14,34 C20,38 30,36 40,32 C43,30 45,27 46,24Z"/>
-        <path id="svg-trap-r"     class="muscle-part" d="M54,24 C60,26 70,28 86,34 C80,38 70,36 60,32 C57,30 55,27 54,24Z"/>
-        <path id="svg-shoulder-l" class="muscle-part" d="M7,34 C3,40 2,49 4,56 C6,62 10,64 14,60 C18,56 19,47 17,41 C15,35 10,32 7,34Z"/>
-        <path id="svg-shoulder-r" class="muscle-part" d="M93,34 C97,40 98,49 96,56 C94,62 90,64 86,60 C82,56 81,47 83,41 C85,35 90,32 93,34Z"/>
-        <path id="svg-chest-l"    class="muscle-part" d="M10,36 C8,45 8,57 10,67 C12,76 17,81 23,81 C29,81 33,75 34,67 C35,58 33,47 30,39 C26,33 18,31 12,33 C11,33 10,34 10,36Z"/>
-        <path id="svg-chest-r"    class="muscle-part" d="M90,36 C92,45 92,57 90,67 C88,76 83,81 77,81 C71,81 67,75 66,67 C65,58 67,47 70,39 C74,33 82,31 88,33 C89,33 90,34 90,36Z"/>
-        <path id="svg-lat-l"      class="muscle-part" d="M9,49 C7,61 7,75 8,89 C9,103 10,115 9,125 C9,133 8,139 10,143 C14,145 19,143 22,135 C25,125 25,111 23,95 C22,79 18,63 14,53 C11,46 9,46 9,49Z"/>
-        <path id="svg-lat-r"      class="muscle-part" d="M91,49 C93,61 93,75 92,89 C91,103 90,115 91,125 C91,133 92,139 90,143 C86,145 81,143 78,135 C75,125 75,111 77,95 C78,79 82,63 86,53 C89,46 91,46 91,49Z"/>
-        <path id="svg-bicep-l"    class="muscle-part" d="M2,38 C-1,50 -1,65 1,77 C3,87 7,93 11,93 C15,93 17,87 17,77 C17,64 14,50 11,39 C8,33 4,33 2,38Z"/>
-        <path id="svg-bicep-r"    class="muscle-part" d="M98,38 C101,50 101,65 99,77 C97,87 93,93 89,93 C85,93 83,87 83,77 C83,64 86,50 89,39 C92,33 96,33 98,38Z"/>
-        <path id="svg-tricep-l"   class="muscle-part" d="M5,36 C2,46 1,59 2,71 C3,81 6,89 9,91 C6,85 4,75 4,65 C4,53 6,42 9,36Z"/>
-        <path id="svg-tricep-r"   class="muscle-part" d="M95,36 C98,46 99,59 98,71 C97,81 94,89 91,91 C94,85 96,75 96,65 C96,53 94,42 91,36Z"/>
-        <path id="svg-forearm-l"  class="muscle-part" d="M4,104 C1,116 1,131 3,141 C5,149 8,152 11,150 C14,149 16,141 16,131 C16,119 13,106 10,103Z"/>
-        <path id="svg-forearm-r"  class="muscle-part" d="M96,104 C99,116 99,131 97,141 C95,149 92,152 89,150 C86,149 84,141 84,131 C84,119 87,106 90,103Z"/>
-        <path id="svg-abs-1"      class="muscle-part" d="M37,83 C36,88 36,93 38,97 C40,100 44,101 47,98 C50,95 50,90 48,86 C46,81 42,80 39,81 C38,81 37,82 37,83Z"/>
-        <path id="svg-abs-2"      class="muscle-part" d="M50,83 C49,88 49,93 52,97 C54,100 58,101 61,98 C64,95 64,90 62,86 C60,81 56,80 53,81 C51,81 50,82 50,83Z"/>
-        <path id="svg-abs-3"      class="muscle-part" d="M37,100 C36,105 36,110 38,114 C40,117 44,118 47,115 C50,112 50,107 48,103 C46,98 42,97 39,98 C38,98 37,99 37,100Z"/>
-        <path id="svg-abs-4"      class="muscle-part" d="M50,100 C49,105 49,110 52,114 C54,117 58,118 61,115 C64,112 64,107 62,103 C60,98 56,97 53,98 C51,98 50,99 50,100Z"/>
-        <path id="svg-abs-5"      class="muscle-part" d="M38,116 C36,121 36,126 39,130 C41,133 45,134 48,131 C51,128 51,123 50,119 C48,114 44,113 41,114 C39,114 38,115 38,116Z"/>
-        <path id="svg-abs-6"      class="muscle-part" d="M50,116 C49,121 49,126 52,130 C54,133 58,134 61,131 C64,128 64,123 63,119 C61,114 57,113 54,114 C52,114 50,115 50,116Z"/>
-        <path id="svg-oblique-l"  class="muscle-part" d="M10,104 C8,114 9,126 11,136 C13,144 17,149 21,145 C25,141 26,131 24,120 C22,109 18,102 14,103 C11,103 10,103 10,104Z"/>
-        <path id="svg-oblique-r"  class="muscle-part" d="M90,104 C92,114 91,126 89,136 C87,144 83,149 79,145 C75,141 74,131 76,120 C78,109 82,102 86,103 C89,103 90,103 90,104Z"/>
-        <path id="svg-lower-back" class="muscle-part" d="M33,136 C31,142 31,150 34,156 C37,160 44,163 50,163 C56,163 63,160 66,156 C69,150 69,142 67,136 C63,131 37,131 33,136Z"/>
-        <path id="svg-glute-l"    class="muscle-part" d="M19,157 C14,167 13,179 16,189 C18,197 24,201 31,199 C38,197 43,191 44,181 C45,171 43,161 38,157 C34,153 24,153 19,157Z"/>
-        <path id="svg-glute-r"    class="muscle-part" d="M81,157 C86,167 87,179 84,189 C82,197 76,201 69,199 C62,197 57,191 56,181 C55,171 57,161 62,157 C66,153 76,153 81,157Z"/>
-        <path id="svg-quad-l"     class="muscle-part" d="M18,164 C13,178 12,198 14,214 C16,228 20,238 26,240 C32,242 38,240 42,233 C45,225 46,211 44,195 C42,179 38,164 32,161Z"/>
-        <path id="svg-quad-r"     class="muscle-part" d="M82,164 C87,178 88,198 86,214 C84,228 80,238 74,240 C68,242 62,240 58,233 C55,225 54,211 56,195 C58,179 62,164 68,161Z"/>
-        <path id="svg-ham-l"      class="muscle-part" d="M42,165 C46,179 48,199 46,215 C44,229 40,239 35,241 C30,237 27,225 27,209 C27,193 31,173 37,163Z"/>
-        <path id="svg-ham-r"      class="muscle-part" d="M58,165 C54,179 52,199 54,215 C56,229 60,239 65,241 C70,237 73,225 73,209 C73,193 69,173 63,163Z"/>
-        <path id="svg-calf-l"     class="muscle-part" d="M13,241 C9,253 9,265 11,271 C13,276 17,279 21,277 C25,276 28,270 28,261 C28,252 26,241 23,239Z"/>
-        <path id="svg-calf-r"     class="muscle-part" d="M87,241 C91,253 91,265 89,271 C87,276 83,279 79,277 C75,276 72,270 72,261 C72,252 74,241 77,239Z"/>
-      </g>
+  // ── Back view SVG zones (mapped to body-back.png) ─────────────────────────
+  const BACK_ZONES = `
+    <path id="svg-trap-l"      class="muscle-zone" d="M39,20 C35,22 30,25 28,29 C32,32 38,30 42,27 C44,24 42,21 39,20Z"/>
+    <path id="svg-trap-r"      class="muscle-zone" d="M61,20 C65,22 70,25 72,29 C68,32 62,30 58,27 C56,24 58,21 61,20Z"/>
+    <path id="svg-shoulder-l"  class="muscle-zone" d="M28,25 C25,28 24,33 26,37 C28,39 32,39 35,36 C37,33 37,29 35,26 C33,24 30,24 28,25Z"/>
+    <path id="svg-shoulder-r"  class="muscle-zone" d="M72,25 C75,28 76,33 74,37 C72,39 68,39 65,36 C63,33 63,29 65,26 C67,24 70,24 72,25Z"/>
+    <path id="svg-lat-l"       class="muscle-zone" d="M30,30 C27,38 26,48 27,58 C28,66 31,72 36,70 C40,68 42,60 41,50 C40,40 37,32 33,28Z"/>
+    <path id="svg-lat-r"       class="muscle-zone" d="M70,30 C73,38 74,48 73,58 C72,66 69,72 64,70 C60,68 58,60 59,50 C60,40 63,32 67,28Z"/>
+    <path id="svg-lower-back"  class="muscle-zone" d="M38,60 C36,66 37,74 40,78 C44,82 56,82 60,78 C63,74 64,66 62,60 C58,55 42,55 38,60Z"/>
+    <path id="svg-tricep-l"    class="muscle-zone" d="M24,30 C21,38 20,48 22,56 C24,62 28,64 30,60 C32,54 32,44 30,36 C28,30 26,28 24,30Z"/>
+    <path id="svg-tricep-r"    class="muscle-zone" d="M76,30 C79,38 80,48 78,56 C76,62 72,64 70,60 C68,54 68,44 70,36 C72,30 74,28 76,30Z"/>
+    <path id="svg-forearm-l"   class="muscle-zone" d="M22,58 C20,64 20,72 22,78 C24,82 27,83 28,80 C29,76 29,68 27,62 C26,58 24,56 22,58Z"/>
+    <path id="svg-forearm-r"   class="muscle-zone" d="M78,58 C80,64 80,72 78,78 C76,82 73,83 72,80 C71,76 71,68 73,62 C74,58 76,56 78,58Z"/>
+    <path id="svg-glute-l"     class="muscle-zone" d="M33,78 C29,84 28,92 31,98 C34,103 40,104 44,100 C47,96 48,88 46,82 C44,77 38,75 33,78Z"/>
+    <path id="svg-glute-r"     class="muscle-zone" d="M67,78 C71,84 72,92 69,98 C66,103 60,104 56,100 C53,96 52,88 54,82 C56,77 62,75 67,78Z"/>
+    <path id="svg-ham-l"       class="muscle-zone" d="M30,100 C27,108 26,120 28,130 C30,138 34,142 38,140 C42,138 44,130 43,120 C42,110 39,102 35,98Z"/>
+    <path id="svg-ham-r"       class="muscle-zone" d="M70,100 C73,108 74,120 72,130 C70,138 66,142 62,140 C58,138 56,130 57,120 C58,110 61,102 65,98Z"/>
+    <path id="svg-calf-l"      class="muscle-zone" d="M28,142 C26,148 26,156 28,162 C30,166 34,167 37,164 C39,160 40,152 38,146 C36,142 32,140 28,142Z"/>
+    <path id="svg-calf-r"      class="muscle-zone" d="M72,142 C74,148 74,156 72,162 C70,166 66,167 63,164 C61,160 60,152 62,146 C64,142 68,140 72,142Z"/>`;
 
-      <!-- ANATOMY GUIDE LINES (ultra subtle) -->
-      <g stroke="rgba(80,180,255,0.11)" stroke-width="0.4" fill="none" stroke-dasharray="1.5,3" pointer-events="none">
-        <line x1="50" y1="30" x2="50" y2="162"/>
-        <path d="M12,77 C20,83 32,83 34,79"/>
-        <path d="M88,77 C80,83 68,83 66,79"/>
-      </g>
-    </svg>`;
+  // ── Build the body visual ─────────────────────────────────────────────────
+  function buildMuscleSVG(view) {
+    const img  = view === "back" ? "body-back.png" : "body-front.png";
+    const zones = view === "back" ? BACK_ZONES : FRONT_ZONES;
+    return `<div class="wc-body-container">
+      <button class="wc-view-toggle" id="wc-view-toggle" type="button">
+        ${view === "front" ? "↻ Back" : "↻ Front"}
+      </button>
+      <img src="${img}" alt="" class="wc-body-img" draggable="false"/>
+      <svg class="wc-body-zones" viewBox="0 0 100 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        ${zones}
+      </svg>
+    </div>`;
   }
 
-  // ── Activate muscles with glow ─────────────────────────────────────────────
+  // ── Toggle front / back ───────────────────────────────────────────────────
+  function toggleView() {
+    currentView = currentView === "front" ? "back" : "front";
+    const wrap = document.getElementById("wc-svg-wrap");
+    if (wrap) {
+      wrap.innerHTML = buildMuscleSVG(currentView);
+      wireToggleBtn();
+      // Re-activate the same muscles on new view
+      setTimeout(() => activateMuscles(lastMuscleKeys), 100);
+    }
+  }
+
+  function wireToggleBtn() {
+    document.getElementById("wc-view-toggle")?.addEventListener("click", toggleView);
+  }
+
+  // ── Activate muscles with teal glow ────────────────────────────────────────
   function activateMuscles(muscleKeys) {
-    document.querySelectorAll(".muscle-part").forEach(el => {
+    lastMuscleKeys = muscleKeys; // remember for view toggle
+    document.querySelectorAll(".muscle-zone").forEach(el => {
       el.classList.remove("muscle-active");
     });
 
     const allIds = new Set();
     muscleKeys.forEach(key => {
-      // Try exact key, then lowercase (handles "Chest" → "chest")
       const ids = MUSCLE_SVG_MAP[key] || MUSCLE_SVG_MAP[key.toLowerCase()] || [];
       ids.forEach(id => allIds.add(id));
     });
@@ -156,14 +176,12 @@
     const modal = document.getElementById("workout-complete-modal");
     if (!modal) return;
 
-    // Random quote
     const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     const quoteEl  = document.getElementById("wc-quote");
     const authorEl = document.getElementById("wc-author");
     if (quoteEl)  quoteEl.textContent  = `"${q.text}"`;
     if (authorEl) authorEl.textContent = `— ${q.author}`;
 
-    // Session stats
     const nameEl = document.getElementById("wc-name");
     const statEl = document.getElementById("wc-stats");
     if (nameEl) nameEl.textContent = name || "Workout Complete";
@@ -172,17 +190,19 @@
       statEl.textContent = `${duration || 45} min · ~${kcal} kcal burned`;
     }
 
-    // Muscles
     const musclesEl = document.getElementById("wc-muscles");
     if (musclesEl) {
       musclesEl.textContent = muscles?.length ? muscles.join(" · ") : "Full Body";
     }
 
-    // Build SVG
-    const svgWrap = document.getElementById("wc-svg-wrap");
-    if (svgWrap) svgWrap.innerHTML = buildMuscleSVG();
+    currentView = "front"; // always start on front
 
-    // Show modal
+    const svgWrap = document.getElementById("wc-svg-wrap");
+    if (svgWrap) {
+      svgWrap.innerHTML = buildMuscleSVG(currentView);
+      wireToggleBtn();
+    }
+
     modal.hidden = false;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -191,7 +211,6 @@
       });
     });
 
-    // Confetti burst
     spawnConfetti();
   };
 
@@ -224,7 +243,7 @@
       for (let i = 0; i < count; i++) {
         const angle  = Math.random() * Math.PI * 2;
         const speed  = (2 + Math.random() * 11) * speedScale;
-        const type   = Math.floor(Math.random() * 4); // 0=square 1=circle 2=ribbon 3=sparkle
+        const type   = Math.floor(Math.random() * 4);
         particles.push({
           x: ox + (Math.random() - 0.5) * 30,
           y: oy + (Math.random() - 0.5) * 20,
@@ -242,18 +261,14 @@
       }
     }
 
-    // Main blast from center
     addBurst(W * 0.5, H * 0.42, 130, 1.2);
-    // Side bursts
     setTimeout(() => addBurst(W * 0.22, H * 0.38, 50, 0.9), 180);
     setTimeout(() => addBurst(W * 0.78, H * 0.38, 50, 0.9), 300);
-    // Top waterfall
     setTimeout(() => {
       for (let i = 0; i < 40; i++) {
         setTimeout(() => {
           particles.push({
-            x: Math.random() * W,
-            y: -12,
+            x: Math.random() * W, y: -12,
             vx: (Math.random() - 0.5) * 2.5,
             vy: 1.5 + Math.random() * 3.5,
             size: 4 + Math.random() * 7,
@@ -261,9 +276,7 @@
             type: Math.floor(Math.random() * 3),
             rot: Math.random() * Math.PI * 2,
             rotV: (Math.random() - 0.5) * 0.18,
-            life: 1,
-            decay: 0.003 + Math.random() * 0.004,
-            drag: 0.992,
+            life: 1, decay: 0.003 + Math.random() * 0.004, drag: 0.992,
           });
         }, i * 80);
       }
@@ -277,28 +290,17 @@
       ctx.fillStyle   = p.color;
       ctx.strokeStyle = p.color;
       switch (p.type) {
-        case 0: // square/rect
-          ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.65);
-          break;
-        case 1: // circle
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case 2: // ribbon
-          ctx.fillRect(-p.size * 0.22, -p.size / 2, p.size * 0.44, p.size);
-          break;
-        case 3: // sparkle / star burst
+        case 0: ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.65); break;
+        case 1: ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2); ctx.fill(); break;
+        case 2: ctx.fillRect(-p.size * 0.22, -p.size / 2, p.size * 0.44, p.size); break;
+        case 3:
           ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.moveTo(-p.size, 0);     ctx.lineTo(p.size, 0);
-          ctx.moveTo(0, -p.size);     ctx.lineTo(0, p.size);
-          ctx.moveTo(-p.size * 0.68, -p.size * 0.68);
-          ctx.lineTo( p.size * 0.68,  p.size * 0.68);
-          ctx.moveTo( p.size * 0.68, -p.size * 0.68);
-          ctx.lineTo(-p.size * 0.68,  p.size * 0.68);
-          ctx.stroke();
-          break;
+          ctx.moveTo(-p.size, 0); ctx.lineTo(p.size, 0);
+          ctx.moveTo(0, -p.size); ctx.lineTo(0, p.size);
+          ctx.moveTo(-p.size * 0.68, -p.size * 0.68); ctx.lineTo(p.size * 0.68, p.size * 0.68);
+          ctx.moveTo(p.size * 0.68, -p.size * 0.68); ctx.lineTo(-p.size * 0.68, p.size * 0.68);
+          ctx.stroke(); break;
       }
       ctx.restore();
     }
@@ -308,22 +310,14 @@
       ctx.clearRect(0, 0, W, H);
       let alive = 0;
       for (const p of particles) {
-        p.life -= p.decay;
-        p.vx   *= p.drag;
-        p.vy   *= p.drag;
-        p.vy   += 0.16; // gravity
-        p.x    += p.vx;
-        p.y    += p.vy;
-        p.rot  += p.rotV;
+        p.life -= p.decay; p.vx *= p.drag; p.vy *= p.drag;
+        p.vy += 0.16; p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
         if (p.life > 0.02) { alive++; drawParticle(p); }
       }
       if (alive > 0) frame = requestAnimationFrame(tick);
     };
     tick();
-    setTimeout(() => {
-      cancelAnimationFrame(frame);
-      ctx.clearRect(0, 0, W, H);
-    }, 5500);
+    setTimeout(() => { cancelAnimationFrame(frame); ctx.clearRect(0, 0, W, H); }, 5500);
   }
 
   // ── Wire close button ──────────────────────────────────────────────────────

@@ -39,8 +39,23 @@
     const modal = el("meal-modal");
     if (!modal) return;
 
-    // Look up recipe
-    const recipe = (typeof MEAL_RECIPES !== "undefined" && MEAL_RECIPES[meal.name]) || null;
+    // Look up recipe — exact match first, then fuzzy (for API-returned meal names)
+    let recipe = null;
+    if (typeof MEAL_RECIPES !== "undefined") {
+      recipe = MEAL_RECIPES[meal.name] || null;
+      if (!recipe) {
+        // Fuzzy: find the MEAL_RECIPES key whose words overlap most with the meal name
+        const nameLower = (meal.name || "").toLowerCase();
+        const nameWords = nameLower.split(/[\s,&\-–—]+/).filter(w => w.length > 3);
+        let bestScore = 0, bestKey = null;
+        Object.keys(MEAL_RECIPES).forEach(key => {
+          const keyLower = key.toLowerCase();
+          const score = nameWords.filter(w => keyLower.includes(w)).length;
+          if (score > bestScore) { bestScore = score; bestKey = key; }
+        });
+        if (bestScore >= 2) recipe = MEAL_RECIPES[bestKey];
+      }
+    }
 
     // Header
     setGradient(meal.slot || "custom");
@@ -108,7 +123,7 @@
     } else {
       const p = document.createElement("p");
       p.className = "meal-no-recipe";
-      p.textContent = "Add this meal via search or barcode to see full ingredients.";
+      p.textContent = "Full ingredients not available for this meal. Try using Fridge Magic 🧙 to build a custom recipe!";
       ingWrap.appendChild(p);
     }
 
@@ -123,7 +138,7 @@
       });
     } else {
       const li = document.createElement("li");
-      li.textContent = "Enjoy as suggested!";
+      li.textContent = "Use the macros above to guide your meal. Log it when ready!";
       stepsEl.appendChild(li);
     }
 

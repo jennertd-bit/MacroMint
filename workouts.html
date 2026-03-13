@@ -52,23 +52,29 @@
                 <div class="body-img-container">
                   <img src="body-front.png" alt="Front body" class="body-img" draggable="false"/>
                   <svg class="body-overlay" viewBox="0 0 100 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M41,22 L35,25 L39,28 L44,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M59,22 L65,25 L61,28 L56,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M28,25 C25,28 24,33 26,37 C28,39 32,39 35,36 C37,33 37,29 35,26 C33,24 30,24 28,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M72,25 C75,28 76,33 74,37 C72,39 68,39 65,36 C63,33 63,29 65,26 C67,24 70,24 72,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M35,28 C33,32 33,38 35,42 C37,45 41,47 45,46 C48,44 50,40 50,36 C50,32 47,28 43,27 C40,26 37,26 35,28Z" class="muscle-group" data-muscle="chest"/>
-                    <path d="M65,28 C67,32 67,38 65,42 C63,45 59,47 55,46 C52,44 50,40 50,36 C50,32 53,28 57,27 C60,26 63,26 65,28Z" class="muscle-group" data-muscle="chest"/>
-                    <path d="M24,30 C22,35 21,42 23,48 C25,53 28,55 30,52 C32,48 32,42 30,36 C28,31 26,28 24,30Z" class="muscle-group" data-muscle="biceps"/>
-                    <path d="M76,30 C78,35 79,42 77,48 C75,53 72,55 70,52 C68,48 68,42 70,36 C72,31 74,28 76,30Z" class="muscle-group" data-muscle="biceps"/>
-                    <path d="M22,54 C20,60 20,67 22,72 C24,76 27,77 28,74 C29,70 29,64 27,58 C26,54 24,52 22,54Z" class="muscle-group" data-muscle="forearms"/>
-                    <path d="M78,54 C80,60 80,67 78,72 C76,76 73,77 72,74 C71,70 71,64 73,58 C74,54 76,52 78,54Z" class="muscle-group" data-muscle="forearms"/>
-                    <path d="M42,46 C41,50 41,56 42,62 C43,66 45,68 50,68 C55,68 57,66 58,62 C59,56 59,50 58,46 C56,43 44,43 42,46Z" class="muscle-group" data-muscle="abs"/>
-                    <path d="M33,50 C31,56 31,64 33,70 C35,74 38,75 40,72 C41,68 41,62 40,56 C39,51 36,48 33,50Z" class="muscle-group" data-muscle="obliques"/>
-                    <path d="M67,50 C69,56 69,64 67,70 C65,74 62,75 60,72 C59,68 59,62 60,56 C61,51 64,48 67,50Z" class="muscle-group" data-muscle="obliques"/>
-                    <path d="M33,90 C30,97 29,107 30,116 C31,122 34,126 38,126 C42,126 45,122 46,116 C47,108 46,98 43,91 C40,87 36,87 33,90Z" class="muscle-group" data-muscle="quads"/>
-                    <path d="M67,90 C70,97 71,107 70,116 C69,122 66,126 62,126 C58,126 55,122 54,116 C53,108 54,98 57,91 C60,87 64,87 67,90Z" class="muscle-group" data-muscle="quads"/>
-                    <path d="M30,128 C28,134 28,140 30,145 C32,148 35,149 38,147 C40,144 41,138 40,132 C39,128 36,126 33,126Z" class="muscle-group" data-muscle="calves"/>
-                    <path d="M70,128 C72,134 72,140 70,145 C68,148 65,149 62,147 C60,144 59,138 60,132 C61,128 64,126 67,126Z" class="muscle-group" data-muscle="calves"/>
+                    <!-- Shoulders -->
+                    <ellipse cx="30" cy="38" rx="10" ry="6" class="muscle-group" data-muscle="shoulders"/>
+                    <ellipse cx="70" cy="38" rx="10" ry="6" class="muscle-group" data-muscle="shoulders"/>
+                    <!-- Chest -->
+                    <ellipse cx="40" cy="48" rx="9" ry="7" class="muscle-group" data-muscle="chest"/>
+                    <ellipse cx="60" cy="48" rx="9" ry="7" class="muscle-group" data-muscle="chest"/>
+                    <!-- Biceps -->
+                    <ellipse cx="23" cy="52" rx="5" ry="10" class="muscle-group" data-muscle="biceps"/>
+                    <ellipse cx="77" cy="52" rx="5" ry="10" class="muscle-group" data-muscle="biceps"/>
+                    <!-- Forearms -->
+                    <ellipse cx="20" cy="68" rx="4" ry="8" class="muscle-group" data-muscle="forearms"/>
+                    <ellipse cx="80" cy="68" rx="4" ry="8" class="muscle-group" data-muscle="forearms"/>
+                    <!-- Abs -->
+                    <rect x="43" y="56" width="14" height="18" rx="4" class="muscle-group" data-muscle="abs"/>
+                    <!-- Obliques -->
+                    <ellipse cx="38" cy="65" rx="4" ry="8" class="muscle-group" data-muscle="obliques"/>
+                    <ellipse cx="62" cy="65" rx="4" ry="8" class="muscle-group" data-muscle="obliques"/>
+                    <!-- Quads -->
+                    <ellipse cx="41" cy="92" rx="8" ry="16" class="muscle-group" data-muscle="quads"/>
+                    <ellipse cx="59" cy="92" rx="8" ry="16" class="muscle-group" data-muscle="quads"/>
+                    <!-- Calves -->
+                    <ellipse cx="39" cy="120" rx="5" ry="12" class="muscle-group" data-muscle="calves"/>
+                    <ellipse cx="61" cy="120" rx="5" ry="12" class="muscle-group" data-muscle="calves"/>
                   </svg>
                 </div>
               </div>
@@ -79,23 +85,32 @@
                 <div class="body-img-container">
                   <img src="body-back.png" alt="Back body" class="body-img" draggable="false"/>
                   <svg class="body-overlay" viewBox="0 0 100 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M39,20 C35,22 30,25 28,29 C32,32 38,30 42,27 C44,24 42,21 39,20Z" class="muscle-group" data-muscle="traps"/>
-                    <path d="M61,20 C65,22 70,25 72,29 C68,32 62,30 58,27 C56,24 58,21 61,20Z" class="muscle-group" data-muscle="traps"/>
-                    <path d="M28,25 C25,28 24,33 26,37 C28,39 32,39 35,36 C37,33 37,29 35,26 C33,24 30,24 28,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M72,25 C75,28 76,33 74,37 C72,39 68,39 65,36 C63,33 63,29 65,26 C67,24 70,24 72,25Z" class="muscle-group" data-muscle="shoulders"/>
-                    <path d="M30,30 C27,38 26,48 27,58 C28,66 31,72 36,70 C40,68 42,60 41,50 C40,40 37,32 33,28Z" class="muscle-group" data-muscle="lats"/>
-                    <path d="M70,30 C73,38 74,48 73,58 C72,66 69,72 64,70 C60,68 58,60 59,50 C60,40 63,32 67,28Z" class="muscle-group" data-muscle="lats"/>
-                    <path d="M38,60 C36,66 37,74 40,78 C44,82 56,82 60,78 C63,74 64,66 62,60 C58,55 42,55 38,60Z" class="muscle-group" data-muscle="lower-back"/>
-                    <path d="M24,30 C21,38 20,48 22,56 C24,62 28,64 30,60 C32,54 32,44 30,36 C28,30 26,28 24,30Z" class="muscle-group" data-muscle="triceps"/>
-                    <path d="M76,30 C79,38 80,48 78,56 C76,62 72,64 70,60 C68,54 68,44 70,36 C72,30 74,28 76,30Z" class="muscle-group" data-muscle="triceps"/>
-                    <path d="M22,58 C20,64 20,72 22,78 C24,82 27,83 28,80 C29,76 29,68 27,62 C26,58 24,56 22,58Z" class="muscle-group" data-muscle="forearms"/>
-                    <path d="M78,58 C80,64 80,72 78,78 C76,82 73,83 72,80 C71,76 71,68 73,62 C74,58 76,56 78,58Z" class="muscle-group" data-muscle="forearms"/>
-                    <path d="M33,78 C29,84 28,92 31,98 C34,103 40,104 44,100 C47,96 48,88 46,82 C44,77 38,75 33,78Z" class="muscle-group" data-muscle="glutes"/>
-                    <path d="M67,78 C71,84 72,92 69,98 C66,103 60,104 56,100 C53,96 52,88 54,82 C56,77 62,75 67,78Z" class="muscle-group" data-muscle="glutes"/>
-                    <path d="M30,100 C27,108 26,120 28,130 C30,138 34,142 38,140 C42,138 44,130 43,120 C42,110 39,102 35,98Z" class="muscle-group" data-muscle="hamstrings"/>
-                    <path d="M70,100 C73,108 74,120 72,130 C70,138 66,142 62,140 C58,138 56,130 57,120 C58,110 61,102 65,98Z" class="muscle-group" data-muscle="hamstrings"/>
-                    <path d="M28,142 C26,148 26,156 28,162 C30,166 34,167 37,164 C39,160 40,152 38,146 C36,142 32,140 28,142Z" class="muscle-group" data-muscle="calves"/>
-                    <path d="M72,142 C74,148 74,156 72,162 C70,166 66,167 63,164 C61,160 60,152 62,146 C64,142 68,140 72,142Z" class="muscle-group" data-muscle="calves"/>
+                    <!-- Traps -->
+                    <ellipse cx="42" cy="26" rx="7" ry="5" class="muscle-group" data-muscle="traps"/>
+                    <ellipse cx="58" cy="26" rx="7" ry="5" class="muscle-group" data-muscle="traps"/>
+                    <!-- Shoulders -->
+                    <ellipse cx="30" cy="32" rx="8" ry="6" class="muscle-group" data-muscle="shoulders"/>
+                    <ellipse cx="70" cy="32" rx="8" ry="6" class="muscle-group" data-muscle="shoulders"/>
+                    <!-- Lats -->
+                    <ellipse cx="36" cy="44" rx="7" ry="12" class="muscle-group" data-muscle="lats"/>
+                    <ellipse cx="64" cy="44" rx="7" ry="12" class="muscle-group" data-muscle="lats"/>
+                    <!-- Triceps -->
+                    <ellipse cx="24" cy="44" rx="5" ry="10" class="muscle-group" data-muscle="triceps"/>
+                    <ellipse cx="76" cy="44" rx="5" ry="10" class="muscle-group" data-muscle="triceps"/>
+                    <!-- Lower back -->
+                    <rect x="43" y="50" width="14" height="12" rx="4" class="muscle-group" data-muscle="lower-back"/>
+                    <!-- Forearms -->
+                    <ellipse cx="20" cy="60" rx="4" ry="8" class="muscle-group" data-muscle="forearms"/>
+                    <ellipse cx="80" cy="60" rx="4" ry="8" class="muscle-group" data-muscle="forearms"/>
+                    <!-- Glutes -->
+                    <ellipse cx="42" cy="68" rx="9" ry="7" class="muscle-group" data-muscle="glutes"/>
+                    <ellipse cx="58" cy="68" rx="9" ry="7" class="muscle-group" data-muscle="glutes"/>
+                    <!-- Hamstrings -->
+                    <ellipse cx="42" cy="88" rx="7" ry="14" class="muscle-group" data-muscle="hamstrings"/>
+                    <ellipse cx="58" cy="88" rx="7" ry="14" class="muscle-group" data-muscle="hamstrings"/>
+                    <!-- Calves -->
+                    <ellipse cx="40" cy="114" rx="5" ry="12" class="muscle-group" data-muscle="calves"/>
+                    <ellipse cx="60" cy="114" rx="5" ry="12" class="muscle-group" data-muscle="calves"/>
                   </svg>
                 </div>
               </div>

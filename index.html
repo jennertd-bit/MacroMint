@@ -1407,11 +1407,17 @@
             body: JSON.stringify({ image: base64, mimeType, goal: goalSelect?.value || "balanced" }),
           });
           const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || "AI error");
+          if (!res.ok || data.error) {
+            const msg = data.error || "AI error";
+            if (msg.includes("API key not configured")) {
+              throw new Error("OpenAI key not set in Netlify — add OPENAI_API_KEY in Site settings → Environment variables, then redeploy.");
+            }
+            throw new Error(msg);
+          }
           setStatus("", false);
           renderRecipe(data);
         } catch (err) {
-          setStatus("Couldn't generate recipe: " + (err.message || "unknown error"), true);
+          setStatus("❌ " + (err.message || "Unknown error"), true);
         } finally {
           btn.disabled = false;
           btnText.textContent = "✨ Generate Recipe";

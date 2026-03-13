@@ -282,7 +282,29 @@
       // Mark onboarded
       localStorage.setItem(ONBOARD_KEY, "1");
 
-      // Show success
+      // Start Stripe Checkout for 7-day free trial → paid subscription
+      if (data.accessToken) {
+        try {
+          btn.textContent = "Starting trial…";
+          const checkoutRes = await fetch(`${API_BASE()}/v1/billing/checkout`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data.accessToken}`,
+            },
+          });
+          const checkoutData = await checkoutRes.json();
+          if (checkoutRes.ok && checkoutData.url) {
+            // Redirect to Stripe Checkout — collects payment method, starts 7-day trial
+            window.location.href = checkoutData.url;
+            return;
+          }
+        } catch (_) {
+          // Stripe checkout failed — continue to app, user can subscribe later
+        }
+      }
+
+      // Fallback: show success if Stripe redirect didn't happen
       showStep("success");
     } catch (err) {
       showError(err.message || "Something went wrong. Please try again.");

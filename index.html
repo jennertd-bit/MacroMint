@@ -841,8 +841,8 @@
                   <option value="plant-based">Plant-Based</option>
                   <option value="quick">Quick (under 20 min)</option>
                 </select>
-                <button id="fridge-magic-btn" class="button fridge-magic-btn" type="button" disabled>
-                  <span id="fridge-magic-btn-text">📷 Add Photo First</span>
+                <button id="fridge-magic-btn" class="button fridge-magic-btn" type="button">
+                  <span id="fridge-magic-btn-text">📷 Take Photo</span>
                 </button>
               </div>
               <div id="fridge-status" class="fridge-status" hidden></div>
@@ -1310,10 +1310,13 @@
       let lastRecipe   = null;
       let photoBase64  = null;   // base64 data URL of captured image
 
-      // ── Photo capture ──
+      // ── Open camera ──
+      function openCamera() { photoInput.click(); }
+
+      // ── Photo zone tap → open camera ──
       photoZone.addEventListener("click", e => {
         if (e.target === retakeBtn) return;
-        photoInput.click();
+        openCamera();
       });
 
       retakeBtn?.addEventListener("click", e => {
@@ -1323,8 +1326,7 @@
         preview.src = "";
         retakeBtn.hidden = true;
         placeholder.hidden = false;
-        btn.disabled = true;
-        btnText.textContent = "📷 Add Photo First";
+        btnText.textContent = "📷 Take Photo";
         resultWrap.hidden = true;
         setStatus("", false);
       });
@@ -1339,7 +1341,6 @@
           preview.hidden = false;
           placeholder.hidden = true;
           retakeBtn.hidden = false;
-          btn.disabled = false;
           btnText.textContent = "✨ Generate Recipe";
         };
         reader.readAsDataURL(file);
@@ -1382,7 +1383,7 @@
 
       // ── Generate via vision API ──
       async function generateRecipe() {
-        if (!photoBase64) { setStatus("Snap a photo of your ingredients first!", true); return; }
+        if (!photoBase64) { openCamera(); return; }
 
         btn.disabled = true;
         btnText.textContent = "✨ Analyzing…";
@@ -1412,12 +1413,24 @@
         }
       }
 
-      btn.addEventListener("click", generateRecipe);
+      btn.addEventListener("click", () => {
+        if (!photoBase64) {
+          openCamera();   // no photo yet → open camera
+        } else {
+          generateRecipe();
+        }
+      });
 
       // ── Save card as photo ──
       document.getElementById("fridge-save-photo-btn")?.addEventListener("click", () => {
         const card = document.getElementById("fridge-result-card");
-        if (!card || typeof html2canvas === "undefined") return;
+        if (!card) return;
+        if (typeof html2canvas === "undefined") {
+          setStatus("Save feature still loading — try again in a moment.", true);
+          return;
+        }
+        const saveBtn = document.getElementById("fridge-save-photo-btn");
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "⏳ Saving…"; }
         html2canvas(card, { backgroundColor: "#0d1117", scale: 2, useCORS: true, logging: false })
           .then(canvas => {
             const link = document.createElement("a");
@@ -1425,10 +1438,14 @@
             link.download = "macromint-" + safeName + ".png";
             link.href = canvas.toDataURL("image/png");
             link.click();
+          })
+          .catch(() => setStatus("Couldn't save image — try a screenshot instead.", true))
+          .finally(() => {
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "📸 Save Card"; }
           });
       });
 
-      // ── Add to Today's log ──
+      // ── Add to Today's log — fills fields + calls addMealToLog directly ──
       document.getElementById("fridge-add-log-btn")?.addEventListener("click", () => {
         if (!lastRecipe) return;
         const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
@@ -1436,12 +1453,21 @@
         setVal("label-protein",  Math.round(lastRecipe.protein  || 0));
         setVal("label-carbs",    Math.round(lastRecipe.carbs    || 0));
         setVal("label-fat",      Math.round(lastRecipe.fat      || 0));
-        setVal("meal-name", lastRecipe.name || "AI Recipe");
+        setVal("meal-name",      lastRecipe.name || "AI Recipe");
+        // Fire input events so updateMealSummary picks up the new values
         ["label-calories","label-protein","label-carbs","label-fat"].forEach(id => {
           document.getElementById(id)?.dispatchEvent(new Event("input", { bubbles: true }));
         });
-        document.querySelector('.scanner-tab[data-tab="photo"]')?.click();
-        setTimeout(() => document.getElementById("add-meal")?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+        // Directly log the meal without requiring extra user interaction
+        if (typeof addMealToLog === "function") {
+          addMealToLog();
+          closeModal();
+          setStatus("", false);
+        } else {
+          // Fallback: switch to food entry tab so user can confirm
+          document.querySelector('.scanner-tab[data-tab="photo"]')?.click();
+          setTimeout(() => document.getElementById("add-meal")?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+        }
       });
 
       // ── Save to Pantry ──
@@ -1454,11 +1480,13 @@
           setVal("label-carbs",    Math.round(lastRecipe.carbs    || 0));
           setVal("label-fat",      Math.round(lastRecipe.fat      || 0));
           setVal("label-serving",  "1 serving");
-          const pn = document.getElementById("product-name");
-          if (pn) pn.textContent = lastRecipe.name || "AI Recipe";
+          // ← Fix: set meal-name input (what saveFoodToLibrary actually reads)
+          setVal("meal-name", lastRecipe.name || "AI Recipe");
           saveFoodToLibrary();
           setStatus("✅ Saved to Pantry!", false);
           setTimeout(() => setStatus("", false), 3000);
+        } else {
+          setStatus("Pantry not available — try refreshing.", true);
         }
       });
     })();

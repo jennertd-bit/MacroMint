@@ -1,5 +1,6 @@
 // netlify/functions/fridge-magic.js
-// Receives ingredients + goal, calls OpenAI, returns structured recipe JSON
+// Receives a base64 photo of ingredients + goal, uses OpenAI Vision (GPT-4o)
+// to identify ingredients and generate a structured recipe JSON.
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -16,9 +17,9 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON body." }) };
   }
 
-  const { ingredients, goal } = body;
-  if (!ingredients || !ingredients.trim()) {
-    return { statusCode: 400, body: JSON.stringify({ error: "No ingredients provided." }) };
+  const { image, mimeType, goal } = body;
+  if (!image) {
+    return { statusCode: 400, body: JSON.stringify({ error: "No image provided." }) };
   }
 
   const goalMap = {
@@ -29,8 +30,12 @@ exports.handler = async (event) => {
     "quick":       "a quick meal ready in under 20 minutes",
   };
   const goalDesc = goalMap[goal] || "a balanced, nutritious meal";
+  const imgMime  = mimeType || "image/jpeg";
 
-  const prompt = `You are a professional nutritionist chef. Given these ingredients: "${ingredients.trim()}", create ${goalDesc}.
+  const textPrompt = `You are a professional nutritionist chef. Look at this photo of ingredients in someone's fridge or kitchen.
+
+1. Identify ALL visible food ingredients in the photo.
+2. Using those ingredients (plus minimal pantry staples like oil, salt, spices), create ${goalDesc}.
 
 Return ONLY valid JSON in exactly this format (no markdown, no explanation):
 {
@@ -50,14 +55,14 @@ Return ONLY valid JSON in exactly this format (no markdown, no explanation):
   ],
   "steps": [
     "Season chicken and cook on medium heat 6 min per side.",
-    "Cook rice per directions.",
+    "Cook rice per package directions.",
     "Steam broccoli 4 min.",
     "Plate and drizzle olive oil."
   ]
 }
 
 Rules:
-- Use only ingredients provided (add minimal pantry staples like oil, salt, spices).
+- Use only ingredients visible in the photo (add minimal pantry staples like oil, salt, spices).
 - Make it genuinely healthy and delicious.
 - Calories and macros must be realistic estimates for 1 serving.
 - Emoji should match the dish visually.
@@ -71,9 +76,26 @@ Rules:
         "Authorization": `Bearer ${OPENAI_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 600,
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${imgMime};base64,${image}`,
+                  detail: "high",
+                },
+              },
+              {
+                type: "text",
+                text: textPrompt,
+              },
+            ],
+          },
+        ],
+        max_tokens: 700,
         temperature: 0.7,
       }),
     });
@@ -87,7 +109,11 @@ Rules:
     const raw = data.choices?.[0]?.message?.content?.trim() || "";
 
     // Strip possible markdown fences
-    const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+    const cleaned = raw
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
 
     let recipe;
     try { recipe = JSON.parse(cleaned); }

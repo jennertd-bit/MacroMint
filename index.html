@@ -817,25 +817,33 @@
                 <span class="fridge-magic-icon">✨</span>
                 <div>
                   <h4 class="fridge-magic-title">Fridge Magic</h4>
-                  <p class="muted" style="margin:0;font-size:0.8rem">List what's in your fridge — AI builds you a clean, healthy recipe.</p>
+                  <p class="muted" style="margin:0;font-size:0.8rem">Snap a photo of your ingredients — AI sees what you have and builds a recipe.</p>
                 </div>
               </div>
-              <div class="fridge-magic-input-wrap">
-                <textarea id="fridge-ingredients" class="fridge-ingredients-input"
-                  placeholder="e.g. chicken breast, broccoli, garlic, olive oil, brown rice, lemon…"
-                  rows="3"></textarea>
-                <div class="fridge-options-row">
-                  <select id="fridge-goal" class="fridge-select">
-                    <option value="balanced">Balanced</option>
-                    <option value="high-protein">High Protein</option>
-                    <option value="low-carb">Low Carb</option>
-                    <option value="plant-based">Plant-Based</option>
-                    <option value="quick">Quick (under 20 min)</option>
-                  </select>
-                  <button id="fridge-magic-btn" class="button fridge-magic-btn" type="button">
-                    <span id="fridge-magic-btn-text">✨ Generate Recipe</span>
-                  </button>
+              <!-- Camera capture -->
+              <div class="fridge-photo-zone" id="fridge-photo-zone">
+                <input id="fridge-photo-input" type="file" accept="image/*" capture="environment" hidden />
+                <div class="fridge-photo-placeholder" id="fridge-photo-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="36" height="36">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                  <span>Tap to take a photo or choose from library</span>
                 </div>
+                <img id="fridge-photo-preview" class="fridge-photo-preview" hidden alt="Ingredient preview" />
+                <button id="fridge-photo-retake" class="fridge-retake-btn" hidden type="button">📷 Retake</button>
+              </div>
+              <div class="fridge-options-row">
+                <select id="fridge-goal" class="fridge-select">
+                  <option value="balanced">Balanced</option>
+                  <option value="high-protein">High Protein</option>
+                  <option value="low-carb">Low Carb</option>
+                  <option value="plant-based">Plant-Based</option>
+                  <option value="quick">Quick (under 20 min)</option>
+                </select>
+                <button id="fridge-magic-btn" class="button fridge-magic-btn" type="button" disabled>
+                  <span id="fridge-magic-btn-text">📷 Add Photo First</span>
+                </button>
               </div>
               <div id="fridge-status" class="fridge-status" hidden></div>
               <!-- Generated recipe output -->
@@ -1285,18 +1293,60 @@
       });
     })();
 
-    // ─── Fridge Magic ──────────────────────────────────────
+    // ─── Fridge Magic (photo → AI vision → recipe) ─────────
     (function() {
-      const btn        = document.getElementById("fridge-magic-btn");
-      const btnText    = document.getElementById("fridge-magic-btn-text");
-      const textarea   = document.getElementById("fridge-ingredients");
-      const goalSelect = document.getElementById("fridge-goal");
-      const statusEl   = document.getElementById("fridge-status");
-      const resultWrap = document.getElementById("fridge-result");
-      if (!btn) return;
+      const btn         = document.getElementById("fridge-magic-btn");
+      const btnText     = document.getElementById("fridge-magic-btn-text");
+      const photoInput  = document.getElementById("fridge-photo-input");
+      const photoZone   = document.getElementById("fridge-photo-zone");
+      const placeholder = document.getElementById("fridge-photo-placeholder");
+      const preview     = document.getElementById("fridge-photo-preview");
+      const retakeBtn   = document.getElementById("fridge-photo-retake");
+      const goalSelect  = document.getElementById("fridge-goal");
+      const statusEl    = document.getElementById("fridge-status");
+      const resultWrap  = document.getElementById("fridge-result");
+      if (!btn || !photoInput) return;
 
-      let lastRecipe = null;
+      let lastRecipe   = null;
+      let photoBase64  = null;   // base64 data URL of captured image
 
+      // ── Photo capture ──
+      photoZone.addEventListener("click", e => {
+        if (e.target === retakeBtn) return;
+        photoInput.click();
+      });
+
+      retakeBtn?.addEventListener("click", e => {
+        e.stopPropagation();
+        photoBase64 = null;
+        preview.hidden = true;
+        preview.src = "";
+        retakeBtn.hidden = true;
+        placeholder.hidden = false;
+        btn.disabled = true;
+        btnText.textContent = "📷 Add Photo First";
+        resultWrap.hidden = true;
+        setStatus("", false);
+      });
+
+      photoInput.addEventListener("change", () => {
+        const file = photoInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          photoBase64 = e.target.result;           // full data URL
+          preview.src = photoBase64;
+          preview.hidden = false;
+          placeholder.hidden = true;
+          retakeBtn.hidden = false;
+          btn.disabled = false;
+          btnText.textContent = "✨ Generate Recipe";
+        };
+        reader.readAsDataURL(file);
+        photoInput.value = "";                     // reset so same file can be reselected
+      });
+
+      // ── Status helper ──
       function setStatus(msg, isErr) {
         if (!statusEl) return;
         statusEl.hidden = !msg;
@@ -1304,15 +1354,16 @@
         statusEl.className = "fridge-status" + (isErr ? " fridge-status--error" : "");
       }
 
+      // ── Render result ──
       function renderRecipe(r) {
         lastRecipe = r;
-        document.getElementById("fridge-result-emoji").textContent = r.emoji || "🍽️";
-        document.getElementById("fridge-result-name").textContent  = r.name  || "AI Recipe";
-        document.getElementById("fridge-result-time").textContent  = "⏱ " + (r.time || "—");
-        document.getElementById("fridge-result-serves").textContent= "👤 " + (r.serves || 1) + " serving";
-        document.getElementById("fridge-chip-p").textContent = "P " + Math.round(r.protein || 0) + "g";
-        document.getElementById("fridge-chip-c").textContent = "C " + Math.round(r.carbs   || 0) + "g";
-        document.getElementById("fridge-chip-f").textContent = "F " + Math.round(r.fat     || 0) + "g";
+        document.getElementById("fridge-result-emoji").textContent  = r.emoji || "🍽️";
+        document.getElementById("fridge-result-name").textContent   = r.name  || "AI Recipe";
+        document.getElementById("fridge-result-time").textContent   = "⏱ " + (r.time || "—");
+        document.getElementById("fridge-result-serves").textContent = "👤 " + (r.serves || 1) + " serving";
+        document.getElementById("fridge-chip-p").textContent = "P " + Math.round(r.protein  || 0) + "g";
+        document.getElementById("fridge-chip-c").textContent = "C " + Math.round(r.carbs    || 0) + "g";
+        document.getElementById("fridge-chip-f").textContent = "F " + Math.round(r.fat      || 0) + "g";
         document.getElementById("fridge-chip-k").textContent = Math.round(r.calories || 0) + " kcal";
 
         const ingList = document.getElementById("fridge-result-ingredients");
@@ -1320,31 +1371,34 @@
         (r.ingredients || []).forEach(ing => {
           const li = document.createElement("li"); li.textContent = ing; ingList.appendChild(li);
         });
-
         const stepsList = document.getElementById("fridge-result-steps");
         stepsList.innerHTML = "";
         (r.steps || []).forEach(step => {
           const li = document.createElement("li"); li.textContent = step; stepsList.appendChild(li);
         });
-
         resultWrap.hidden = false;
         setTimeout(() => resultWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
       }
 
+      // ── Generate via vision API ──
       async function generateRecipe() {
-        const ingredients = textarea?.value?.trim() || "";
-        if (!ingredients) { setStatus("Add some ingredients first!", true); return; }
+        if (!photoBase64) { setStatus("Snap a photo of your ingredients first!", true); return; }
 
         btn.disabled = true;
-        btnText.textContent = "✨ Conjuring…";
-        setStatus("Asking AI for your perfect recipe…", false);
+        btnText.textContent = "✨ Analyzing…";
+        setStatus("AI is identifying your ingredients and building a recipe…", false);
         resultWrap.hidden = true;
+
+        // Strip data URL prefix → pure base64
+        const base64 = photoBase64.includes(",") ? photoBase64.split(",")[1] : photoBase64;
+        const mimeMatch = photoBase64.match(/^data:(image\/\w+);/);
+        const mimeType  = mimeMatch ? mimeMatch[1] : "image/jpeg";
 
         try {
           const res = await fetch("/.netlify/functions/fridge-magic", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ingredients, goal: goalSelect?.value || "balanced" }),
+            body: JSON.stringify({ image: base64, mimeType, goal: goalSelect?.value || "balanced" }),
           });
           const data = await res.json();
           if (!res.ok || data.error) throw new Error(data.error || "AI error");
@@ -1359,11 +1413,8 @@
       }
 
       btn.addEventListener("click", generateRecipe);
-      textarea?.addEventListener("keydown", e => {
-        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); generateRecipe(); }
-      });
 
-      // Save card as photo
+      // ── Save card as photo ──
       document.getElementById("fridge-save-photo-btn")?.addEventListener("click", () => {
         const card = document.getElementById("fridge-result-card");
         if (!card || typeof html2canvas === "undefined") return;
@@ -1377,10 +1428,9 @@
           });
       });
 
-      // Add to Today's log
+      // ── Add to Today's log ──
       document.getElementById("fridge-add-log-btn")?.addEventListener("click", () => {
         if (!lastRecipe) return;
-        // Fill in the Scan Insights fields and switch to photo tab
         const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
         setVal("label-calories", Math.round(lastRecipe.calories || 0));
         setVal("label-protein",  Math.round(lastRecipe.protein  || 0));
@@ -1394,18 +1444,16 @@
         setTimeout(() => document.getElementById("add-meal")?.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
       });
 
-      // Save to Pantry
+      // ── Save to Pantry ──
       document.getElementById("fridge-save-pantry-btn")?.addEventListener("click", () => {
         if (!lastRecipe) return;
         if (typeof saveFoodToLibrary === "function") {
-          // Fill fields and trigger save
           const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
           setVal("label-calories", Math.round(lastRecipe.calories || 0));
           setVal("label-protein",  Math.round(lastRecipe.protein  || 0));
           setVal("label-carbs",    Math.round(lastRecipe.carbs    || 0));
           setVal("label-fat",      Math.round(lastRecipe.fat      || 0));
           setVal("label-serving",  "1 serving");
-          // Use meal name via the product name field
           const pn = document.getElementById("product-name");
           if (pn) pn.textContent = lastRecipe.name || "AI Recipe";
           saveFoodToLibrary();

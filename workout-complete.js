@@ -67,115 +67,207 @@
     cardio:       ["svg-quad-l", "svg-quad-r", "svg-ham-l", "svg-ham-r", "svg-calf-l", "svg-calf-r"],
   };
 
-  // ── Build the muscle SVG ───────────────────────────────────────────────────
+  // ── Build the muscle SVG — modern athletic silhouette ─────────────────────
   function buildMuscleSVG() {
     return `
-    <svg id="muscle-svg" viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;filter:drop-shadow(0 0 18px rgba(0,229,204,0.15))">
+    <svg id="muscle-svg" viewBox="0 0 160 380" xmlns="http://www.w3.org/2000/svg"
+         style="width:100%;max-width:190px;filter:drop-shadow(0 0 20px rgba(0,229,204,0.12))">
       <defs>
-        <filter id="glow-teal" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="glow-teal" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <radialGradient id="grad-teal" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#00e5cc" stop-opacity="1"/>
-          <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.7"/>
-        </radialGradient>
-        <radialGradient id="grad-orange" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f97316" stop-opacity="1"/>
-          <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.7"/>
-        </radialGradient>
+        <linearGradient id="body-base" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a2535"/>
+          <stop offset="100%" stop-color="#111827"/>
+        </linearGradient>
+        <linearGradient id="grad-teal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00e5cc"/>
+          <stop offset="100%" stop-color="#06b6d4"/>
+        </linearGradient>
       </defs>
 
-      <!-- ── Body silhouette ── -->
+      <!-- ── BASE SILHOUETTE ─────────────────────────────────────────── -->
+
       <!-- Head -->
-      <ellipse cx="100" cy="35" rx="22" ry="25" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <ellipse cx="80" cy="22" rx="16" ry="19" fill="#1e2d3d" stroke="#2d4057" stroke-width="1.2"/>
       <!-- Neck -->
-      <rect x="91" y="57" width="18" height="18" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-      <!-- Torso -->
-      <path d="M58 75 Q50 95 48 130 Q46 170 52 200 Q60 210 100 212 Q140 210 148 200 Q154 170 152 130 Q150 95 142 75 Q122 68 100 68 Q78 68 58 75Z" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
-      <!-- Hips -->
-      <path d="M58 200 Q55 215 58 230 Q70 240 100 242 Q130 240 142 230 Q145 215 142 200Z" fill="#1a2235" stroke="#334155" stroke-width="1"/>
-      <!-- Left Upper Arm -->
-      <path d="M58 78 Q42 85 38 115 Q36 130 42 142 Q50 148 58 140 Q62 128 62 110 Q63 92 58 78Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Right Upper Arm -->
-      <path d="M142 78 Q158 85 162 115 Q164 130 158 142 Q150 148 142 140 Q138 128 138 110 Q137 92 142 78Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Left Forearm -->
-      <path d="M42 144 Q36 158 36 178 Q37 192 44 196 Q52 198 56 188 Q60 175 58 158 Q58 148 52 144Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Right Forearm -->
-      <path d="M158 144 Q164 158 164 178 Q163 192 156 196 Q148 198 144 188 Q140 175 142 158 Q142 148 148 144Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Left Thigh -->
-      <path d="M60 230 Q55 255 56 285 Q58 310 65 318 Q76 324 84 316 Q90 305 88 280 Q86 255 84 230Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Right Thigh -->
-      <path d="M140 230 Q145 255 144 285 Q142 310 135 318 Q124 324 116 316 Q110 305 112 280 Q114 255 116 230Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Left Calf -->
-      <path d="M65 320 Q62 340 63 360 Q65 378 70 384 Q78 390 84 382 Q88 370 88 352 Q88 334 86 320Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
-      <!-- Right Calf -->
-      <path d="M135 320 Q138 340 137 360 Q135 378 130 384 Q122 390 116 382 Q112 370 112 352 Q112 334 114 320Z" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
+      <path d="M73 38 C73 44 87 44 87 38 L87 48 C87 52 73 52 73 48Z" fill="#1a2535" stroke="#2d4057" stroke-width="1"/>
 
-      <!-- ── MUSCLE GROUPS (start all dim, glow when active) ── -->
+      <!-- Torso — V-taper shape -->
+      <path d="M47 56 C40 68 36 90 35 115 C34 140 36 165 40 185 C44 200 58 208 80 210 C102 208 116 200 120 185 C124 165 126 140 125 115 C124 90 120 68 113 56 C104 52 56 52 47 56Z"
+            fill="url(#body-base)" stroke="#2d4057" stroke-width="1.2"/>
 
-      <!-- Traps -->
-      <path id="svg-trap-l" class="muscle-part" d="M82 68 Q72 72 64 80 Q70 88 80 85 Q88 80 88 72Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-trap-r" class="muscle-part" d="M118 68 Q128 72 136 80 Q130 88 120 85 Q112 80 112 72Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Hips / pelvis -->
+      <path d="M43 200 C42 212 44 224 48 232 C58 242 80 244 80 244 C80 244 102 242 112 232 C116 224 118 212 117 200Z"
+            fill="#151f2e" stroke="#2d4057" stroke-width="1"/>
 
-      <!-- Shoulders -->
-      <ellipse id="svg-shoulder-l" class="muscle-part" cx="53" cy="85" rx="11" ry="9" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(-15,53,85)"/>
-      <ellipse id="svg-shoulder-r" class="muscle-part" cx="147" cy="85" rx="11" ry="9" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(15,147,85)"/>
+      <!-- Left upper arm -->
+      <path d="M47 58 C38 62 32 78 30 98 C28 114 30 128 36 136 C42 142 50 140 54 132 C58 120 58 102 56 84 C55 70 52 58 47 58Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1.1"/>
+      <!-- Right upper arm -->
+      <path d="M113 58 C122 62 128 78 130 98 C132 114 130 128 124 136 C118 142 110 140 106 132 C102 120 102 102 104 84 C105 70 108 58 113 58Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1.1"/>
 
-      <!-- Chest (pecs) -->
-      <path id="svg-chest-l" class="muscle-part" d="M72 82 Q62 88 60 105 Q60 118 68 122 Q80 124 88 115 Q92 105 90 90 Q84 80 72 82Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-chest-r" class="muscle-part" d="M128 82 Q138 88 140 105 Q140 118 132 122 Q120 124 112 115 Q108 105 110 90 Q116 80 128 82Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Left forearm -->
+      <path d="M36 138 C30 150 28 166 30 180 C32 192 38 198 44 196 C50 194 54 184 54 172 C54 158 52 144 46 138Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1"/>
+      <!-- Right forearm -->
+      <path d="M124 138 C130 150 132 166 130 180 C128 192 122 198 116 196 C110 194 106 184 106 172 C106 158 108 144 114 138Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1"/>
 
-      <!-- Lats -->
-      <path id="svg-lat-l" class="muscle-part" d="M56 100 Q50 120 50 145 Q54 160 62 162 Q70 162 72 148 Q74 130 70 108 Q66 96 56 100Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-lat-r" class="muscle-part" d="M144 100 Q150 120 150 145 Q146 160 138 162 Q130 162 128 148 Q126 130 130 108 Q134 96 144 100Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Left thigh -->
+      <path d="M46 232 C40 250 38 274 40 296 C42 314 50 326 60 328 C70 330 78 320 80 306 C80 290 78 266 74 246 C70 232 60 228 46 232Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1.1"/>
+      <!-- Right thigh -->
+      <path d="M114 232 C120 250 122 274 120 296 C118 314 110 326 100 328 C90 330 82 320 80 306 C80 290 82 266 86 246 C90 232 100 228 114 232Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1.1"/>
 
-      <!-- Biceps -->
-      <ellipse id="svg-bicep-l" class="muscle-part" cx="48" cy="112" rx="7" ry="14" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(-10,48,112)"/>
-      <ellipse id="svg-bicep-r" class="muscle-part" cx="152" cy="112" rx="7" ry="14" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(10,152,112)"/>
+      <!-- Left calf -->
+      <path d="M40 330 C37 346 38 362 41 372 C45 380 56 382 62 376 C68 370 70 356 68 340 C66 328 58 324 50 326 C44 328 42 330 40 330Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1"/>
+      <!-- Right calf -->
+      <path d="M120 330 C123 346 122 362 119 372 C115 380 104 382 98 376 C92 370 90 356 92 340 C94 328 102 324 110 326 C116 328 118 330 120 330Z"
+            fill="#1a2535" stroke="#2d4057" stroke-width="1"/>
 
-      <!-- Triceps (visible from front as outer arm) -->
-      <path id="svg-tricep-l" class="muscle-part" d="M42 100 Q36 112 36 128 Q38 140 44 140 Q50 138 52 126 Q54 112 50 100Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-tricep-r" class="muscle-part" d="M158 100 Q164 112 164 128 Q162 140 156 140 Q150 138 148 126 Q146 112 150 100Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
 
-      <!-- Forearms -->
-      <ellipse id="svg-forearm-l" class="muscle-part" cx="44" cy="170" rx="7" ry="16" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(-5,44,170)"/>
-      <ellipse id="svg-forearm-r" class="muscle-part" cx="156" cy="170" rx="7" ry="16" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1" transform="rotate(5,156,170)"/>
+      <!-- ── MUSCLE GROUPS — clean organic shapes ────────────────────── -->
 
-      <!-- Abs (6-pack: 3 rows × 2 cols) -->
-      <rect id="svg-abs-1" class="muscle-part" x="83" y="128" width="13" height="12" rx="4" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <rect id="svg-abs-2" class="muscle-part" x="104" y="128" width="13" height="12" rx="4" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <rect id="svg-abs-3" class="muscle-part" x="83" y="143" width="13" height="12" rx="4" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <rect id="svg-abs-4" class="muscle-part" x="104" y="143" width="13" height="12" rx="4" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <rect id="svg-abs-5" class="muscle-part" x="84" y="158" width="12" height="10" rx="3" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <rect id="svg-abs-6" class="muscle-part" x="104" y="158" width="12" height="10" rx="3" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Traps — diamond ridge at neck base -->
+      <path id="svg-trap-l" class="muscle-part"
+            d="M68 50 C62 54 54 60 50 68 C56 72 66 70 72 64 C74 60 72 54 68 50Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-trap-r" class="muscle-part"
+            d="M92 50 C98 54 106 60 110 68 C104 72 94 70 88 64 C86 60 88 54 92 50Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
 
-      <!-- Obliques -->
-      <path id="svg-oblique-l" class="muscle-part" d="M70 128 Q62 140 60 160 Q62 175 68 178 Q74 176 76 162 Q78 148 74 132Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-oblique-r" class="muscle-part" d="M130 128 Q138 140 140 160 Q138 175 132 178 Q126 176 124 162 Q122 148 126 132Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Shoulders — rounded cap over deltoid -->
+      <path id="svg-shoulder-l" class="muscle-part"
+            d="M46 58 C38 60 30 68 28 80 C28 90 34 96 42 92 C50 88 54 76 54 66 C54 60 50 56 46 58Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-shoulder-r" class="muscle-part"
+            d="M114 58 C122 60 130 68 132 80 C132 90 126 96 118 92 C110 88 106 76 106 66 C106 60 110 56 114 58Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
 
-      <!-- Lower Back -->
-      <path id="svg-lower-back" class="muscle-part" d="M84 185 Q84 200 100 202 Q116 200 116 185 Q108 180 100 180 Q92 180 84 185Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Chest — left pec -->
+      <path id="svg-chest-l" class="muscle-part"
+            d="M50 64 C42 70 38 84 40 98 C42 110 50 116 60 114 C70 112 76 102 76 90 C76 76 68 62 56 62 C54 62 52 62 50 64Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <!-- Chest — right pec -->
+      <path id="svg-chest-r" class="muscle-part"
+            d="M110 64 C118 70 122 84 120 98 C118 110 110 116 100 114 C90 112 84 102 84 90 C84 76 92 62 104 62 C106 62 108 62 110 64Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Lats — sweeping wing from armpit -->
+      <path id="svg-lat-l" class="muscle-part"
+            d="M42 84 C36 100 34 124 36 148 C38 160 44 166 52 162 C58 160 62 148 62 134 C62 116 58 96 50 84 C46 78 44 80 42 84Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-lat-r" class="muscle-part"
+            d="M118 84 C124 100 126 124 124 148 C122 160 116 166 108 162 C102 160 98 148 98 134 C98 116 102 96 110 84 C114 78 116 80 118 84Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Biceps — peak on upper arm front -->
+      <path id="svg-bicep-l" class="muscle-part"
+            d="M32 88 C28 100 28 116 32 128 C36 138 44 140 50 134 C54 126 54 112 50 100 C46 90 38 84 32 88Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-bicep-r" class="muscle-part"
+            d="M128 88 C132 100 132 116 128 128 C124 138 116 140 110 134 C106 126 106 112 110 100 C114 90 122 84 128 88Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Triceps — outer horseshoe of upper arm -->
+      <path id="svg-tricep-l" class="muscle-part"
+            d="M36 72 C30 84 28 104 30 120 C32 130 38 134 44 130 C48 126 50 114 48 100 C46 86 42 72 36 72Z"
+            fill="#192f42" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-tricep-r" class="muscle-part"
+            d="M124 72 C130 84 132 104 130 120 C128 130 122 134 116 130 C112 126 110 114 112 100 C114 86 118 72 124 72Z"
+            fill="#192f42" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Forearms — tapered lower arm -->
+      <path id="svg-forearm-l" class="muscle-part"
+            d="M30 142 C26 156 26 172 28 184 C30 194 36 198 42 196 C48 194 52 184 52 172 C52 158 48 144 42 140 C36 138 32 140 30 142Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-forearm-r" class="muscle-part"
+            d="M130 142 C134 156 134 172 132 184 C130 194 124 198 118 196 C112 194 108 184 108 172 C108 158 112 144 118 140 C124 138 128 140 130 142Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Abs — 3 pairs of defined blocks -->
+      <path id="svg-abs-1" class="muscle-part"
+            d="M66 118 C64 124 65 132 68 136 C72 138 76 136 77 130 C78 124 76 118 72 116 C69 115 67 116 66 118Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-abs-2" class="muscle-part"
+            d="M94 118 C96 124 95 132 92 136 C88 138 84 136 83 130 C82 124 84 118 88 116 C91 115 93 116 94 118Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-abs-3" class="muscle-part"
+            d="M65 140 C63 147 64 155 68 159 C72 161 76 159 77 153 C78 146 76 140 72 138 C69 137 66 138 65 140Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-abs-4" class="muscle-part"
+            d="M95 140 C97 147 96 155 92 159 C88 161 84 159 83 153 C82 146 84 140 88 138 C91 137 94 138 95 140Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-abs-5" class="muscle-part"
+            d="M66 163 C64 170 65 177 69 180 C73 182 77 179 78 173 C78 167 76 161 72 160 C69 159 67 161 66 163Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-abs-6" class="muscle-part"
+            d="M94 163 C96 170 95 177 91 180 C87 182 83 179 82 173 C82 167 84 161 88 160 C91 159 93 161 94 163Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Obliques — flanks -->
+      <path id="svg-oblique-l" class="muscle-part"
+            d="M40 120 C36 134 36 156 38 172 C40 182 46 186 52 182 C56 178 58 166 56 152 C54 136 50 122 44 118 C42 117 40 118 40 120Z"
+            fill="#192f42" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-oblique-r" class="muscle-part"
+            d="M120 120 C124 134 124 156 122 172 C120 182 114 186 108 182 C104 178 102 166 104 152 C106 136 110 122 116 118 C118 117 120 118 120 120Z"
+            fill="#192f42" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- Lower back -->
+      <path id="svg-lower-back" class="muscle-part"
+            d="M66 188 C64 196 65 206 68 210 C72 214 88 214 92 210 C95 206 96 196 94 188 C90 184 70 184 66 188Z"
+            fill="#192f42" stroke="#264560" stroke-width="0.8"/>
 
       <!-- Glutes -->
-      <path id="svg-glute-l" class="muscle-part" d="M62 202 Q58 215 60 228 Q68 238 84 238 Q90 235 90 224 Q88 210 82 202Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-glute-r" class="muscle-part" d="M138 202 Q142 215 140 228 Q132 238 116 238 Q110 235 110 224 Q112 210 118 202Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <path id="svg-glute-l" class="muscle-part"
+            d="M44 200 C40 214 40 228 44 238 C50 246 62 248 70 242 C76 236 78 224 76 212 C74 200 66 194 56 194 C50 194 46 196 44 200Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-glute-r" class="muscle-part"
+            d="M116 200 C120 214 120 228 116 238 C110 246 98 248 90 242 C84 236 82 224 84 212 C86 200 94 194 104 194 C110 194 114 196 116 200Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
 
-      <!-- Quads -->
-      <path id="svg-quad-l" class="muscle-part" d="M62 238 Q56 260 58 285 Q62 310 72 315 Q82 316 86 304 Q88 282 86 258 Q84 240 76 236Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <path id="svg-quad-r" class="muscle-part" d="M138 238 Q144 260 142 285 Q138 310 128 315 Q118 316 114 304 Q112 282 114 258 Q116 240 124 236Z" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Quads — sweeping front thigh -->
+      <path id="svg-quad-l" class="muscle-part"
+            d="M44 236 C38 256 36 280 38 302 C40 318 50 328 62 326 C72 324 78 312 78 296 C78 276 74 254 66 238 C60 228 50 228 44 236Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-quad-r" class="muscle-part"
+            d="M116 236 C122 256 124 280 122 302 C120 318 110 328 98 326 C88 324 82 312 82 296 C82 276 86 254 94 238 C100 228 110 228 116 236Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
 
-      <!-- Hamstrings (shown on inner thigh from front) -->
-      <path id="svg-ham-l" class="muscle-part" d="M82 238 Q86 258 86 282 Q84 306 80 316 Q72 318 68 310 Q64 295 64 270 Q64 248 68 238Z" fill="#152a3a" stroke="#1e4a5a" stroke-width="0.8"/>
-      <path id="svg-ham-r" class="muscle-part" d="M118 238 Q114 258 114 282 Q116 306 120 316 Q128 318 132 310 Q136 295 136 270 Q136 248 132 238Z" fill="#152a3a" stroke="#1e4a5a" stroke-width="0.8"/>
+      <!-- Hamstrings — inner thigh visible -->
+      <path id="svg-ham-l" class="muscle-part"
+            d="M62 238 C66 256 68 278 66 300 C64 316 58 326 52 324 C44 322 40 308 40 290 C40 268 46 248 54 238 C58 234 62 236 62 238Z"
+            fill="#172840" stroke="#264560" stroke-width="0.7"/>
+      <path id="svg-ham-r" class="muscle-part"
+            d="M98 238 C94 256 92 278 94 300 C96 316 102 326 108 324 C116 322 120 308 120 290 C120 268 114 248 106 238 C102 234 98 236 98 238Z"
+            fill="#172840" stroke="#264560" stroke-width="0.7"/>
 
-      <!-- Calves -->
-      <ellipse id="svg-calf-l" class="muscle-part" cx="74" cy="350" rx="10" ry="24" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
-      <ellipse id="svg-calf-r" class="muscle-part" cx="126" cy="350" rx="10" ry="24" fill="#1e3a4a" stroke="#1e4a5a" stroke-width="1"/>
+      <!-- Calves — defined gastrocnemius shape -->
+      <path id="svg-calf-l" class="muscle-part"
+            d="M40 332 C36 348 36 364 40 374 C44 382 54 384 62 378 C68 372 70 358 68 344 C66 330 58 324 50 326 C44 328 42 330 40 332Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+      <path id="svg-calf-r" class="muscle-part"
+            d="M120 332 C124 348 124 364 120 374 C116 382 106 384 98 378 C92 372 90 358 92 344 C94 330 102 324 110 326 C116 328 118 330 120 332Z"
+            fill="#1e3548" stroke="#264560" stroke-width="0.8"/>
+
+      <!-- ── Muscle definition lines (subtle anatomy strokes) ── -->
+      <!-- Chest centre line -->
+      <line x1="80" y1="64" x2="80" y2="115" stroke="#2d4057" stroke-width="0.8" stroke-dasharray="2,3"/>
+      <!-- Abs centre line -->
+      <line x1="80" y1="116" x2="80" y2="186" stroke="#2d4057" stroke-width="0.8" stroke-dasharray="2,3"/>
+      <!-- Pec lower edge L -->
+      <path d="M42 112 C52 118 68 118 76 112" stroke="#2d4057" stroke-width="0.7" fill="none"/>
+      <!-- Pec lower edge R -->
+      <path d="M118 112 C108 118 92 118 84 112" stroke="#2d4057" stroke-width="0.7" fill="none"/>
+      <!-- Quad sweep L -->
+      <path d="M52 240 C48 260 46 288 48 308" stroke="#2d4057" stroke-width="0.7" fill="none"/>
+      <!-- Quad sweep R -->
+      <path d="M108 240 C112 260 114 288 112 308" stroke="#2d4057" stroke-width="0.7" fill="none"/>
     </svg>`;
   }
 

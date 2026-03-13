@@ -281,27 +281,31 @@
       <canvas id="wc-confetti" class="wc-confetti"></canvas>
       <div class="wc-sheet">
 
-        <!-- Header -->
-        <div class="wc-header">
+        <!-- Top: trophy + name + stats -->
+        <div class="wc-top">
           <div class="wc-trophy">🏆</div>
-          <h2 class="wc-title" id="wc-name">Workout Complete!</h2>
-          <p class="wc-stats" id="wc-stats">45 min · ~270 kcal burned</p>
-          <div class="wc-muscles-hit">
-            <span class="wc-muscles-label">Muscles trained:</span>
-            <span class="wc-muscles-list" id="wc-muscles">—</span>
+          <div class="wc-title-block">
+            <h2 class="wc-title" id="wc-name">Workout Complete!</h2>
+            <p class="wc-stats" id="wc-stats">45 min · ~270 kcal</p>
           </div>
         </div>
 
-        <!-- Muscle figure -->
-        <div class="wc-body-wrap">
-          <div id="wc-svg-wrap" class="wc-svg-wrap"></div>
-          <p class="wc-glow-hint">Glowing = muscles you hit today 🔥</p>
-        </div>
-
-        <!-- Quote -->
-        <div class="wc-quote-wrap">
-          <p class="wc-quote" id="wc-quote">"The body achieves what the mind believes."</p>
-          <p class="wc-author" id="wc-author">— Napoleon Hill</p>
+        <!-- Middle: neon body figure + muscles + quote side by side -->
+        <div class="wc-body-row">
+          <div class="wc-svg-col">
+            <div id="wc-svg-wrap" class="wc-svg-wrap"></div>
+            <p class="wc-glow-hint">hit muscles<br>glow 🔥</p>
+          </div>
+          <div class="wc-info-col">
+            <div class="wc-muscles-box">
+              <p class="wc-muscles-label">Muscles trained</p>
+              <p class="wc-muscles-list" id="wc-muscles">—</p>
+            </div>
+            <div class="wc-quote-wrap">
+              <p class="wc-quote" id="wc-quote">...</p>
+              <p class="wc-author" id="wc-author">— MacroMint</p>
+            </div>
+          </div>
         </div>
 
         <!-- Close -->

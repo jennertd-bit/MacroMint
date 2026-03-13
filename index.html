@@ -822,7 +822,7 @@
               </div>
               <!-- Camera capture -->
               <div class="fridge-photo-zone" id="fridge-photo-zone">
-                <input id="fridge-photo-input" type="file" accept="image/*" capture="environment" hidden />
+                <input id="fridge-photo-input" type="file" accept="image/*" hidden />
                 <div class="fridge-photo-placeholder" id="fridge-photo-placeholder">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="36" height="36">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -1065,6 +1065,7 @@
         const stopBtn = document.getElementById("barcode-stop");
         if (stopBtn && !stopBtn.disabled) stopBtn.click();
       }
+      window.closeModal = closeModal; // expose for Fridge Magic IIFE
 
       // ── tabs ──────────────────────────────────────────────
       function switchTab(tabName) {
@@ -1378,7 +1379,11 @@
           const li = document.createElement("li"); li.textContent = step; stepsList.appendChild(li);
         });
         resultWrap.hidden = false;
-        setTimeout(() => resultWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        // Scroll inside the modal sheet, not the page body
+        setTimeout(() => {
+          const sheet = document.querySelector(".scanner-modal-body");
+          if (sheet) sheet.scrollTo({ top: sheet.scrollHeight, behavior: "smooth" });
+        }, 100);
       }
 
       // ── Generate via vision API ──

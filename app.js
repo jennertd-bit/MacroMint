@@ -2698,3 +2698,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     initWorkoutModule();
   }, 800);
 });
+
+// ── Global exports for cross-IIFE access ──────────────────────────────────
+// Fridge Magic and other inline scripts need these functions from app.js scope
+window.addMealToLog      = (...args) => addMealToLog(...args);
+window.saveFoodToLibrary = (...args) => saveFoodToLibrary(...args);

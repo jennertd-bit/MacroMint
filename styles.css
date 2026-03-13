@@ -744,7 +744,7 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
   align-items: center;
   gap: 6px;
   flex: 1;
-  max-width: 160px;
+  max-width: 180px;
 }
 .body-view-label {
   font-size: 0.7rem;
@@ -755,10 +755,14 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 /* PNG image + invisible SVG overlay */
 .body-img-container {
   position: relative; width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 12px;
 }
 .body-img {
-  width: 100%; height: auto; display: block;
-  border-radius: 12px;
+  width: 100%; height: 100%; display: block;
+  object-fit: cover;
+  object-position: top center;
   pointer-events: none;
   -webkit-user-select: none; user-select: none;
 }

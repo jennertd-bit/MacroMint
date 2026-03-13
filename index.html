@@ -1443,10 +1443,25 @@
         const saveBtn = document.getElementById("fridge-save-photo-btn");
         if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "⏳ Saving…"; }
         html2canvas(card, { backgroundColor: "#0d1117", scale: 2, useCORS: true, logging: false })
-          .then(canvas => {
-            const link = document.createElement("a");
+          .then(async canvas => {
             const safeName = (lastRecipe?.name || "ai-recipe").replace(/[^a-z0-9]/gi, "-").toLowerCase();
-            link.download = "macromint-" + safeName + ".png";
+            const fileName = "macromint-" + safeName + ".png";
+            // iOS: use Web Share API → "Save Image" goes straight to Photos
+            if (navigator.canShare) {
+              try {
+                const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+                const file = new File([blob], fileName, { type: "image/png" });
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({ files: [file], title: lastRecipe?.name || "MacroMint Recipe" });
+                  return;
+                }
+              } catch (e) {
+                if (e.name !== "AbortError") console.warn("Share failed, falling back", e);
+              }
+            }
+            // Desktop / fallback: regular download
+            const link = document.createElement("a");
+            link.download = fileName;
             link.href = canvas.toDataURL("image/png");
             link.click();
           })

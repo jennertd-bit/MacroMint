@@ -158,10 +158,29 @@
       scale: 2,
       useCORS: true,
       logging: false,
-    }).then(canvas => {
-      const link = document.createElement("a");
+    }).then(async canvas => {
       const safeName = (currentMeal?.name || "meal").replace(/[^a-z0-9]/gi, "-").toLowerCase();
-      link.download = "macromint-" + safeName + ".png";
+      const fileName = "macromint-" + safeName + ".png";
+      // iOS: Web Share API → share sheet → "Save Image" goes straight to Photos
+      if (navigator.canShare) {
+        try {
+          const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+          const file = new File([blob], fileName, { type: "image/png" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: currentMeal?.name || "MacroMint Meal" });
+            if (btn) { btn.disabled = false; btn.textContent = "📸 Save Card"; }
+            return;
+          }
+        } catch (e) {
+          if (e.name === "AbortError") {
+            if (btn) { btn.disabled = false; btn.textContent = "📸 Save Card"; }
+            return; // user cancelled share sheet — that's fine
+          }
+        }
+      }
+      // Desktop / fallback: regular download
+      const link = document.createElement("a");
+      link.download = fileName;
       link.href = canvas.toDataURL("image/png");
       link.click();
       if (btn) { btn.disabled = false; btn.textContent = "📸 Save Card"; }

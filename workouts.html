@@ -275,5 +275,40 @@
       </div>
     </div>
 
+    <!-- ── Workout Complete Celebration Modal ── -->
+    <div id="workout-complete-modal" class="wc-modal" hidden aria-modal="true" role="dialog">
+      <div class="wc-backdrop" id="wc-backdrop"></div>
+      <canvas id="wc-confetti" class="wc-confetti"></canvas>
+      <div class="wc-sheet">
+
+        <!-- Header -->
+        <div class="wc-header">
+          <div class="wc-trophy">🏆</div>
+          <h2 class="wc-title" id="wc-name">Workout Complete!</h2>
+          <p class="wc-stats" id="wc-stats">45 min · ~270 kcal burned</p>
+          <div class="wc-muscles-hit">
+            <span class="wc-muscles-label">Muscles trained:</span>
+            <span class="wc-muscles-list" id="wc-muscles">—</span>
+          </div>
+        </div>
+
+        <!-- Muscle figure -->
+        <div class="wc-body-wrap">
+          <div id="wc-svg-wrap" class="wc-svg-wrap"></div>
+          <p class="wc-glow-hint">Glowing = muscles you hit today 🔥</p>
+        </div>
+
+        <!-- Quote -->
+        <div class="wc-quote-wrap">
+          <p class="wc-quote" id="wc-quote">"The body achieves what the mind believes."</p>
+          <p class="wc-author" id="wc-author">— Napoleon Hill</p>
+        </div>
+
+        <!-- Close -->
+        <button id="wc-close-btn" class="button wc-close-btn">💪 Let's Go!</button>
+      </div>
+    </div>
+
+    <script src="workout-complete.js" defer></script>
   </body>
 </html>

@@ -783,6 +783,8 @@
     const name     = document.getElementById("save-session-name")?.value?.trim() || "Workout";
     const duration = parseInt(document.getElementById("save-session-duration")?.value) || 45;
     const today    = new Date().toISOString().slice(0, 10);
+    const muscles  = [...currentSession.muscles];
+    const exercises = currentSession.exercises;
 
     const log = loadWorkoutLog();
     log.push({
@@ -790,8 +792,8 @@
       date:           today,
       name,
       duration,
-      muscles:        [...currentSession.muscles],
-      exercises:      currentSession.exercises,
+      muscles,
+      exercises,
       caloriesBurned: Math.round(duration * 6),
     });
     saveWorkoutLog(log);
@@ -805,11 +807,17 @@
     if (selectedMuscle) renderExercises(selectedMuscle);
     renderDayPlan(activePlanType, activeDayIndex);
 
-    const statusEl = document.getElementById("workout-status-msg");
-    if (statusEl) {
-      statusEl.textContent = `✓ ${name} saved — ${duration} min, ~${Math.round(duration * 6)} kcal burned`;
-      statusEl.hidden = false;
-      setTimeout(() => { statusEl.hidden = true; }, 5000);
+    // ── 🎉 Celebration popup ───────────────────────────────────────────────
+    if (typeof showWorkoutComplete === "function") {
+      const muscleLabels = muscles.map(m => EXERCISES[m]?.label || m);
+      setTimeout(() => showWorkoutComplete({ name, duration, muscles: muscleLabels, exercises }), 300);
+    } else {
+      const statusEl = document.getElementById("workout-status-msg");
+      if (statusEl) {
+        statusEl.textContent = `✓ ${name} saved — ${duration} min, ~${Math.round(duration * 6)} kcal burned`;
+        statusEl.hidden = false;
+        setTimeout(() => { statusEl.hidden = true; }, 5000);
+      }
     }
   };
 

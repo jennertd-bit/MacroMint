@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>MacroMint | Get Started</title>
     <meta name="theme-color" content="#080c14" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,7 +32,13 @@
         </div>
         <div class="field-group">
           <label class="field-label" for="si-password">Password</label>
-          <input class="onboard-input" id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
+          <div class="pw-wrap">
+            <input class="onboard-input" id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
+            <button type="button" class="pw-toggle" data-target="si-password" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
         </div>
         <p class="onboard-error hidden" id="si-error"></p>
         <button class="onboard-cta cta-green" id="si-submit" type="button">Sign In</button>
@@ -258,7 +264,13 @@
           </div>
           <div class="field-group">
             <label class="field-label" for="ob-password">Password</label>
-            <input class="onboard-input" id="ob-password" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+            <div class="pw-wrap">
+              <input class="onboard-input" id="ob-password" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+              <button type="button" class="pw-toggle" data-target="ob-password" aria-label="Show password">
+                <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -331,5 +343,17 @@
     </div>
 
     <script src="onboarding.js" defer></script>
+    <script>
+      document.querySelectorAll('.pw-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = document.getElementById(btn.dataset.target);
+          const show = input.type === 'password';
+          input.type = show ? 'text' : 'password';
+          btn.querySelector('.eye-icon').style.display = show ? 'none' : '';
+          btn.querySelector('.eye-off-icon').style.display = show ? '' : 'none';
+          btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+      });
+    </script>
   </body>
 </html>

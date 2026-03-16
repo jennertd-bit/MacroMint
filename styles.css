@@ -309,6 +309,20 @@ button, input, select, textarea { font-family: inherit; }
   box-shadow: 0 0 0 3px rgba(0,229,204,0.1);
 }
 .form-field select option { background: var(--surface-2); }
+/* Password visibility toggle */
+.pw-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.pw-wrap input { flex: 1; padding-right: 42px; }
+.pw-toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--muted); display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s;
+}
+.pw-toggle:hover { color: var(--teal); }
+.pw-toggle svg { width: 20px; height: 20px; }
+
 .help { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
 
 .segmented {

@@ -944,6 +944,74 @@ const toDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+// ── Date navigation state ─────────────────────────────────────────────────
+let viewDate = new Date();            // currently viewed date
+const getViewDateKey = () => toDateKey(viewDate);
+const isViewingToday = () => getViewDateKey() === getTodayKey();
+
+function formatDateLabel(date) {
+  const key = toDateKey(date);
+  const today = getTodayKey();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  if (key === today) return "Today";
+  if (key === toDateKey(yesterday)) return "Yesterday";
+  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+}
+
+function updateDateNav() {
+  const label = document.getElementById("date-label");
+  const nextBtn = document.getElementById("date-next");
+  if (label) {
+    label.textContent = formatDateLabel(viewDate);
+    label.classList.toggle("is-today", isViewingToday());
+  }
+  // Don't allow navigating into the future
+  if (nextBtn) nextBtn.disabled = isViewingToday();
+  // Disable "Add to Today" and "Clear Today" when not viewing today
+  const addMealBtn = document.getElementById("add-meal");
+  const clearBtn = document.getElementById("clear-log");
+  if (addMealBtn) {
+    addMealBtn.disabled = !isViewingToday();
+    addMealBtn.textContent = isViewingToday() ? "Add to Today ✓" : "← Go to Today to add";
+  }
+  if (clearBtn) clearBtn.disabled = !isViewingToday();
+}
+
+function navigateDate(offset) {
+  viewDate.setDate(viewDate.getDate() + offset);
+  updateDateNav();
+  reloadLogForDate();
+}
+
+function goToToday() {
+  viewDate = new Date();
+  updateDateNav();
+  reloadLogForDate();
+}
+
+async function reloadLogForDate() {
+  const dateKey = getViewDateKey();
+  if (!state.isAuthenticated) {
+    state.log = getLocalLogForDate(dateKey).map(e => ({ ...e, date: e.date || dateKey }));
+  } else {
+    try {
+      const meals = await apiFetch(`/api/meals?date=${dateKey}`);
+      state.log = (meals || []).map(mapMealLogToEntry);
+    } catch {
+      state.log = [];
+    }
+  }
+  renderLog();
+}
+
+// Wire up date nav buttons after DOM load
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("date-prev")?.addEventListener("click", () => navigateDate(-1));
+  document.getElementById("date-next")?.addEventListener("click", () => navigateDate(1));
+  document.getElementById("date-label")?.addEventListener("click", goToToday);
+  updateDateNav();
+});
+
 const mapMealLogToEntry = (meal) => {
   const calories = (meal.items || []).reduce(
     (sum, item) => sum + (item.computedCalories || 0),
@@ -1539,8 +1607,8 @@ const queuePlanUpdate = () => {
 };
 
 const renderLog = () => {
-  const today = getTodayKey();
-  const todaysLog = state.log.filter((entry) => entry.date === today);
+  const dateKey = typeof getViewDateKey === "function" ? getViewDateKey() : getTodayKey();
+  const todaysLog = state.log.filter((entry) => entry.date === dateKey);
 
   elements.logList.innerHTML = "";
 

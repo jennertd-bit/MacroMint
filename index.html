@@ -178,6 +178,22 @@
 
     <!-- FAB Speed-dial menu -->
     <div class="fab-speed-dial" id="fab-speed-dial" hidden>
+      <button class="fab-dial-btn" id="fab-quick-add" type="button">
+        <span class="fab-dial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </span>
+        <span class="fab-dial-label">Quick Add</span>
+      </button>
+      <button class="fab-dial-btn" id="fab-search" type="button">
+        <span class="fab-dial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <span class="fab-dial-label">Search Food</span>
+      </button>
       <button class="fab-dial-btn" id="fab-camera" type="button">
         <span class="fab-dial-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -323,9 +339,14 @@
 
         <!-- ── Daily Intake Log ── -->
         <section id="log" class="panel">
+          <!-- Date navigation -->
+          <div class="date-nav" id="date-nav">
+            <button class="date-nav-btn" id="date-prev" type="button" aria-label="Previous day">‹</button>
+            <button class="date-nav-label" id="date-label" type="button">Today</button>
+            <button class="date-nav-btn" id="date-next" type="button" aria-label="Next day">›</button>
+          </div>
           <div class="panel-header split">
             <div>
-              <p class="eyebrow">Today</p>
               <h3>Daily Intake</h3>
               <p class="muted">Compare your intake to your target.</p>
             </div>
@@ -1132,6 +1153,20 @@
 
       document.getElementById("fab-barcode")?.addEventListener("click", () => { closeDial(); openModal("barcode"); });
       document.getElementById("fab-camera")?.addEventListener("click",  () => { closeDial(); openModal("photo"); setTimeout(() => document.getElementById("label-input")?.click(), 400); });
+      document.getElementById("fab-search")?.addEventListener("click",  () => { closeDial(); openModal("search"); setTimeout(() => document.getElementById("food-search-input")?.focus(), 300); });
+      document.getElementById("fab-quick-add")?.addEventListener("click", () => {
+        closeDial(); openModal("search");
+        // Clear fields and let user type a name + calories directly
+        setTimeout(() => {
+          const nameEl = document.getElementById("meal-name");
+          const calEl  = document.getElementById("label-calories");
+          if (nameEl) { nameEl.value = ""; nameEl.focus(); }
+          if (calEl) calEl.value = "";
+          // Scroll to the "Log This Meal" card
+          const logCard = document.querySelector(".scan-card-meal");
+          if (logCard) logCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300);
+      });
 
       // ── Scan buttons (always visible) ─────────────────────
       document.getElementById("always-barcode")?.addEventListener("click", () => openModal("barcode"));

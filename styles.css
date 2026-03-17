@@ -593,6 +593,29 @@ progress { width: 100%; height: 4px; accent-color: var(--teal); border-radius: 2
 .meal-summary span   { font-size: 0.68rem; color: var(--muted); }
 .meal-summary strong { font-family: "DM Mono", monospace; font-size: 0.95rem; font-weight: 500; color: var(--teal); }
 
+/* ─── Date navigation ──────────────────────────────────── */
+.date-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-bottom: 12px;
+}
+.date-nav-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; width: 36px; height: 36px;
+  font-size: 1.2rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all 0.15s;
+}
+.date-nav-btn:hover { background: rgba(0,229,204,0.12); border-color: var(--teal); }
+.date-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.date-nav-btn:disabled:hover { background: rgba(255,255,255,0.06); border-color: var(--border); }
+.date-nav-label {
+  background: none; border: none; color: var(--text);
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 0.95rem; cursor: pointer; padding: 6px 14px;
+  border-radius: 8px; transition: background 0.15s;
+}
+.date-nav-label:hover { background: rgba(255,255,255,0.06); }
+.date-nav-label.is-today { color: var(--teal); }
+
 /* ─── Log list ──────────────────────────────────────────── */
 .log-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .log-item {

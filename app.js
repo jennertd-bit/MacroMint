@@ -2189,8 +2189,13 @@ const addMealToLog = async () => {
     renderLog();
     queuePlanUpdate();
   } catch (error) {
-    setAuthMessage("Unable to save meal.", true);
-    return;
+    // API failed — fall back to local storage so the entry isn't lost
+    console.warn("API save failed, saving locally:", error);
+    addLocalLogEntry(entry);
+    state.log = [entry, ...state.log];
+    renderLog();
+    queuePlanUpdate();
+    setAuthMessage("Saved locally (server unavailable). It will sync later.", true);
   }
 
   elements.mealName.value = "";
